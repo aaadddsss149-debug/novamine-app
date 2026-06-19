@@ -1270,16 +1270,6 @@ export default function NovaMine(){
                   </div>
                 ))}
               </div>
-              <div style={{background:"rgba(0,0,0,0.3)",borderRadius:12,padding:14,marginBottom:16}}>
-                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
-                  <span style={{fontSize:12,color:T.muted}}>Withdraw unlock progress</span>
-                  <span style={{fontSize:12,color:T.gold,fontWeight:700}}>{qualifiedFriends}/5 active</span>
-                </div>
-                <div style={{background:"rgba(0,0,0,0.5)",borderRadius:6,height:6,overflow:"hidden"}}>
-                  <div style={{width:`${(qualifiedFriends/5)*100}%`,height:"100%",background:`linear-gradient(90deg,${T.gold},${T.green})`,borderRadius:6}}/>
-                </div>
-                <div style={{fontSize:11,color:T.muted,marginTop:6}}>Friend must login + mine 10 days/month to count as active</div>
-              </div>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:8,marginBottom:16,background:"rgba(0,0,0,0.3)",borderRadius:10,padding:12}}>
                 {[[String(refStats.total),"REFERRED"],[String(refStats.valid),"VALID"],[String(refStats.pending),"PENDING"],[refStats.nova.toFixed(0),"NOVA"]].map(([v,l])=>(
                   <div key={l} style={{textAlign:"center"}}>
