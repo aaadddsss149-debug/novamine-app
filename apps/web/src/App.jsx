@@ -959,7 +959,7 @@ export default function EarnX(){
       <div style={{position:"sticky",top:0,zIndex:100,background:`${T.bg}ee`,backdropFilter:"blur(12px)",borderBottom:`1px solid ${T.goldFaint}`,padding:"12px 16px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
         <div style={{display:"flex",alignItems:"center",gap:10}}>
           <div style={{width:36,height:36,borderRadius:10,background:`linear-gradient(135deg,${T.gold},${T.goldDim})`,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Orbitron'",fontWeight:900,fontSize:14,color:"#000",boxShadow:`0 0 16px ${T.goldGlow}`}}>N</div>
-          <span style={{fontFamily:"'Orbitron'",fontWeight:700,fontSize:16,color:T.gold,letterSpacing:2}}>NOVAMINE</span>
+          <span style={{fontFamily:"'Orbitron'",fontWeight:700,fontSize:16,color:T.gold,letterSpacing:2}}>EARNX</span>
         </div>
         <div style={{display:"flex",gap:8,alignItems:"center"}}>
           <div style={{display:"flex",alignItems:"center",gap:6,background:T.goldFaint,border:`1px solid ${T.goldDim}`,borderRadius:50,padding:"5px 12px"}}>
