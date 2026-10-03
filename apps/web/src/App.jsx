@@ -22,87 +22,13 @@ const LANGUAGES={
 };
 
 const HOME_COPY={
-  en:{welcome:"Welcome back",totalBalance:"Total balance",earnxCredits:"EARNX credits",referrals:"Referrals",miningCenter:"Mining center",earnEvery:"Earn every 24 hours",balance:"EARNX BALANCE",credits:"credits",energy:"ENERGY",miningEnergy:"mining energy",tonBalance:"TON BALANCE",miningPower:"MINING POWER",power:"power",nextReward:"NEXT MINING REWARD",session:"24h session",start:"Start earning",progress:"Mining in progress",collect:"Collect reward",accumulated:"Accumulated",perSession:"per session",earnMore:"Earn more",tasksRewards:"Tasks & rewards",invite:"Invite friends",buildTeam:"Build your team",welcomeGift:"Welcome gift",claimBonus:"Claim your bonus"},
-  ar:{welcome:"مرحبًا بعودتك",totalBalance:"إجمالي الرصيد",earnxCredits:"رصيد EARNX",referrals:"الإحالات",miningCenter:"مركز التعدين",earnEvery:"اكسب كل 24 ساعة",balance:"رصيد EARNX",credits:"وحدات",energy:"الطاقة",miningEnergy:"طاقة التعدين",tonBalance:"رصيد TON",miningPower:"قوة التعدين",power:"القوة",nextReward:"مكافأة التعدين القادمة",session:"جلسة 24 ساعة",start:"ابدأ التعدين",progress:"التعدين جارٍ",collect:"استلام المكافأة",accumulated:"المجموع المكتسب",perSession:"لكل جلسة",earnMore:"اربح أكثر",tasksRewards:"المهمات والمكافآت",invite:"ادعُ أصدقاءك",buildTeam:"كوّن فريقك",welcomeGift:"هدية الترحيب",claimBonus:"استلم مكافأتك"},
-  ku:{welcome:"بەخێربێیتەوە",totalBalance:"کۆی باڵانس",earnxCredits:"باڵانسی EARNX",referrals:"بانگهێشتەکان",miningCenter:"ناوەندی کانکردن",earnEvery:"هەر ٢٤ کاتژمێر قازانج بکە",balance:"باڵانسی EARNX",credits:"یەکە",energy:"وزە",miningEnergy:"وزەی کانکردن",tonBalance:"باڵانسی TON",miningPower:"هێزی کانکردن",power:"هێز",nextReward:"خەڵاتی داهاتووی کانکردن",session:"دانیشتنی ٢٤ کاتژمێر",start:"دەست بە کانکردن بکە",progress:"کانکردن بەردەوامە",collect:"خەڵات وەربگرە",accumulated:"کۆی بەدەستهاتوو",perSession:"بۆ هەر دانیشتنێک",earnMore:"زیاتر قازانج بکە",tasksRewards:"ئەرک و خەڵاتەکان",invite:"هاوڕێکانت بانگهێشت بکە",buildTeam:"تیمەکەت دروست بکە",welcomeGift:"دیاریی بەخێرهاتن",claimBonus:"خەڵاتەکەت وەربگرە"},
-  tr:{welcome:"Tekrar hoş geldin",totalBalance:"Toplam bakiye",earnxCredits:"EARNX bakiyesi",referrals:"Davetler",miningCenter:"Madencilik merkezi",earnEvery:"Her 24 saatte kazan",balance:"EARNX BAKİYESİ",credits:"kredi",energy:"ENERJİ",miningEnergy:"madencilik enerjisi",tonBalance:"TON BAKİYESİ",miningPower:"MADENCİLİK GÜCÜ",power:"güç",nextReward:"SONRAKİ MADENCİLİK ÖDÜLÜ",session:"24 saatlik oturum",start:"Madenciliği başlat",progress:"Madencilik devam ediyor",collect:"Ödülü al",accumulated:"Birikmiş",perSession:"oturum başına",earnMore:"Daha fazla kazan",tasksRewards:"Görevler ve ödüller",invite:"Arkadaşlarını davet et",buildTeam:"Ekibini oluştur",welcomeGift:"Hoş geldin hediyesi",claimBonus:"Bonusunu al"},
-  fa:{welcome:"خوش برگشتی",totalBalance:"موجودی کل",earnxCredits:"موجودی EARNX",referrals:"معرفی‌ها",miningCenter:"مرکز استخراج",earnEvery:"هر ۲۴ ساعت درآمد کسب کنید",balance:"موجودی EARNX",credits:"اعتبار",energy:"انرژی",miningEnergy:"انرژی استخراج",tonBalance:"موجودی TON",miningPower:"قدرت استخراج",power:"قدرت",nextReward:"پاداش استخراج بعدی",session:"جلسه ۲۴ ساعته",start:"شروع استخراج",progress:"استخراج در حال انجام است",collect:"دریافت پاداش",accumulated:"جمع شده",perSession:"در هر جلسه",earnMore:"بیشتر کسب کنید",tasksRewards:"وظایف و پاداش‌ها",invite:"دوستان را دعوت کنید",buildTeam:"تیم خود را بسازید",welcomeGift:"هدیه خوش‌آمدگویی",claimBonus:"پاداش را دریافت کنید"},
-  es:{welcome:"Bienvenido de nuevo",totalBalance:"Saldo total",earnxCredits:"Saldo EARNX",referrals:"Referidos",miningCenter:"Centro de minería",earnEvery:"Gana cada 24 horas",balance:"SALDO EARNX",credits:"créditos",energy:"ENERGÍA",miningEnergy:"energía de minería",tonBalance:"SALDO TON",miningPower:"POTENCIA DE MINERÍA",power:"potencia",nextReward:"PRÓXIMA RECOMPENSA",session:"sesión de 24 h",start:"Empezar a minar",progress:"Minería en curso",collect:"Cobrar recompensa",accumulated:"Acumulado",perSession:"por sesión",earnMore:"Gana más",tasksRewards:"Tareas y recompensas",invite:"Invitar amigos",buildTeam:"Crea tu equipo",welcomeGift:"Regalo de bienvenida",claimBonus:"Reclamar bono"},
-  fr:{welcome:"Bon retour",totalBalance:"Solde total",earnxCredits:"Solde EARNX",referrals:"Parrainages",miningCenter:"Centre de minage",earnEvery:"Gagnez toutes les 24 heures",balance:"SOLDE EARNX",credits:"crédits",energy:"ÉNERGIE",miningEnergy:"énergie de minage",tonBalance:"SOLDE TON",miningPower:"PUISSANCE DE MINAGE",power:"puissance",nextReward:"PROCHAINE RÉCOMPENSE",session:"session de 24 h",start:"Commencer le minage",progress:"Minage en cours",collect:"Collecter la récompense",accumulated:"Cumulé",perSession:"par session",earnMore:"Gagner plus",tasksRewards:"Tâches et récompenses",invite:"Inviter des amis",buildTeam:"Créer votre équipe",welcomeGift:"Cadeau de bienvenue",claimBonus:"Réclamer le bonus"},
-  de:{welcome:"Willkommen zurück",totalBalance:"Gesamtsaldo",earnxCredits:"EARNX-Guthaben",referrals:"Empfehlungen",miningCenter:"Mining-Zentrum",earnEvery:"Alle 24 Stunden verdienen",balance:"EARNX-GUTHABEN",credits:"Credits",energy:"ENERGIE",miningEnergy:"Mining-Energie",tonBalance:"TON-GUTHABEN",miningPower:"MINING-POWER",power:"Power",nextReward:"NÄCHSTE MINING-BELohnung",session:"24-Stunden-Sitzung",start:"Mining starten",progress:"Mining läuft",collect:"Belohnung sammeln",accumulated:"Gesammelt",perSession:"pro Sitzung",earnMore:"Mehr verdienen",tasksRewards:"Aufgaben & Belohnungen",invite:"Freunde einladen",buildTeam:"Team aufbauen",welcomeGift:"Willkommensgeschenk",claimBonus:"Bonus erhalten"},
-  ru:{welcome:"С возвращением",totalBalance:"Общий баланс",earnxCredits:"Баланс EARNX",referrals:"Рефералы",miningCenter:"Центр майнинга",earnEvery:"Зарабатывайте каждые 24 часа",balance:"БАЛАНС EARNX",credits:"кредиты",energy:"ЭНЕРГИЯ",miningEnergy:"энергия майнинга",tonBalance:"БАЛАНС TON",miningPower:"МОЩНОСТЬ МАЙНИНГА",power:"мощность",nextReward:"СЛЕДУЮЩАЯ НАГРАДА",session:"сессия 24 часа",start:"Начать майнинг",progress:"Майнинг идёт",collect:"Забрать награду",accumulated:"Накоплено",perSession:"за сессию",earnMore:"Заработать больше",tasksRewards:"Задания и награды",invite:"Пригласить друзей",buildTeam:"Создать команду",welcomeGift:"Подарок за приветствие",claimBonus:"Забрать бонус"},
-  pt:{welcome:"Bem-vindo de volta",totalBalance:"Saldo total",earnxCredits:"Saldo EARNX",referrals:"Indicações",miningCenter:"Central de mineração",earnEvery:"Ganhe a cada 24 horas",balance:"SALDO EARNX",credits:"créditos",energy:"ENERGIA",miningEnergy:"energia de mineração",tonBalance:"SALDO TON",miningPower:"PODER DE MINERAÇÃO",power:"poder",nextReward:"PRÓXIMA RECOMPENSA",session:"sessão de 24 h",start:"Começar mineração",progress:"Mineração em andamento",collect:"Coletar recompensa",accumulated:"Acumulado",perSession:"por sessão",earnMore:"Ganhe mais",tasksRewards:"Tarefas e recompensas",invite:"Convidar amigos",buildTeam:"Crie sua equipe",welcomeGift:"Presente de boas-vindas",claimBonus:"Resgatar bônus"},
-  zh:{welcome:"欢迎回来",totalBalance:"总余额",earnxCredits:"EARNX余额",referrals:"邀请",miningCenter:"挖矿中心",earnEvery:"每24小时获得收益",balance:"EARNX余额",credits:"积分",energy:"能量",miningEnergy:"挖矿能量",tonBalance:"TON余额",miningPower:"挖矿算力",power:"算力",nextReward:"下一次挖矿奖励",session:"24小时会话",start:"开始挖矿",progress:"挖矿进行中",collect:"领取奖励",accumulated:"已累计",perSession:"每次会话",earnMore:"赚取更多",tasksRewards:"任务与奖励",invite:"邀请好友",buildTeam:"建立团队",welcomeGift:"欢迎礼物",claimBonus:"领取奖励"},
-  ja:{welcome:"おかえりなさい",totalBalance:"総残高",earnxCredits:"EARNX残高",referrals:"紹介",miningCenter:"マイニングセンター",earnEvery:"24時間ごとに獲得",balance:"EARNX残高",credits:"クレジット",energy:"エネルギー",miningEnergy:"マイニングエネルギー",tonBalance:"TON残高",miningPower:"マイニングパワー",power:"パワー",nextReward:"次のマイニング報酬",session:"24時間セッション",start:"マイニング開始",progress:"マイニング中",collect:"報酬を受け取る",accumulated:"累計",perSession:"セッションごと",earnMore:"もっと稼ぐ",tasksRewards:"タスクと報酬",invite:"友達を招待",buildTeam:"チームを作る",welcomeGift:"ウェルカムギフト",claimBonus:"ボーナスを受け取る"},
-  ko:{welcome:"다시 오신 것을 환영합니다",totalBalance:"총 잔액",earnxCredits:"EARNX 잔액",referrals:"추천",miningCenter:"채굴 센터",earnEvery:"24시간마다 수익",balance:"EARNX 잔액",credits:"크레딧",energy:"에너지",miningEnergy:"채굴 에너지",tonBalance:"TON 잔액",miningPower:"채굴 파워",power:"파워",nextReward:"다음 채굴 보상",session:"24시간 세션",start:"채굴 시작",progress:"채굴 진행 중",collect:"보상 받기",accumulated:"누적",perSession:"세션당",earnMore:"더 벌기",tasksRewards:"작업 및 보상",invite:"친구 초대",buildTeam:"팀 만들기",welcomeGift:"환영 선물",claimBonus:"보너스 받기"},
-  hi:{welcome:"वापसी पर स्वागत है",totalBalance:"कुल बैलेंस",earnxCredits:"EARNX बैलेंस",referrals:"रेफरल",miningCenter:"माइनिंग सेंटर",earnEvery:"हर 24 घंटे कमाएँ",balance:"EARNX बैलेंस",credits:"क्रेडिट",energy:"ऊर्जा",miningEnergy:"माइनिंग ऊर्जा",tonBalance:"TON बैलेंस",miningPower:"माइनिंग पावर",power:"पावर",nextReward:"अगला माइनिंग रिवॉर्ड",session:"24 घंटे का सत्र",start:"माइनिंग शुरू करें",progress:"माइनिंग जारी है",collect:"रिवॉर्ड लें",accumulated:"जमा",perSession:"प्रति सत्र",earnMore:"और कमाएँ",tasksRewards:"कार्य और रिवॉर्ड",invite:"दोस्तों को आमंत्रित करें",buildTeam:"अपनी टीम बनाएँ",welcomeGift:"स्वागत उपहार",claimBonus:"बोनस लें"},
-  ur:{welcome:"واپس خوش آمدید",totalBalance:"کل بیلنس",earnxCredits:"EARNX بیلنس",referrals:"ریفرلز",miningCenter:"مائننگ سینٹر",earnEvery:"ہر 24 گھنٹے کمائیں",balance:"EARNX بیلنس",credits:"کریڈٹس",energy:"توانائی",miningEnergy:"مائننگ توانائی",tonBalance:"TON بیلنس",miningPower:"مائننگ پاور",power:"پاور",nextReward:"اگلا مائننگ انعام",session:"24 گھنٹے کا سیشن",start:"مائننگ شروع کریں",progress:"مائننگ جاری ہے",collect:"انعام حاصل کریں",accumulated:"جمع شدہ",perSession:"فی سیشن",earnMore:"مزید کمائیں",tasksRewards:"کام اور انعامات",invite:"دوستوں کو مدعو کریں",buildTeam:"اپنی ٹیم بنائیں",welcomeGift:"خوش آمدید تحفہ",claimBonus:"بونس حاصل کریں"}
+  en:{welcome:"Welcome back",totalBalance:"Total balance",earnxCredits:"TON balance",referrals:"Referrals",miningCenter:"Mining center",earnEvery:"Earn every 24 hours",balance:"TON BALANCE",credits:"TON",energy:"Mining rate",miningEnergy:"TON per day",tonBalance:"TON BALANCE",miningPower:"MINING RATE",power:"rate",nextReward:"NEXT MINING REWARD",session:"24h session",start:"Start earning",progress:"Mining in progress",collect:"Collect reward",accumulated:"Accumulated",perSession:"per session",earnMore:"Earn more",tasksRewards:"Tasks & rewards",invite:"Invite friends",buildTeam:"Build your team",welcomeGift:"Welcome gift",claimBonus:"Claim your bonus"},
+  ar:{welcome:"مرحبًا بعودتك",totalBalance:"إجمالي الرصيد",earnxCredits:"رصيد TON",referrals:"الإحالات",miningCenter:"مركز التعدين",earnEvery:"اكسب كل 24 ساعة",balance:"رصيد TON",credits:"TON",energy:"معدل التعدين",miningEnergy:"TON يوميًا",tonBalance:"رصيد TON",miningPower:"معدل التعدين",power:"المعدل",nextReward:"مكافأة التعدين القادمة",session:"جلسة 24 ساعة",start:"ابدأ التعدين",progress:"التعدين جارٍ",collect:"استلام المكافأة",accumulated:"المجموع المكتسب",perSession:"لكل جلسة",earnMore:"اربح أكثر",tasksRewards:"المهام والمكافآت",invite:"ادعُ أصدقاءك",buildTeam:"كوّن فريقك",welcomeGift:"هدية الترحيب",claimBonus:"استلم مكافأتك"}
 };
 const TASK_COPY={
-  en:{title:"Tasks",sub:"Complete tasks and watch ads to earn EARNX",loading:"Loading tasks…",empty:"No tasks available right now.",done:"Done",watch:"Watch",open:"Open",completed:"Task completed! +",refMilestones:"Referral milestones",completedLabel:"Completed",locked:"Locked"},
-  ar:{title:"المهمات",sub:"أكمل المهمات وشاهد الإعلانات لكسب EARNX",loading:"جارٍ تحميل المهمات…",empty:"لا توجد مهمات متاحة الآن.",done:"تم",watch:"مشاهدة",open:"فتح",completed:"تم إكمال المهمة! +",refMilestones:"مراحل الإحالات",completedLabel:"مكتمل",locked:"مقفل"},
-  ku:{title:"ئەرکەکان",sub:"ئەرکەکان تەواو بکە و ڕیکلام ببینە بۆ EARNX",loading:"ئەرکەکان بار دەکرێن…",empty:"ئێستا هیچ ئەرکێک بەردەست نییە.",done:"تەواو",watch:"بینین",open:"کردنەوە",completed:"ئەرک تەواو بوو! +",refMilestones:"قۆناغەکانی بانگهێشت",completedLabel:"تەواو",locked:"داخراو"},
-  tr:{title:"Görevler",sub:"Görevleri tamamla ve reklam izleyerek EARNX kazan",loading:"Görevler yükleniyor…",empty:"Şu anda görev yok.",done:"Tamam",watch:"İzle",open:"Aç",completed:"Görev tamamlandı! +",refMilestones:"Davet hedefleri",completedLabel:"Tamamlandı",locked:"Kilitli"},
-  fa:{title:"وظایف",sub:"وظایف را انجام دهید و با دیدن تبلیغات EARNX بگیرید",loading:"در حال بارگذاری…",empty:"فعلاً وظیفه‌ای وجود ندارد.",done:"انجام شد",watch:"مشاهده",open:"باز کردن",completed:"وظیفه انجام شد! +",refMilestones:"مراحل دعوت",completedLabel:"تکمیل",locked:"قفل"},
-  es:{title:"Tareas",sub:"Completa tareas y mira anuncios para ganar EARNX",loading:"Cargando tareas…",empty:"No hay tareas disponibles.",done:"Hecho",watch:"Ver",open:"Abrir",completed:"¡Tarea completada! +",refMilestones:"Metas de referidos",completedLabel:"Completado",locked:"Bloqueado"},
-  fr:{title:"Tâches",sub:"Accomplissez des tâches et regardez des pubs pour gagner des EARNX",loading:"Chargement…",empty:"Aucune tâche disponible.",done:"Terminé",watch:"Voir",open:"Ouvrir",completed:"Tâche terminée ! +",refMilestones:"Objectifs de parrainage",completedLabel:"Terminé",locked:"Verrouillé"},
-  de:{title:"Aufgaben",sub:"Aufgaben erledigen und Werbung ansehen, um EARNX zu verdienen",loading:"Aufgaben werden geladen…",empty:"Keine Aufgaben verfügbar.",done:"Fertig",watch:"Ansehen",open:"Öffnen",completed:"Aufgabe erledigt! +",refMilestones:"Empfehlungsziele",completedLabel:"Erledigt",locked:"Gesperrt"},
-  ru:{title:"Задания",sub:"Выполняйте задания и смотрите рекламу, чтобы получать EARNX",loading:"Загрузка заданий…",empty:"Сейчас заданий нет.",done:"Готово",watch:"Смотреть",open:"Открыть",completed:"Задание выполнено! +",refMilestones:"Цели рефералов",completedLabel:"Выполнено",locked:"Закрыто"},
-  pt:{title:"Tarefas",sub:"Conclua tarefas e assista anúncios para ganhar EARNX",loading:"Carregando…",empty:"Nenhuma tarefa disponível.",done:"Concluído",watch:"Assistir",open:"Abrir",completed:"Tarefa concluída! +",refMilestones:"Metas de indicação",completedLabel:"Concluído",locked:"Bloqueado"},
-  zh:{title:"任务",sub:"完成任务并观看广告赚取 EARNX",loading:"正在加载任务…",empty:"暂无可用任务。",done:"完成",watch:"观看",open:"打开",completed:"任务完成！+",refMilestones:"邀请里程碑",completedLabel:"已完成",locked:"已锁定"},
-  ja:{title:"タスク",sub:"タスクを完了して広告を見てEARNXを獲得",loading:"読み込み中…",empty:"現在利用できるタスクはありません。",done:"完了",watch:"視聴",open:"開く",completed:"タスク完了！+",refMilestones:"紹介マイルストーン",completedLabel:"完了",locked:"ロック中"},
-  ko:{title:"작업",sub:"작업을 완료하고 광고를 시청하여 EARNX를 받으세요",loading:"작업을 불러오는 중…",empty:"현재 작업이 없습니다.",done:"완료",watch:"시청",open:"열기",completed:"작업 완료! +",refMilestones:"추천 마일스톤",completedLabel:"완료",locked:"잠김"},
-  hi:{title:"कार्य",sub:"कार्य पूरा करें और विज्ञापन देखकर EARNX कमाएँ",loading:"कार्य लोड हो रहे हैं…",empty:"अभी कोई कार्य उपलब्ध नहीं है।",done:"पूरा",watch:"देखें",open:"खोलें",completed:"कार्य पूरा हुआ! +",refMilestones:"रेफरल लक्ष्य",completedLabel:"पूरा",locked:"लॉक"},
-  ur:{title:"کام",sub:"کام مکمل کریں اور اشتہارات دیکھ کر EARNX کمائیں",loading:"کام لوڈ ہو رہے ہیں…",empty:"ابھی کوئی کام دستیاب نہیں۔",done:"مکمل",watch:"دیکھیں",open:"کھولیں",completed:"کام مکمل ہوگیا! +",refMilestones:"ریفرل اہداف",completedLabel:"مکمل",locked:"مقفل"}
+  en:{title:"Tasks & Rewards",sub:"Complete tasks and watch rewarded ads to earn TON",loading:"Loading…",empty:"No tasks available right now.",done:"Done",watch:"Watch",open:"Open",completed:"Task completed! +",refMilestones:"Referral milestones",completedLabel:"Completed",locked:"Locked"},
+  ar:{title:"المهام والمكافآت",sub:"أكمل المهام وشاهد الإعلانات لكسب TON",loading:"جارٍ التحميل…",empty:"لا توجد مهام متاحة الآن.",done:"تم",watch:"مشاهدة",open:"فتح",completed:"تم إكمال المهمة! +",refMilestones:"مراحل الإحالة",completedLabel:"مكتمل",locked:"مقفل"}
 };
-const ALL_USERS = [
-  "MikeCarterX","JoaoSilva99","EmilyJOfficial","SantosGabriel_","AshleyWave",
-  "LucasOliveira7","DanielB_Pro","RafaCostaX","JessicaMLive","BrunoFps",
-  "ChrisDZone","MatheusPlayz","AmandaGlow","FelipeRider","BrandonElite",
-  "ThiagoVibes","SamTaylorXO","PedroLegend","RyanAces","VictorRush",
-  "OliviaDreams","CaioStorm","EthanPrime","HenriqueYT","ChloeMagic",
-  "AndreFlex","NathanVolt","EduardoKing","MadisonStar","LeoMeloX",
-  "JustinNova","VinnyPereira","SophiaLux","DiegoMotion","TylerSync",
-  "MarceloWave","IsabellaSky","GustavoFire","KevinRise","RicardoFlow"
-];
-
-const css = `
-  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&display=swap');
-  *{box-sizing:border-box;margin:0;padding:0;}
-  body{background:#080b0f;}
-  ::-webkit-scrollbar{width:4px;}
-  ::-webkit-scrollbar-track{background:#080b0f;}
-  ::-webkit-scrollbar-thumb{background:#7c5cff;border-radius:2px;}
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
-  @keyframes glow{0%,100%{box-shadow:0 0 8px rgba(85,231,255,0.18)}50%{box-shadow:0 0 32px rgba(245,200,66,0.4)}}
-  @keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
-  @keyframes scanline{0%{transform:translateY(-100%)}100%{transform:translateY(100vh)}}
-  @keyframes reelSpin{0%{transform:translateY(-6px)}50%{transform:translateY(6px)}100%{transform:translateY(-6px)}}
-  @keyframes float{0%,100%{transform:translateY(0px)}50%{transform:translateY(-6px)}}
-  @keyframes float{0%,100%{transform:translateY(0) rotate(-5deg)}50%{transform:translateY(-12px) rotate(5deg)}}
-  @keyframes particle{0%{transform:scale(1);opacity:1}100%{transform:scale(0) translate(20px,-40px);opacity:0}}
-  @keyframes popIn{0%{transform:scale(0.6);opacity:0}80%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
-  @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
-  @keyframes activitySlide{from{transform:translateY(-40px);opacity:0}to{transform:translateY(0);opacity:1}}
-  @keyframes tickerScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-  @keyframes swapPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
-  .nav-btn{transition:all 0.2s;}
-  .btn-gold{transition:all 0.2s;}
-  .btn-gold:hover:not(:disabled){transform:translateY(-1px);filter:brightness(1.1);}
-  .card-hover{transition:all 0.25s;cursor:pointer;}
-  .card-hover:hover{transform:translateY(-2px);border-color:#7c5cff !important;box-shadow:0 8px 32px rgba(85,231,255,0.18) !important;}
-  .activity-item{animation:activitySlide 0.4s ease;}
-  .prize-card{transition:all 0.15s;}
-  .prize-card:hover{transform:scale(1.04);}
-  .shimmer-btn{background:linear-gradient(90deg,#55e7ff 0%,#fff8d6 40%,#55e7ff 60%,#7c5cff 100%);background-size:200% 100%;animation:shimmer 2s linear infinite;}
-  .swap-card{animation:swapPulse 2s ease-in-out infinite;}
-  @keyframes adProgress{from{width:0%}to{width:100%}}
-  @keyframes adFadeIn{from{opacity:0;transform:scale(0.95)}to{opacity:1;transform:scale(1)}}
-  @keyframes adSkipPulse{0%,100%{box-shadow:0 0 0 0 rgba(245,200,66,0.4)}50%{box-shadow:0 0 0 8px rgba(245,200,66,0)}}
-  @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-  @keyframes ringPulse{0%,100%{opacity:0.6;transform:scale(1)}50%{opacity:1;transform:scale(1.02)}}
-`;
-
 function Icon({name,size=20}) {
   const icons = {
     zap:"⚡", swap:"↔", check:"✓", lock:"🔒", info:"ⓘ",
@@ -140,55 +66,6 @@ function genActivity(){
     {icon:"🚀",color:"#c084fc",text:`${u} invited`,  value:`a new member`},
   ];
   return {...types[Math.floor(Math.random()*types.length)],time:"just now",id:Date.now()+Math.random()};
-}
-
-function SwapModal({onClose,hashes,onSwapComplete}){
-  const [amount,setAmount]=useState("");
-  const [swapping,setSwapping]=useState(false);
-  const [swapError,setSwapError]=useState(null);
-  const rate=0.00001440;
-  const tonOut=amount?(parseFloat(amount)*rate).toFixed(8):"0.00000000";
-  async function handleConfirmSwap(){
-    const amountNum=parseFloat(amount);
-    if(!amountNum||amountNum<=0)return;
-    if(amountNum>hashes){setSwapError("Amount exceeds your available hashes.");return;}
-    setSwapping(true);setSwapError(null);
-    try{const result=await api.swap(amountNum);if(onSwapComplete)onSwapComplete(result);onClose();}
-    catch(e){setSwapError(e?.message||"Swap failed. Please try again.");}
-    finally{setSwapping(false);}
-  }
-  return(
-    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.88)",zIndex:1000,display:"flex",alignItems:"flex-end",justifyContent:"center"}} onClick={onClose}>
-      <div onClick={e=>e.stopPropagation()} style={{background:T.card,border:`1px solid ${T.goldDim}`,borderRadius:"24px 24px 0 0",padding:24,width:"100%",maxWidth:430,animation:"slideUp 0.3s ease",boxShadow:`0 -8px 40px ${T.goldGlow}`}}>
-        <div style={{width:40,height:4,background:"#2a2a2a",borderRadius:2,margin:"0 auto 20px"}}/>
-        <div style={{fontFamily:"'Orbitron'",fontWeight:700,fontSize:18,color:T.gold,marginBottom:4}}>SWAP ENERGY → TON</div>
-        <div style={{fontSize:13,color:T.muted,marginBottom:20}}>Convert your mined energy to TON</div>
-        <div style={{background:T.goldFaint,border:`1px solid ${T.goldDim}`,borderRadius:12,padding:14,marginBottom:16,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-          <div style={{fontSize:12,color:T.muted}}>Exchange Rate</div>
-          <div style={{fontFamily:"'Orbitron'",fontSize:12,color:T.gold,fontWeight:700}}>1 EARNX = {rate} TON</div>
-        </div>
-        <div style={{background:"rgba(0,0,0,0.4)",border:"1px solid #1e2a1e",borderRadius:12,padding:14,marginBottom:8}}>
-          <div style={{fontSize:11,color:T.muted,marginBottom:6,letterSpacing:1}}>FROM (EARNX)</div>
-          <div style={{display:"flex",alignItems:"center",gap:10}}>
-            <input type="number" placeholder="0.00" value={amount} onChange={e=>{setAmount(e.target.value);setSwapError(null);}} style={{flex:1,background:"transparent",border:"none",outline:"none",fontFamily:"'Orbitron'",fontSize:22,fontWeight:700,color:T.text,width:"100%"}}/>
-            <button onClick={()=>setAmount(hashes.toFixed(8))} style={{background:T.goldFaint,border:`1px solid ${T.goldDim}`,borderRadius:8,padding:"4px 10px",color:T.gold,fontSize:11,cursor:"pointer",fontFamily:"'Rajdhani'",fontWeight:700}}>MAX</button>
-          </div>
-          <div style={{fontSize:11,color:T.muted,marginTop:4}}>Available: {hashes.toFixed(8)} EARNX</div>
-        </div>
-        <div style={{textAlign:"center",color:T.gold,marginBottom:8}}>↕</div>
-        <div style={{background:"rgba(57,255,138,0.05)",border:`1px solid ${T.greenDim}`,borderRadius:12,padding:14,marginBottom:20}}>
-          <div style={{fontSize:11,color:T.muted,marginBottom:6,letterSpacing:1}}>YOU RECEIVE (TON)</div>
-          <div style={{fontFamily:"'Orbitron'",fontSize:22,fontWeight:700,color:T.green}}>{tonOut}</div>
-          <div style={{fontSize:11,color:T.muted,marginTop:4}}>TON Network</div>
-        </div>
-        {swapError&&<div style={{background:"rgba(255,77,77,0.08)",border:"1px solid rgba(255,77,77,0.3)",borderRadius:10,padding:"10px 14px",marginBottom:12,fontSize:12,color:T.red}}>{swapError}</div>}
-        <button className="btn-gold shimmer-btn" onClick={handleConfirmSwap} disabled={swapping||!amount} style={{width:"100%",padding:16,border:"none",borderRadius:14,fontFamily:"'Rajdhani'",fontWeight:700,fontSize:16,cursor:swapping?"not-allowed":"pointer",color:"#000",opacity:(!amount||swapping)?0.7:1}}>
-          {swapping?"⏳ Swapping…":"⚡ Confirm Swap"}
-        </button>
-        <div style={{textAlign:"center",fontSize:11,color:T.muted,marginTop:10}}>Convert ENERGY → TON before withdrawing</div>
-      </div>
-    </div>
-  );
 }
 
 function WithdrawModal({onClose,tonBalance,qualifiedFriends,onInvite,onWithdrawComplete,minWithdrawTon}){
@@ -333,8 +210,7 @@ export default function EarnX(){
   const [dailyAdCount,setDailyAdCount]=useState(0);
   const userDbId=useRef(null);
   const [showWithdraw,setShowWithdraw]=useState(false);
-  const [showSwap,setShowSwap]=useState(false);
-  // Mining state — persisted in localStorage so it survives page reloads/quit
+    // Mining state — persisted in localStorage so it survives page reloads/quit
   const MINING_DURATION_MS = 24 * 60 * 60 * 1000; // 24 hours — matches Dulce CANDY 24h production loop
   const [miningTick,setMiningTick]=useState(0);
   const [miningStartedAt, setMiningStartedAt] = useState(() => {
