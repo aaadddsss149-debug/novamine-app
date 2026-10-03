@@ -1,5 +1,5 @@
 {
-  "name": "@novamine/web",
+  "name": "@earnx/web",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -9,7 +9,7 @@
     "preview": "vite preview --port 5173"
   },
   "dependencies": {
-    "@novamine/shared": "file:../../packages/shared",
+    "@earnx/shared": "file:../../packages/shared",
     "@supabase/supabase-js": "^2.45.4",
     "@telegram-apps/sdk-react": "^2.0.16",
     "@tonconnect/ui-react": "^2.0.6",
