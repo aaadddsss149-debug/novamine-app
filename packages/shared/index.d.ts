@@ -50,6 +50,7 @@ export interface Task {
   reward: number;
   action: string;
   url: string;
+  category?: string;
 }
 export interface TasksModule {
   readonly LIST: readonly Task[];
