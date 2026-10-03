@@ -1,4 +1,4 @@
-// Type definitions for @novamine/shared.
+// Type definitions for @earnx/shared.
 // Hand-written so the runtime stays in plain JS (no build step needed).
 
 export interface MiningModule {
