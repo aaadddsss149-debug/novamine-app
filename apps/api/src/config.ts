@@ -23,7 +23,7 @@ export const config = {
   isProd: process.env.NODE_ENV === "production",
   allowDevAuth: process.env.ALLOW_DEV_AUTH === "true",
 
-  corsOrigins: (process.env.CORS_ORIGINS ?? "http://localhost:5173,https://earnx-web-yujc.onrender.com")
+  corsOrigins: (process.env.CORS_ORIGINS ?? "")
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean),
@@ -31,8 +31,8 @@ export const config = {
   bot: {
     token: required("BOT_TOKEN"),
     username: optional("BOT_USERNAME"),
-    publicUrl: optional("PUBLIC_API_URL", "http://localhost:8080"),
-    appUrl: optional("WEB_APP_URL", "https://earnx-web-yujc.onrender.com"),
+    publicUrl: optional("PUBLIC_API_URL"),
+    appUrl: optional("WEB_APP_URL"),
     webhookSecret: optional("TELEGRAM_WEBHOOK_SECRET"),
   },
 
