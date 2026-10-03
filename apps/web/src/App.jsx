@@ -623,7 +623,7 @@ export default function EarnX(){
       .then(r=>r.json()).then(x=>{ if(alive) setDailyAdCount(Number(x?.dailyCount||0)); })
       .catch(()=>{ if(alive) setDailyAdCount(0); })
       .finally(()=>{ if(alive) setTasksLoading(false); });
-    setTaskItems([{id:"daily_ads",label:"Watch Ads",reward:0.0022,category:"ADS",active:true,done:false}]);
+    setTaskItems([{id:"daily_ads",label:"Watch Ads",reward:0.0013,category:"ADS",active:true,done:false}]);
     return ()=>{alive=false;};
   },[tab,userLoaded]);
 
@@ -916,11 +916,11 @@ export default function EarnX(){
             <div style={{display:"flex",alignItems:"center",gap:12}}>
               <div style={{width:50,height:50,borderRadius:15,background:"#fff0d8",display:"grid",placeItems:"center",fontSize:24}}>📺</div>
               <div style={{flex:1}}><b style={{fontSize:15}}>Watch Ads</b><div style={{fontSize:11,color:"#8d96a7",marginTop:3}}>AdsGram · Block 51781</div></div>
-              <b style={{color:"#18a76a",fontSize:12}}>+0.0022 TON</b>
+              <b style={{color:"#18a76a",fontSize:12}}>+0.0013 TON</b>
             </div>
             <div style={{marginTop:14,height:8,borderRadius:8,background:"#edf0f4",overflow:"hidden"}}><div style={{height:"100%",width:(Math.min(20,dailyAdCount)/20*100)+"%",background:"linear-gradient(90deg,#5d57e9,#18a76a)",borderRadius:8}}/></div>
-            <div style={{display:"flex",justifyContent:"space-between",marginTop:8,fontSize:11,color:"#7f8998"}}><span>{dailyAdCount}/20 {lang==="ar"?"إعلان اليوم":"ads today"}</span><span>0.0022 TON / ad</span></div>
-            <button className="ex-btn" disabled={dailyAdCount>=20||taskBusy==="daily_ads"} onClick={()=>runTask({id:"daily_ads",reward:0.0022,category:"ADS"})} style={{width:"100%",marginTop:12,padding:12,borderRadius:12,background:dailyAdCount>=20?"#eef1f5":"#5d57e9",color:dailyAdCount>=20?"#8d96a7":"#fff"}}>{dailyAdCount>=20?"✓ 20/20":taskBusy==="daily_ads"?"…":TC.watch+" · +0.0022 TON"}</button>
+            <div style={{display:"flex",justifyContent:"space-between",marginTop:8,fontSize:11,color:"#7f8998"}}><span>{dailyAdCount}/20 {lang==="ar"?"إعلان اليوم":"ads today"}</span><span>0.0013 TON / ad</span></div>
+            <button className="ex-btn" disabled={dailyAdCount>=20||taskBusy==="daily_ads"} onClick={()=>runTask({id:"daily_ads",reward:0.0013,category:"ADS"})} style={{width:"100%",marginTop:12,padding:12,borderRadius:12,background:dailyAdCount>=20?"#eef1f5":"#5d57e9",color:dailyAdCount>=20?"#8d96a7":"#fff"}}>{dailyAdCount>=20?"✓ 20/20":taskBusy==="daily_ads"?"…":TC.watch+" · +0.0013 TON"}</button>
           </div>
           <div className="ex-card" style={{padding:16}}><b>{TC.refMilestones}</b>{[1,3,5,10].map(n=>{const done=refStats.total>=n;return <div key={n} style={{display:"flex",alignItems:"center",gap:10,padding:"11px 0",borderTop:"1px solid #eef0f5",marginTop:7}}><span style={{width:30,height:30,borderRadius:"50%",background:done?"#eafbf4":"#f3f5f8",color:done?"#18a76a":"#8d96a7",display:"grid",placeItems:"center",fontWeight:800,fontSize:11}}>{done?"✓":n}</span><span style={{flex:1,fontSize:12}}>{n} referral{n>1?"s":""}</span><small style={{color:done?"#18a76a":"#8d96a7"}}>{done?TC.completedLabel:TC.locked}</small></div>})}</div>
         </div>
