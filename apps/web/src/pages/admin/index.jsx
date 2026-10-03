@@ -412,7 +412,7 @@ function UsersPanel({ notify }) {
         <select value={sort} onChange={e => setSort(e.target.value)} style={{ background: "#080c12", border: `1px solid ${S.cardBorder}`, color: S.text, padding: "7px 12px", borderRadius: 6, fontSize: 13 }}>
           <option value="active">Active first</option>
           <option value="balance">TON balance</option>
-          <option value="nova">NOVA</option>
+          <option value="nova">EARNX</option>
           <option value="power">Mining Power</option>
         </select>
       </div>
@@ -434,7 +434,7 @@ function UsersPanel({ notify }) {
                 </div>
                 <div style={{ textAlign: "center" }}>
                   <div style={{ fontSize: 13, fontWeight: 700, color: S.accent, fontFamily: "'JetBrains Mono'" }}>{Number(u.nova).toLocaleString()}</div>
-                  <div style={{ fontSize: 10, color: S.muted }}>NOVA</div>
+                  <div style={{ fontSize: 10, color: S.muted }}>EARNX</div>
                 </div>
                 <div style={{ textAlign: "center" }}>
                   <div style={{ fontSize: 13, fontWeight: 700, color: S.text, fontFamily: "'JetBrains Mono'" }}>{MINING.hashesPerSession(miningPowerFromNova(u.nova)).toFixed(8)}</div>
@@ -452,7 +452,7 @@ function UsersPanel({ notify }) {
       {editUser && (
         <Modal title={`Edit: ${editUser.first_name || editUser.username}`} onClose={() => setEditUser(null)}>
           <div style={{ display: "grid", gap: 12 }}>
-            <label style={{ fontSize: 12, color: S.mutedLight }}>TON Balance <span style={{color:"#39ff8a",fontSize:10}}>(auto-fills NOVA & HASHES)</span></label>
+            <label style={{ fontSize: 12, color: S.mutedLight }}>TON Balance <span style={{color:"#39ff8a",fontSize:10}}>(auto-fills EARNX & HASHES)</span></label>
             <Input value={editVals.ton_balance} onChange={v => {
               const ton = Number(v) || 0;
               setEditVals(p => ({
@@ -462,11 +462,11 @@ function UsersPanel({ notify }) {
                 hashes: ton > 0 ? ADMIN_RATES.hashesFromTon(ton) : p.hashes,
               }));
             }} type="number" />
-            <label style={{ fontSize: 12, color: S.mutedLight }}>NOVA Balance</label>
+            <label style={{ fontSize: 12, color: S.mutedLight }}>EARNX Balance</label>
             <Input value={editVals.nova} onChange={v => setEditVals(p => ({ ...p, nova: v }))} type="number" />
             <label style={{ fontSize: 12, color: S.mutedLight }}>HASHES</label>
             <Input value={editVals.hashes ?? 0} onChange={v => setEditVals(p => ({ ...p, hashes: v }))} type="number" />
-            <label style={{ fontSize: 12, color: S.mutedLight }}>Mining Power (auto from NOVA)</label>
+            <label style={{ fontSize: 12, color: S.mutedLight }}>Mining Power (auto from EARNX)</label>
             <div style={{ background: "#080c12", border: "1px solid #1e2a1e", borderRadius: 6, color: "#39ff8a", padding: "7px 12px", fontSize: 13, fontWeight: 700 }}>
               {Number(miningPowerFromNova(editVals.nova)).toLocaleString()} power
             </div>
@@ -538,7 +538,7 @@ function ShopPanel({ notify }) {
             {editing === t.id ? (
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr auto auto", gap: 10, alignItems: "flex-end" }}>
                 <div><div style={{ fontSize: 10, color: S.muted, marginBottom: 4 }}>LABEL</div><Input value={editVals.label} onChange={v => setEditVals(p => ({ ...p, label: v }))} /></div>
-                <div><div style={{ fontSize: 10, color: S.muted, marginBottom: 4 }}>NOVA POWER</div><Input value={editVals.novaPower} onChange={v => setEditVals(p => ({ ...p, novaPower: v }))} type="number" /></div>
+                <div><div style={{ fontSize: 10, color: S.muted, marginBottom: 4 }}>EARNX POWER</div><Input value={editVals.novaPower} onChange={v => setEditVals(p => ({ ...p, novaPower: v }))} type="number" /></div>
                 <div><div style={{ fontSize: 10, color: S.muted, marginBottom: 4 }}>PRICE (TON)</div><Input value={editVals.priceTon} onChange={v => setEditVals(p => ({ ...p, priceTon: v }))} type="number" /></div>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}><Toggle value={editVals.hot} onChange={v => setEditVals(p => ({ ...p, hot: v }))} /><span style={{ fontSize: 12, color: S.mutedLight }}>Hot</span></div>
                 <div style={{ display: "flex", gap: 6 }}><Btn small onClick={applyEdit}>Save</Btn><Btn small onClick={() => setEditing(null)} color={S.muted}>✕</Btn></div>
@@ -548,7 +548,7 @@ function ShopPanel({ notify }) {
                 <div style={{ width: 48, height: 48, background: `${S.gold}15`, border: `1px solid ${S.gold}44`, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 800, color: S.gold }}>{t.label}</div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: 700, fontSize: 14, display: "flex", gap: 8, alignItems: "center" }}>{t.id}{t.hot && <Badge color={S.orange}>🔥 HOT</Badge>}</div>
-                  <div style={{ fontSize: 12, color: S.mutedLight, fontFamily: "'JetBrains Mono'" }}>{Number(t.novaPower).toLocaleString()} NOVA · {t.priceTon} TON</div>
+                  <div style={{ fontSize: 12, color: S.mutedLight, fontFamily: "'JetBrains Mono'" }}>{Number(t.novaPower).toLocaleString()} EARNX · {t.priceTon} TON</div>
                 </div>
                 <Btn small onClick={() => { setEditing(t.id); setEditVals({ ...t }); }}>Edit</Btn>
               </div>
@@ -586,7 +586,7 @@ function AdsPanel({ notify }) {
 
   const triggerLabels = {
     start_mining:   { label: "Start Mining",       icon: "⛏️" },
-    collect_mining: { label: "Collect Mined NOVA", icon: "📦" },
+    collect_mining: { label: "Collect Mined EARNX", icon: "📦" },
   };
 
   return (
@@ -710,7 +710,7 @@ function PurchasesPanel({ notify }) {
   const act = async (id, action) => {
     try {
       await adminFetch(`/purchases/${id}`, { method: "PATCH", body: { action } });
-      notify(action === "confirm" ? "Purchase confirmed — NOVA granted!" : "Purchase rejected");
+      notify(action === "confirm" ? "Purchase confirmed — EARNX granted!" : "Purchase rejected");
       load();
     } catch (e) { notify(e.message, "error"); }
   };
@@ -741,7 +741,7 @@ function PurchasesPanel({ notify }) {
                   <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6 }}>
                     <span style={{ fontWeight: 800, fontSize: 14, color: S.gold }}>{row.tier_id}</span>
                     <Badge color={statusColor[row.status] || S.muted}>{row.status.toUpperCase()}</Badge>
-                    <span style={{ fontSize: 13, color: S.accent }}>+{Number(row.nova_granted).toLocaleString()} NOVA</span>
+                    <span style={{ fontSize: 13, color: S.accent }}>+{Number(row.nova_granted).toLocaleString()} EARNX</span>
                   </div>
                   <div style={{ fontSize: 11, color: S.mutedLight }}>{u ? `@${u.username || u.first_name} (${u.telegram_id})` : row.user_id.slice(0, 8) + "…"}</div>
                   <div style={{ fontSize: 11, fontFamily: "'JetBrains Mono'", color: S.muted }}>{Number(row.ton_paid).toFixed(4)} TON · tx: {row.tx_hash?.slice(0, 20)}…</div>
@@ -760,7 +760,7 @@ function PurchasesPanel({ notify }) {
         {filtered.length === 0 && <EmptyState icon="🛒" msg={`No ${filter} purchases`} />}
       </div>
       <div style={{ marginTop: 20, padding: 16, background: `${S.accent}08`, border: `1px solid ${S.accent}33`, borderRadius: 10, fontSize: 12, color: S.mutedLight }}>
-        <strong style={{ color: S.accent }}>Before confirming:</strong> verify the tx_hash on <a href="https://tonscan.org" target="_blank" style={{ color: S.accent }}>tonscan.org</a> to confirm TON reached your wallet. Confirming auto-grants NOVA + mining power.
+        <strong style={{ color: S.accent }}>Before confirming:</strong> verify the tx_hash on <a href="https://tonscan.org" target="_blank" style={{ color: S.accent }}>tonscan.org</a> to confirm TON reached your wallet. Confirming auto-grants EARNX + mining power.
       </div>
     </div>
   );
