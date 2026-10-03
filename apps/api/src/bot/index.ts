@@ -16,7 +16,9 @@ function miniAppLink(startParam?: string | null) {
 function appKeyboard(referrerTelegramId?: number | null) {
   const username = botUsername();
   const inviteUrl = username && referrerTelegramId
-    ? `https://t.me/share/url?url=${encodeURIComponent(\n        `https://t.me/${username}?startapp=ref_${referrerTelegramId}`\n      )}&text=${encodeURIComponent("🚀 Join me on EarnX and start earning rewards!")}`
+    ? `https://t.me/share/url?url=${encodeURIComponent(
+        `https://t.me/${username}?startapp=ref_${referrerTelegramId}`
+      )}&text=${encodeURIComponent("🚀 Join me on EarnX and start earning rewards!")}`
     : null;
 
   const keyboard = new InlineKeyboard()
