@@ -1,4 +1,4 @@
-# NovaMine — Code Patches
+# EarnX — Code Patches
 
 ---
 
@@ -28,7 +28,7 @@ createRoot(document.getElementById("root")).render(
 ```json
 {
   "url": "https://your-domain.com",
-  "name": "NovaMine",
+  "name": "EarnX",
   "iconUrl": "https://your-domain.com/icon.png"
 }
 ```
