@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { requireAuth } from "../middleware/auth.js";
 import { supabaseAdmin } from "../lib/supabase.js";
-import { MINING } from "@novamine/shared";
+import { MINING } from "@earnx/shared";
 
 export const miningRouter = Router();
 
