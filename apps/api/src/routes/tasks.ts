@@ -29,6 +29,8 @@ tasksRouter.get("/", requireAuth, async (req, res, next) => {
             reward: Number(t.reward ?? 0),
             action: t.action ?? "Claim",
             url: t.url ?? null,
+            category: t.category ?? "TG TASKS",
+            active: t.active !== false,
           }))
         : TASKS.LIST.map((t) => ({
             id: t.id,
@@ -36,6 +38,8 @@ tasksRouter.get("/", requireAuth, async (req, res, next) => {
             reward: t.reward,
             action: t.action,
             url: t.url ?? null,
+            category: t.category ?? "TG TASKS",
+            active: true,
           }));
 
     // 2. Fetch which tasks this user has already completed.
