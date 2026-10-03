@@ -58,7 +58,7 @@ export async function startBot(app: Express) {
       ].join("\n"),
       {
         parse_mode: "Markdown",
-        reply_markup: appKeyboard(startParam),
+        reply_markup: appKeyboard(ctx.from?.id),
       }
     );
   });
@@ -66,7 +66,7 @@ export async function startBot(app: Express) {
   // ── /app ─────────────────────────────────────────────────────────────────
   bot.command("app", async (ctx) => {
     await ctx.reply("⚡ Your EarnX dashboard is ready:", {
-      reply_markup: appKeyboard(),
+      reply_markup: appKeyboard(ctx.from?.id),
     });
   });
 
@@ -89,7 +89,7 @@ export async function startBot(app: Express) {
     if (!user) {
       return ctx.reply(
         "👋 You haven't opened EarnX yet. Tap the button below to create your account.",
-        { reply_markup: appKeyboard() }
+        { reply_markup: appKeyboard(ctx.from?.id) }
       );
     }
 
@@ -103,7 +103,7 @@ export async function startBot(app: Express) {
         "",
         "Open EarnX to earn more.",
       ].join("\n"),
-      { parse_mode: "Markdown", reply_markup: appKeyboard() }
+      { parse_mode: "Markdown", reply_markup: appKeyboard(ctx.from?.id) }
     );
   });
 
@@ -114,7 +114,7 @@ export async function startBot(app: Express) {
       return ctx.reply("⚠️ Referral links are not configured yet.");
     }
 
-    const link = `https://t.me/${username}/app?startapp=ref_${telegramId}`;
+    const link = `https://t.me/${username}?startapp=ref_${telegramId}`;
 
     await ctx.reply(
       [
@@ -143,7 +143,7 @@ export async function startBot(app: Express) {
         "",
         "Inside EarnX you can use Tasks, Reward Ads, Referrals and Withdraw.",
       ].join("\n"),
-      { parse_mode: "Markdown", reply_markup: appKeyboard() }
+      { parse_mode: "Markdown", reply_markup: appKeyboard(ctx.from?.id) }
     );
   });
 
