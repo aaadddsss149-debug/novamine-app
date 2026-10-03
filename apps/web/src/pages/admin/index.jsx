@@ -612,12 +612,25 @@ function AdsPanel({ notify }) {
     <div className="fade-in">
       <SectionHeader icon="📺" title="Ad Session Control" sub="Changes save directly to your database" />
       <Card style={{ marginBottom: 20, border: `1px solid ${config.adsEnabled ? S.green + "55" : S.cardBorder}` }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div style={{ display: "grid", gap: 14 }}>
+          <div>
+            <div style={{ fontSize: 12, color: S.mutedLight, marginBottom: 6 }}>AdsGram Reward Block ID</div>
+            <div style={{ display: "flex", gap: 8 }}>
+              <input value={config.adBlockId || ""} onChange={e => setConfig({ ...config, adBlockId: e.target.value.trim() })}
+                placeholder="Example: 12345"
+                inputMode="numeric"
+                style={{ flex: 1, background: S.input || "#0b0f14", color: S.text, border: `1px solid ${S.cardBorder}`, borderRadius: 8, padding: "10px 12px", outline: "none" }} />
+              <Btn small disabled={saving} onClick={() => saveConfig(config)}>Save</Btn>
+            </div>
+            <div style={{ fontSize: 11, color: S.mutedLight, marginTop: 5 }}>Use the Reward block ID from your AdsGram publisher account.</div>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div>
             <div style={{ fontSize: 16, fontWeight: 800 }}>Master Ad Toggle</div>
             <div style={{ fontSize: 12, color: S.mutedLight, marginTop: 4 }}>{config.adsEnabled ? "🟢 Ads ON — showing to all users" : "🔴 Ads OFF — disabled everywhere"}</div>
           </div>
-          <Toggle value={config.adsEnabled} onChange={v => saveConfig({ ...config, adsEnabled: v })} />
+          <Toggle value={config.adsEnabled} onChange={v => saveConfig({ ...config, adsEnabled: v, adBlockId: config.adBlockId || "" })} />
+          </div>
         </div>
       </Card>
       <div style={{ display: "grid", gap: 10 }}>
