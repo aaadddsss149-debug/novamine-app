@@ -1,4 +1,4 @@
-# NovaMine
+# EarnX
 
 A Telegram Mini App for mining NOVA and earning TON. Stack: **Vercel** (web) + **Render** (API + Telegram bot) + **Supabase** (Postgres + Auth + RLS).
 
@@ -33,8 +33,8 @@ Work through this checklist. I've left clear placeholders everywhere.
 
 1. Open `@BotFather` on Telegram → `/newbot`
 2. Save the **bot token** (e.g. `123456:ABCDEF...`) → goes into `BOT_TOKEN`
-3. Save the **bot username** (e.g. `NovaMineBot`) → goes into `BOT_USERNAME`
-4. Tell BotFather: `/newapp` → choose your bot → upload an icon, set title "NovaMine", URL = your Vercel domain (you'll have it after step 4)
+3. Save the **bot username** (e.g. `EarnXBot`) → goes into `BOT_USERNAME`
+4. Tell BotFather: `/newapp` → choose your bot → upload an icon, set title "EarnX", URL = your Vercel domain (you'll have it after step 4)
 
 ### 2. Supabase
 
@@ -76,7 +76,7 @@ Work through this checklist. I've left clear placeholders everywhere.
 
 ### 5. Test it
 
-- Open `t.me/<your-bot-username>` → tap **/start** → tap the **Open NovaMine** button.
+- Open `t.me/<your-bot-username>` → tap **/start** → tap the **Open EarnX** button.
 - The Mini App should load, auth should happen invisibly, and you should see your NOVA balance start at 0.
 
 ---
