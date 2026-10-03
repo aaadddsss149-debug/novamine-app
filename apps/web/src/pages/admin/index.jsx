@@ -587,8 +587,6 @@ function AdsPanel({ notify }) {
   const triggerLabels = {
     start_mining:   { label: "Start Mining",       icon: "⛏️" },
     collect_mining: { label: "Collect Mined NOVA", icon: "📦" },
-    spin_slot:      { label: "Spin Fruit Slot",    icon: "🎰" },
-    dice_roll:      { label: "Dice Roll",          icon: "🎲" },
   };
 
   return (
