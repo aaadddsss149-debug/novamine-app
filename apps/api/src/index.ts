@@ -58,33 +58,36 @@ app.use("/leaderboard", leaderboardRouter);
 app.get("/adsgram/reward", async (req, res) => {
   try {
     const rawUserId = String(req.query.userid ?? "").trim();
-    if (!/^\\d{5,20}$/.test(rawUserId)) {
-      return res.status(400).json({ ok: false, error: "invalid_userid" });
-    }
-
+    if (!/^\d{5,20}$/.test(rawUserId)) return res.status(400).json({ ok:false, error:"invalid_userid" });
     const telegramId = Number(rawUserId);
     const { supabaseAdmin } = await import("./lib/supabase.js");
-
-    const { data: user } = await supabaseAdmin
-      .from("users")
-      .select("id")
-      .eq("telegram_id", telegramId)
-      .maybeSingle();
-
-    if (!user) {
-      return res.status(404).json({ ok: false, error: "user_not_found" });
-    }
-
-    await supabaseAdmin.from("adsgram_reward_events").insert({
-      telegram_id: telegramId,
-      source: "adsgram",
-    });
-
-    return res.json({ ok: true });
+    const { data:user } = await supabaseAdmin.from("users").select("id,ton_balance").eq("telegram_id",telegramId).maybeSingle();
+    if (!user) return res.status(404).json({ok:false,error:"user_not_found"});
+    const { count } = await supabaseAdmin.from("adsgram_reward_events").select("id",{count:"exact",head:true})
+      .eq("telegram_id",telegramId).gte("received_at",new Date(Date.now()-24*60*60*1000).toISOString());
+    if ((count ?? 0) >= 20) return res.json({ok:true,credited:false,reason:"daily_limit"});
+    const { data:event,error:eventError } = await supabaseAdmin.from("adsgram_reward_events").insert({telegram_id:telegramId,source:"adsgram"}).select("id").single();
+    if (eventError) throw eventError;
+    const rewardTon = 0.0022;
+    const { data:updated,error:updateError } = await supabaseAdmin.from("users").update({ton_balance:Number(user.ton_balance||0)+rewardTon})
+      .eq("id",user.id).select("ton_balance").single();
+    if (updateError) throw updateError;
+    return res.json({ok:true,credited:true,rewardTon,tonBalance:updated.ton_balance,events:event ? 1 : 0,dailyCount:(count??0)+1,dailyLimit:20});
   } catch (err) {
     console.error("[adsgram] reward callback failed:", err);
-    return res.status(500).json({ ok: false });
+    return res.status(500).json({ok:false});
   }
+});
+
+app.get("/adsgram/daily-status", async (req,res)=>{
+  try{
+    const telegramId=Number(String(req.query.userid??"").trim());
+    if(!Number.isSafeInteger(telegramId)||telegramId<=0) return res.status(400).json({ok:false,error:"invalid_userid"});
+    const {supabaseAdmin}=await import("./lib/supabase.js");
+    const {count}=await supabaseAdmin.from("adsgram_reward_events").select("id",{count:"exact",head:true})
+      .eq("telegram_id",telegramId).gte("received_at",new Date(Date.now()-24*60*60*1000).toISOString());
+    res.json({ok:true,dailyCount:count??0,dailyLimit:20,rewardTon:0.0022});
+  }catch{res.status(500).json({ok:false});}
 });
 
 app.get("/ad-config-public", async (_req, res) => {
