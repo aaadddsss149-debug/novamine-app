@@ -29,7 +29,7 @@ tasksRouter.get("/", requireAuth, async (req, res, next) => {
             reward: Number(t.reward ?? 0),
             action: t.action ?? "Claim",
             url: t.url ?? null,
-            category: t.category ?? "TG TASKS",
+            category: (t as any).category ?? "TG TASKS",
             active: t.active !== false,
           }))
         : TASKS.LIST.map((t) => ({
