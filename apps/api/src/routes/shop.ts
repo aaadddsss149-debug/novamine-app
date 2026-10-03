@@ -170,6 +170,7 @@ shopRouter.post("/buy", requireAuth, async (req, res, next) => {
         receiverAddress,
         expectedNano,
         paymentComment,
+        paymentAttemptStartedAt,
       );
 
       if (payment) break;
