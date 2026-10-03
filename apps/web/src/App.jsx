@@ -5,7 +5,7 @@ import { getTelegramUser, initTelegram } from "./lib/telegram.js";
 import { authenticate } from "./lib/auth.js";
 import { api } from "./lib/api.js";
 import { supabase } from "./lib/supabase.js";
-import { miningPowerFromNova, tierFromNova, MINING } from "@novamine/shared";
+import { miningPowerFromNova, tierFromNova, MINING } from "@earnx/shared";
 import { useTonConnectUI, useTonAddress, TonConnectButton } from "@tonconnect/ui-react";
 
 const T = {
