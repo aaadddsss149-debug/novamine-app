@@ -1,6 +1,6 @@
 # EarnX
 
-A Telegram Mini App for mining NOVA and earning TON. Stack: **Vercel** (web) + **Render** (API + Telegram bot) + **Supabase** (Postgres + Auth + RLS).
+A Telegram Mini App for earning NOVA and TON through EarnX missions, referrals and rewards. Stack: **Vercel** (web) + **Render** (API + Telegram bot) + **Supabase** (Postgres + Auth + RLS).
 
 ```
 ┌──────────────┐    ┌──────────────┐    ┌──────────────┐
