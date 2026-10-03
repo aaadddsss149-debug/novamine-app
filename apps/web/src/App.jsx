@@ -302,9 +302,6 @@ export default function EarnX(){
   const [minWithdrawTon, setMinWithdrawTon] = useState(2.0);
   const [showGift, setShowGift] = useState(false);
   const [giftUnclaimed, setGiftUnclaimed] = useState(false); // shows banner on homepage
-  const [showStreak, setShowStreak] = useState(false);
-  const [streakDays, setStreakDays] = useState([]);   // array of {day, nova, ton, claimed}
-  const [streakLoading, setStreakLoading] = useState(false);
   const [giftOpened, setGiftOpened] = useState(false);
   const [welcomeTon, setWelcomeTon] = useState(1.5);
   const [giftParticles, setGiftParticles] = useState([]);
@@ -410,17 +407,6 @@ export default function EarnX(){
       } finally {
         setUserLoaded(true);
 
-        // Load streak in background — never blocks app load
-        setTimeout(async () => {
-          try {
-            const sd = await api.getStreak();
-            if (sd?.days && sd.days.length > 0) {
-              setStreakDays(sd.days);
-              const today = sd.days.find(d => d.isToday);
-              if (today && !today.claimed) setShowStreak(true);
-            }
-          } catch(_) {}
-        }, 1500); // 1.5s delay so app fully renders first
       }
     })();
     return () => {
@@ -800,14 +786,6 @@ export default function EarnX(){
         .ex-nav button.active{color:#5d57e9}
       `}</style>
 
-      {showStreak&&streakDays.length>0&&<div style={{position:"fixed",inset:0,zIndex:1000,background:"rgba(20,25,40,.55)",backdropFilter:"blur(8px)",display:"flex",alignItems:"center",justifyContent:"center",padding:18}} onClick={()=>setShowStreak(false)}>
-        <div className="ex-card" onClick={e=>e.stopPropagation()} style={{padding:22,width:"100%",maxWidth:390}}>
-          <div style={{textAlign:"center",marginBottom:16}}><div style={{fontSize:34}}>🎁</div><b style={{fontSize:20}}>Daily rewards</b><div style={{fontSize:12,color:"#8d96a7",marginTop:4}}>Claim today's reward to keep your streak.</div></div>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:8}}>{streakDays.map(d=>{const label=d.ton>0?d.ton+" TON":(d.nova>=1000?d.nova/1000+"K":d.nova);return <button key={d.day} className="ex-btn" onClick={async()=>{if(!d.isToday||d.claimed)return;try{const rr=await api.claimStreak(d.day);if(rr?.ok){setStreakDays(p=>p.map(x=>x.day===d.day?{...x,claimed:true}:x));if(rr.nova)setNova(p=>p+rr.nova);if(rr.ton)setTonBalance(p=>p+rr.ton);setShowStreak(false)}}catch(e){alert(e?.message||"Failed")}}} style={{padding:"10px 3px",borderRadius:13,border:`1px solid ${d.claimed?"#bcebd8":d.isToday?"#635ced":"#e9ecf3"}`,background:d.claimed?"#effbf6":d.isToday?"#f0efff":"#fafbfc",color:d.claimed?"#16a66a":d.isToday?"#5d57e9":"#8d96a7"}}><small>DAY {d.day}</small><div style={{fontSize:11,marginTop:4}}>{d.claimed?"✓":label}</div></button>})}</div>
-          <button className="ex-btn" onClick={()=>setShowStreak(false)} style={{width:"100%",marginTop:15,padding:12,borderRadius:13,background:"#f1f3f7",color:"#596274"}}>Close</button>
-        </div>
-      </div>}
-
       {showGift&&<div style={{position:"fixed",inset:0,zIndex:1001,background:"rgba(20,25,40,.55)",backdropFilter:"blur(8px)",display:"flex",alignItems:"center",justifyContent:"center",padding:18}}>
         <div className="ex-card" style={{padding:28,width:"100%",maxWidth:350,textAlign:"center"}}>
           {!giftOpened?<><div onClick={async()=>{try{await api.claimGift?.(); const fresh=await api.me(); if(fresh?.user){setTonBalance(Number(fresh.user.ton_balance ?? 0));setNova(Number(fresh.user.nova ?? 0));setHashes(Number(fresh.user.hashes ?? 0));setMiningPower(miningPowerFromNova(Number(fresh.user.nova ?? 0)));} setGiftOpened(true);}catch(e){setBuyError(e?.message||"Could not claim the welcome gift.");}}} style={{fontSize:75,cursor:"pointer"}}>🎁</div><b style={{fontSize:20}}>Welcome to EarnX</b><div style={{fontSize:12,color:"#8d96a7",marginTop:5}}>Tap the gift to reveal your bonus.</div></>:<><div style={{fontSize:50}}>🎉</div><b style={{fontSize:20}}>Reward unlocked</b><div style={{fontSize:12,color:"#8d96a7",marginTop:5}}>Welcome bonus</div><div style={{fontSize:34,fontWeight:800,color:"#5d57e9",margin:"8px 0 16px"}}>+{welcomeTon} TON</div><button className="ex-btn" onClick={async()=>{try{const fresh=await api.me();if(fresh?.user){setTonBalance(Number(fresh.user.ton_balance ?? 0));setNova(Number(fresh.user.nova ?? 0));setHashes(Number(fresh.user.hashes ?? 0));setMiningPower(miningPowerFromNova(Number(fresh.user.nova ?? 0)));}}catch(_){} setShowGift(false);setGiftUnclaimed(false);}} style={{width:"100%",padding:13,borderRadius:14,background:"linear-gradient(135deg,#5d57e9,#857fff)",color:"#fff"}}>Claim reward</button></>}
@@ -842,7 +820,7 @@ export default function EarnX(){
 
         {tab==="tasks"&&<div>
           <div style={{marginBottom:15}}><div style={{fontSize:25,fontWeight:800}}>Tasks</div><div style={{fontSize:12,color:"#8d96a7"}}>Simple ways to grow your EarnX balance</div></div>
-          {[["📅","Daily rewards","Claim today's streak reward",()=>setShowStreak(true),"Open"],["▶","Start earning","Start a 24-hour mining session",startMining,"Start"]].map(([ic,t,sub,fn,lab])=><div className="ex-card" key={t} style={{padding:15,display:"flex",alignItems:"center",gap:12,marginBottom:10}}><div style={{width:44,height:44,borderRadius:14,background:"#f0efff",display:"grid",placeItems:"center",fontSize:20}}>{ic}</div><div style={{flex:1}}><b style={{fontSize:14}}>{t}</b><div style={{fontSize:10,color:"#8d96a7"}}>{sub}</div></div><button className="ex-btn" onClick={fn} style={{padding:"9px 12px",borderRadius:10,background:"#f0efff",color:"#5d57e9"}}>{lab}</button></div>)}
+          {[["▶","Start earning","Start a 24-hour mining session",startMining,"Start"]].map(([ic,t,sub,fn,lab])=><div className="ex-card" key={t} style={{padding:15,display:"flex",alignItems:"center",gap:12,marginBottom:10}}><div style={{width:44,height:44,borderRadius:14,background:"#f0efff",display:"grid",placeItems:"center",fontSize:20}}>{ic}</div><div style={{flex:1}}><b style={{fontSize:14}}>{t}</b><div style={{fontSize:10,color:"#8d96a7"}}>{sub}</div></div><button className="ex-btn" onClick={fn} style={{padding:"9px 12px",borderRadius:10,background:"#f0efff",color:"#5d57e9"}}>{lab}</button></div>)}
           <div className="ex-card" style={{padding:16}}><b>Referral milestones</b>{[1,3,5,10].map(n=>{const done=refStats.total>=n;return <div key={n} style={{display:"flex",alignItems:"center",gap:10,padding:"11px 0",borderTop:"1px solid #eef0f5",marginTop:7}}><span style={{width:30,height:30,borderRadius:"50%",background:done?"#eafbf4":"#f3f5f8",color:done?"#18a76a":"#8d96a7",display:"grid",placeItems:"center",fontWeight:800,fontSize:11}}>{done?"✓":n}</span><span style={{flex:1,fontSize:12}}>{n} referral{n>1?"s":""}</span><small style={{color:done?"#18a76a":"#8d96a7"}}>{done?"Completed":"Locked"}</small></div>})}</div>
         </div>}
 
@@ -862,7 +840,7 @@ export default function EarnX(){
 
         {tab==="profile"&&<div>
           <div style={{textAlign:"center",padding:"6px 0 17px"}}><div style={{width:76,height:76,borderRadius:"50%",margin:"0 auto 9px",background:"linear-gradient(135deg,#5d57e9,#8580ff)",display:"grid",placeItems:"center",color:"#fff",fontSize:29,fontWeight:800}}>{(tgUser?.first_name||"E").charAt(0).toUpperCase()}</div><div style={{fontSize:21,fontWeight:800}}>{tgUser?.first_name||"EarnX member"}</div><div style={{fontSize:11,color:"#8d96a7"}}>{tgUser?.username?"@"+tgUser.username:"Telegram member"}</div></div>
-          <div className="ex-card" style={{padding:7,marginBottom:11}}>{[["🛍️","EarnX Shop",()=>setTab("wallet")],["🎁","Daily rewards",()=>setShowStreak(true)],["↗","Invite friends",()=>setTab("team")],["🏆","Leaderboard",()=>alert("Leaderboard is available in EarnX.")]].map(([ic,label,fn])=><button key={label} className="ex-btn" onClick={fn} style={{width:"100%",display:"flex",alignItems:"center",gap:11,padding:13,border:0,borderBottom:"1px solid #eef0f5",background:"#fff",textAlign:"left",color:"#202637"}}><span style={{width:34,height:34,borderRadius:10,background:"#f2f3ff",display:"grid",placeItems:"center"}}>{ic}</span><span style={{flex:1}}>{label}</span><span style={{color:"#a0a7b4"}}>›</span></button>)}</div>
+          <div className="ex-card" style={{padding:7,marginBottom:11}}>{[["🛍️","EarnX Shop",()=>setTab("wallet")],["↗","Invite friends",()=>setTab("team")],["🏆","Leaderboard",()=>alert("Leaderboard is available in EarnX.")]].map(([ic,label,fn])=><button key={label} className="ex-btn" onClick={fn} style={{width:"100%",display:"flex",alignItems:"center",gap:11,padding:13,border:0,borderBottom:"1px solid #eef0f5",background:"#fff",textAlign:"left",color:"#202637"}}><span style={{width:34,height:34,borderRadius:10,background:"#f2f3ff",display:"grid",placeItems:"center"}}>{ic}</span><span style={{flex:1}}>{label}</span><span style={{color:"#a0a7b4"}}>›</span></button>)}</div>
           <div className="ex-card" style={{padding:16}}><b>Account</b><div style={{display:"flex",justifyContent:"space-between",padding:"10px 0",borderBottom:"1px solid #eef0f5",fontSize:11}}><span style={{color:"#8d96a7"}}>Telegram ID</span><span>{tgUser?.id||"—"}</span></div><div style={{display:"flex",justifyContent:"space-between",padding:"10px 0",borderBottom:"1px solid #eef0f5",fontSize:11}}><span style={{color:"#8d96a7"}}>Mining power</span><span>{miningPower.toLocaleString()}</span></div><div style={{display:"flex",justifyContent:"space-between",padding:"10px 0",fontSize:11}}><span style={{color:"#8d96a7"}}>Status</span><span style={{color:"#18a76a",fontWeight:800}}>Active</span></div></div>
         </div>}
       </main>
