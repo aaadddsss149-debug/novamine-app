@@ -270,6 +270,7 @@ export default function EarnXAdmin() {
     { id: "users",       label: "Users",          icon: "👥" },
     { id: "shop",        label: "Shop",           icon: "🏪" },
     { id: "ads",         label: "Ad Control",     icon: "📺" },
+    { id: "tasks",       label: "Tasks",          icon: "📋" },
     { id: "rewards",      label: "Rewards",         icon: "🎁" },
     { id: "withdrawals", label: "Withdrawals",    icon: "💸" },
     { id: "purchases",   label: "Purchases",      icon: "🛒" },
@@ -302,6 +303,7 @@ export default function EarnXAdmin() {
         {tab === "users"       && <UsersPanel notify={notify} />}
         {tab === "shop"        && <ShopPanel notify={notify} />}
         {tab === "ads"         && <AdsPanel notify={notify} />}
+        {tab === "tasks"       && <TasksPanel notify={notify} />}
         {tab === "rewards"      && <RewardsPanel notify={notify} />}
         {tab === "withdrawals" && <WithdrawalsPanel notify={notify} />}
         {tab === "purchases"   && <PurchasesPanel notify={notify} />}
@@ -500,6 +502,41 @@ function UsersPanel({ notify }) {
   );
 }
 
+// ─── TASK MANAGER ────────────────────────────────────────────────────────────
+function TasksPanel({ notify }) {
+  const [tasks,setTasks]=useState([]);
+  const [loading,setLoading]=useState(true);
+  const [saving,setSaving]=useState(false);
+  const [form,setForm]=useState({label:"",reward:100,category:"TG TASKS",url:"",action:"Open"});
+  const load=useCallback(()=>{setLoading(true);adminFetch("/tasks").then(setTasks).catch(e=>notify(e.message,"error")).finally(()=>setLoading(false));},[]);
+  useEffect(()=>{load();},[]);
+  const add=async()=>{
+    if(!form.label.trim()) return notify("Task name is required","error");
+    setSaving(true);
+    try{ const id="task_"+Date.now(); await adminFetch("/tasks",{method:"POST",body:{...form,id,reward:Number(form.reward),active:true}}); notify("Task added — live in the app"); setForm({label:"",reward:100,category:"TG TASKS",url:"",action:"Open"}); load(); }
+    catch(e){notify(e.message,"error");} finally{setSaving(false);}
+  };
+  const toggle=async t=>{try{await adminFetch(`/tasks/${encodeURIComponent(t.id)}`,{method:"PATCH",body:{active:!t.active}});load();}catch(e){notify(e.message,"error");}};
+  const remove=async t=>{if(!confirm("Delete this task?"))return;try{await adminFetch(`/tasks/${encodeURIComponent(t.id)}`,{method:"DELETE"});notify("Task deleted");load();}catch(e){notify(e.message,"error");}};
+  return <div className="fade-in">
+    <SectionHeader icon="📋" title="Task Manager" sub="Add Telegram links, channels, and rewarded-ad tasks. Changes are live immediately." />
+    <Card style={{marginBottom:20}}>
+      <div style={{fontWeight:800,fontSize:16,marginBottom:14}}>➕ Add New Task</div>
+      <div style={{display:"grid",gridTemplateColumns:"2fr 1fr 1fr",gap:10,marginBottom:10}}>
+        <Input value={form.label} onChange={v=>setForm(p=>({...p,label:v}))} placeholder="Task title e.g. Join EarnX Channel" />
+        <Input value={form.reward} onChange={v=>setForm(p=>({...p,reward:v}))} type="number" placeholder="Reward" />
+        <select value={form.category} onChange={e=>setForm(p=>({...p,category:e.target.value}))} style={{background:"#080c12",border:`1px solid ${S.cardBorder}`,borderRadius:6,color:S.text,padding:"7px 12px"}}><option>TG TASKS</option><option>ADS</option><option>LINK</option></select>
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr auto",gap:10,alignItems:"end"}}>
+        <Input value={form.url} onChange={v=>setForm(p=>({...p,url:v}))} placeholder="https://t.me/..." />
+        <Input value={form.action} onChange={v=>setForm(p=>({...p,action:v}))} placeholder="Open / Watch" />
+        <Btn onClick={add} disabled={saving}>{saving?"Adding…":"Add Task"}</Btn>
+      </div>
+      <div style={{fontSize:11,color:S.mutedLight,marginTop:10}}>ADS tasks use the configured AdsGram rewarded block. TG TASKS / LINK tasks open the URL, then the user claims the reward.</div>
+    </Card>
+    {loading?<LoadingScreen/>:<div style={{display:"grid",gap:10}}>{tasks.map(t=><Card key={t.id} style={{padding:"13px 16px"}}><div style={{display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}><div style={{width:42,height:42,borderRadius:10,background:t.active?S.greenDim:S.cardBorder,display:"grid",placeItems:"center"}}>{String(t.category).toUpperCase().includes("AD")?"📺":"📣"}</div><div style={{flex:1,minWidth:180}}><div style={{fontWeight:800,fontSize:14}}>{t.label}</div><div style={{fontSize:11,color:S.mutedLight}}>{t.category} · +{Number(t.reward).toLocaleString()} EARNX{t.url?" · "+t.url:""}</div></div><Badge color={t.active?S.green:S.muted}>{t.active?"ACTIVE":"OFF"}</Badge><Btn small onClick={()=>toggle(t)}>{t.active?"Disable":"Enable"}</Btn><Btn small danger onClick={()=>remove(t)}>Delete</Btn></div></Card>)}{tasks.length===0&&<EmptyState icon="📋" msg="No tasks yet. Add your first task above."/>}</div>}
+  </div>;
+}
 // ─── SHOP (DB-backed editor — saves live to the database) ─────────────────────
 const DEFAULT_TIERS = [
   { id: "tier_1k",    label: "1K",    novaPower:    1000, priceTon: 0.5,  hot: false },
