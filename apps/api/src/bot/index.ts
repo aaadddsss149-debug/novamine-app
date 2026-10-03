@@ -163,7 +163,6 @@ export async function startBot(app: Express) {
       await bot.api.setChatMenuButton({
         menu_button: {
           type: "commands",
-          text: "EarnX",
         },
       });
     }
