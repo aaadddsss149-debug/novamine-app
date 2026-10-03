@@ -35,11 +35,10 @@ export async function updateReferralStatus() {
       return;
     }
 
-    // 2. Count active days from activity_feed.
-    // The current production schema does not contain streak_claims, so querying
-    // that table makes the cron fail with "Invalid path specified in request URL".
-    // activity_feed is already part of the deployed schema and gives us a
-    // reliable per-day activity signal for referral qualification.
+    // 2. Count active days from mining_sessions.
+    // The production schema uses mining_sessions for user activity; there is no
+    // activity_feed table in the deployed schema. Querying a missing table can
+    // make PostgREST return "Invalid path specified in request URL".
     const referredIds = referrals.map((r: any) => r.referred_id);
     const monthStart = new Date(Date.UTC(
       Number(monthKey.slice(0, 4)),
@@ -53,19 +52,19 @@ export async function updateReferralStatus() {
     ));
 
     const { data: activities, error: activityErr } = await supabaseAdmin
-      .from("activity_feed")
-      .select("user_id, created_at")
+      .from("mining_sessions")
+      .select("user_id, started_at")
       .in("user_id", referredIds)
-      .gte("created_at", monthStart.toISOString())
-      .lt("created_at", nextMonthStart.toISOString());
+      .gte("started_at", monthStart.toISOString())
+      .lt("started_at", nextMonthStart.toISOString());
 
     if (activityErr) throw activityErr;
 
     // Count distinct UTC calendar days per referred user.
     const activeDaySets: Record<string, Set<string>> = {};
     for (const activity of activities ?? []) {
-      if (!activity.user_id || !activity.created_at) continue;
-      const day = new Date(activity.created_at).toISOString().slice(0, 10);
+      if (!activity.user_id || !activity.started_at) continue;
+      const day = new Date(activity.started_at).toISOString().slice(0, 10);
       (activeDaySets[activity.user_id] ??= new Set()).add(day);
     }
 
