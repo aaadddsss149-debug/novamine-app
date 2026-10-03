@@ -32,6 +32,7 @@ export const config = {
     token: required("BOT_TOKEN"),
     username: optional("BOT_USERNAME"),
     publicUrl: optional("PUBLIC_API_URL", "http://localhost:8080"),
+    appUrl: optional("WEB_APP_URL", "https://earnx-web-yujc.onrender.com"),
     webhookSecret: optional("TELEGRAM_WEBHOOK_SECRET"),
   },
 
