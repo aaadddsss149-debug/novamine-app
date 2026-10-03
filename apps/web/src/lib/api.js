@@ -48,6 +48,10 @@ export const api = {
   startMining: () => request("/mining/start", { method: "POST" }),
   claimMining: () => request("/mining/claim", { method: "POST" }),
 
+  // Tasks
+  tasks: () => request("/tasks"),
+  claimTask: (taskId) => request(`/tasks/${encodeURIComponent(taskId)}/claim`, { method: "POST" }),
+
   // Swap & withdraw
   swap: (hashes) => request("/swap", { method: "POST", body: { hashes } }),
   requestWithdraw: (amount, walletAddress) =>
