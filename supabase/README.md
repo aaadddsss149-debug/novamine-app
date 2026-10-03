@@ -1,6 +1,6 @@
 # Supabase
 
-This folder holds the database schema for NovaMine.
+This folder holds the database schema for EarnX.
 
 ## Applying the migration
 
