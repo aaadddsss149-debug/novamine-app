@@ -1,6 +1,8 @@
 
 import { createRoot } from "react-dom/client";
 import { TonConnectUIProvider } from "@tonconnect/ui-react";
+import { Buffer } from "buffer";
+if (!globalThis.Buffer) globalThis.Buffer = Buffer;
 import React, { lazy, Suspense } from "react";
 const App = lazy(() => import("./App.jsx"));
 import { initTelegram } from "./lib/telegram.js";
