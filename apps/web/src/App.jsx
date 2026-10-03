@@ -722,7 +722,7 @@ export default function EarnX(){
 
   return(
     <div style={{background:"#f7f8fc",minHeight:"100vh",maxWidth:430,margin:"0 auto",fontFamily:"'DM Sans',sans-serif",color:"#202637",position:"relative"}}>
-      <style>{\`
+      <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');
         *{box-sizing:border-box} body{background:#f7f8fc}
         @keyframes exIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
@@ -731,7 +731,7 @@ export default function EarnX(){
         .ex-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(255,255,255,.96);backdrop-filter:blur(18px);border-top:1px solid #e9ecf3;z-index:300;padding:7px 5px calc(7px + env(safe-area-inset-bottom))}
         .ex-nav button{flex:1;background:transparent;border:0;color:#8d96a7;font:600 10px 'DM Sans';display:flex;flex-direction:column;align-items:center;gap:5px;padding:5px 1px;cursor:pointer}
         .ex-nav button.active{color:#5d57e9}
-      \`}</style>
+      `}</style>
 
       {showStreak&&streakDays.length>0&&<div style={{position:"fixed",inset:0,zIndex:1000,background:"rgba(20,25,40,.55)",backdropFilter:"blur(8px)",display:"flex",alignItems:"center",justifyContent:"center",padding:18}} onClick={()=>setShowStreak(false)}>
         <div className="ex-card" onClick={e=>e.stopPropagation()} style={{padding:22,width:"100%",maxWidth:390}}>
