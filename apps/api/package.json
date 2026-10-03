@@ -2,7 +2,7 @@
   "name": "@novamine/api",
   "version": "0.1.0",
   "private": true,
-  "description": "NovaMine backend — Express API + grammy Telegram bot",
+  "description": "EarnX backend — Express API + grammy Telegram bot",
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
@@ -11,7 +11,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@novamine/shared": "*",
+    "@earnx/shared": "*",
     "@supabase/supabase-js": "^2.45.4",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
