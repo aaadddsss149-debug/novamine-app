@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { requireAuth } from "../middleware/auth.js";
 import { supabaseAdmin } from "../lib/supabase.js";
-import { WITHDRAW } from "@novamine/shared";
+import { WITHDRAW } from "@earnx/shared";
 
 export const referralsRouter = Router();
 
