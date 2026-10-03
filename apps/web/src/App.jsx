@@ -645,9 +645,20 @@ export default function EarnX(){
     if(buyingTierId) return;
     setBuyError(null);
 
-    if(!tonWalletAddress){
-      try { await tonConnectUI.connectWallet(); } catch(_){}
-      return;
+    let connectedAddress = tonWalletAddress;
+    if(!connectedAddress){
+      try {
+        const wallet = await tonConnectUI.connectWallet();
+        connectedAddress = wallet?.account?.address || "";
+      } catch(e) {
+        if(e?.message?.includes("User declined") || e?.message?.includes("Cancel")) return;
+        setBuyError(e?.message || "Could not connect your TON wallet.");
+        return;
+      }
+      if(!connectedAddress){
+        setBuyError("TON wallet connected. Tap the plan again to continue.");
+        return;
+      }
     }
 
     const receiverWallet = shopWallet || import.meta.env.VITE_TON_WALLET_ADDRESS || "";
@@ -682,7 +693,7 @@ export default function EarnX(){
         }],
       });
 
-      const purchase = await api.buyShopTier(tier.id, tonWalletAddress, paymentComment);
+      const purchase = await api.buyShopTier(tier.id, connectedAddress, paymentComment);
       setNova(Number(purchase.nova ?? nova));
       setMiningPower(Number(purchase.miningPower ?? miningPower));
       alert(`✅ Payment confirmed! +${tier.power} EARNX has been added to your account.`);
