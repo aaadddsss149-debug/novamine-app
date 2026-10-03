@@ -1,7 +1,8 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { TonConnectUIProvider } from "@tonconnect/ui-react";
-import App from "./App.jsx";
+import React, { lazy, Suspense } from "react";
+const App = lazy(() => import("./App.jsx"));
 import { initTelegram } from "./lib/telegram.js";
 import { authenticate } from "./lib/auth.js";
 
@@ -35,7 +36,7 @@ function boot() {
     createRoot(document.getElementById("root")).render(
       <React.StrictMode>
         <TonConnectUIProvider manifestUrl={MANIFEST_URL}>
-          <App />
+          <Suspense fallback={<div style={{minHeight:"100vh",background:"#080b0f",color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"system-ui,sans-serif"}}>Loading EarnX…</div>}><App /></Suspense>
         </TonConnectUIProvider>
       </React.StrictMode>
     );
