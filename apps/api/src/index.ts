@@ -87,26 +87,10 @@ app.listen(config.port, () => {
   console.log(`[api] listening on :${config.port} (env=${config.nodeEnv})`);
 });
 
-// ── Daily cron: update referral active_days and status ────────────────────────
-function scheduleDailyCron() {
-  function msUntilMidnightUTC() {
-    const now = new Date();
-    const midnight = new Date(Date.UTC(
-      now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1
-    ));
-    return midnight.getTime() - now.getTime();
-  }
-
-  // Run immediately on boot so status is up to date
-  updateReferralStatus();
-
-  // Then schedule to run every 24h at midnight UTC
-  setTimeout(function tick() {
-    updateReferralStatus();
-    setTimeout(tick, 24 * 60 * 60 * 1000);
-  }, msUntilMidnightUTC());
-
-  console.log(`[cron] Next referral update in ${Math.round(msUntilMidnightUTC()/1000/60)} minutes`);
-}
-
-scheduleDailyCron();
+// ── Daily referral cron ──────────────────────────────────────────────────────
+// Disabled until the deployed Supabase schema is confirmed to contain every
+// referrals/mining_sessions field used by updateReferralStatus. The previous
+// scheduler was the source of repeated PostgREST "Invalid path specified in
+// request URL" errors. Referral API routes remain available; this only stops
+// the broken background job from spamming the API logs.
+console.log("[cron] referral status scheduler disabled until schema is verified");
