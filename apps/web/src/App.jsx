@@ -64,42 +64,6 @@ const css = `
   @keyframes ringPulse{0%,100%{opacity:0.6;transform:scale(1)}50%{opacity:1;transform:scale(1.02)}}
 `;
 
-const diceDots={1:[[50,50]],2:[[25,25],[75,75]],3:[[25,25],[50,50],[75,75]],4:[[25,25],[75,25],[25,75],[75,75]],5:[[25,25],[75,25],[50,50],[25,75],[75,75]],6:[[25,25],[75,25],[25,50],[75,50],[25,75],[75,75]]};
-const diceColors={1:"#ef4444",2:"#f97316",3:"#eab308",4:"#22c55e",5:"#3b82f6",6:"#a855f7"};
-
-const Icon = ({name,size=20})=>{
-  const icons={
-    zap:<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>,
-    shop:<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>,
-    trophy:<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-1a2 2 0 012-2h16a2 2 0 012 2v1a2 2 0 01-2 2h-2"/><rect x="6" y="18" width="12" height="4"/></svg>,
-    users:<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>,
-    tasks:<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>,
-    copy:<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>,
-    share:<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>,
-    cpu:<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>,
-    swap:<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>,
-    check:<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>,
-    lock:<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>,
-    withdraw:<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v20M2 12h20"/><path d="M17 7l-5-5-5 5"/></svg>,
-    info:<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>,
-    arrowRight:<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>,
-  };
-  return icons[name]||null;
-};
-
-const diceDotsFace={1:[[50,50]],2:[[25,25],[75,75]],3:[[25,25],[50,50],[75,75]],4:[[25,25],[75,25],[25,75],[75,75]],5:[[25,25],[75,25],[50,50],[25,75],[75,75]],6:[[25,25],[75,25],[25,50],[75,50],[25,75],[75,75]]};
-function DiceFace({value,size=80}){
-  const dots=diceDotsFace[value]||diceDotsFace[1];
-  return(
-    <svg width={size} height={size} viewBox="0 0 100 100">
-      <defs><linearGradient id={`dg${value}`} x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor={diceColors[value]}/><stop offset="100%" stopColor={diceColors[value]} stopOpacity="0.7"/></linearGradient></defs>
-      <rect x="4" y="4" width="92" height="92" rx="20" fill={`url(#dg${value})`} stroke="rgba(255,255,255,0.15)" strokeWidth="1.5"/>
-      <rect x="6" y="6" width="88" height="30" rx="16" fill="rgba(255,255,255,0.08)"/>
-      {dots.map(([cx,cy],i)=><circle key={i} cx={cx} cy={cy} r="9" fill="white" opacity="0.95"/>)}
-    </svg>
-  );
-}
-
 let actIdx=0;
 function genActivity(){
   const u=ALL_USERS[actIdx%ALL_USERS.length]; actIdx++;
@@ -108,26 +72,8 @@ function genActivity(){
     {icon:"💰",color:T.gold,  text:`${u} withdrew`, value:`${(Math.random()*2+0.8).toFixed(2)} TON`},
     {icon:"⚡",color:T.blue,  text:`${u} bought`,   value:`${["100K","500K","1.25M"][Math.floor(Math.random()*3)]} NOVA`},
     {icon:"🚀",color:"#c084fc",text:`${u} invited`,  value:`a new member`},
-    {icon:"🎰",color:T.gold,  text:`${u} won`,      value:`${[3,10,25][Math.floor(Math.random()*3)]} NOVA on slots`},
-    {icon:"🎲",color:T.green, text:`${u} rolled`,   value:`50 NOVA!`},
   ];
   return {...types[Math.floor(Math.random()*types.length)],time:"just now",id:Date.now()+Math.random()};
-}
-
-function SlotReel({symbol,spinning}){
-  return(
-    <div style={{
-      width:72,height:72,borderRadius:12,
-      background:"rgba(255,255,255,0.04)",
-      border:"1px solid rgba(245,200,66,0.2)",
-      display:"flex",alignItems:"center",justifyContent:"center",
-      fontSize:32,
-      animation:spinning?"reelSpin 0.15s ease-in-out infinite":"none",
-      transition:"all 0.15s",
-    }}>
-      {symbol}
-    </div>
-  );
 }
 
 function SwapModal({onClose,hashes,onSwapComplete}){
@@ -557,29 +503,6 @@ export default function EarnX(){
 
   const [activities,setActivities]=useState(()=>Array.from({length:6},()=>genActivity()));
 
-  const [reels,setReels]=useState(["⚡","⚡","⚡"]);
-  const [spinning,setSpinning]=useState(false);
-  const [slotsResult,setSlotsResult]=useState(null);
-  const [slotsCooldown,setSlotsCooldown]=useState(()=>{
-    const until=localStorage.getItem("nm_slot_cooldown_until");
-    if(!until) return 0;
-    const remaining=Math.max(0,Math.round((Number(until)-Date.now())/1000));
-    return remaining;
-  });
-  const slotTimer=useRef(null);
-
-  const [diceVal,setDiceVal]=useState(6);
-  const [rolling,setRolling]=useState(false);
-  const [diceResult,setDiceResult]=useState(null);
-  // Dice state — persisted so rolling once per UTC day survives reloads
-  const [diceUsed,setDiceUsed]=useState(()=>{
-    const v = localStorage.getItem("nm_dice_rolled_date");
-    if (!v) return false;
-    const today = new Date().toISOString().slice(0,10); // "YYYY-MM-DD"
-    return v === today;
-  });
-
-
 
   // ── Auto-update mining power when NOVA changes ───────────────────────────
   useEffect(()=>{
@@ -712,75 +635,6 @@ export default function EarnX(){
     if(s>=3600){const h=Math.floor(s/3600);const m=Math.floor((s%3600)/60);const sec=s%60;return`${h}:${m.toString().padStart(2,"0")}:${sec.toString().padStart(2,"0")}`;}
     return`${Math.floor(s/60)}:${(s%60).toString().padStart(2,"0")}`;
   };
-
-  const SYMBOLS=["⚡","💎","🔮","🌟","🔥","🪙"];
-  const SLOT_REWARDS={"⚡⚡⚡":25,"💎💎💎":25,"🔮🔮🔮":10,"🌟🌟🌟":10,"🔥🔥🔥":10,"🪙🪙🪙":10};
-  const DICE_REWARDS={1:5,2:10,3:15,4:20,5:30,6:50};
-
-  function spinSlots(){
-    if(adsEnabled && adTriggers["spin_slot"] && typeof show_11059350==="function"){show_11059350().catch(()=>{});}
-    setSpinning(true);setSlotsResult(null);
-    // Animate reels while API call runs in background
-    let t=0;
-    const iv=setInterval(()=>{
-      setReels([SYMBOLS[Math.floor(Math.random()*6)],SYMBOLS[Math.floor(Math.random()*6)],SYMBOLS[Math.floor(Math.random()*6)]]);
-      t++;
-      if(t>=20){clearInterval(iv);}
-    },80);
-    // Call the API — server is authoritative for result and nova balance
-    api.spinSlots().then(result=>{
-      const final = result.reels ?? [SYMBOLS[Math.floor(Math.random()*6)],SYMBOLS[Math.floor(Math.random()*6)],SYMBOLS[Math.floor(Math.random()*6)]];
-      setReels(final);setSpinning(false);
-      // API returns { reels, reward, nextAvailableAt } — reward is the field name
-      const earned = result.reward ?? result.novaEarned ?? 0;
-      setSlotsResult(earned);
-      if(result.nova!=null) setNova(Number(result.nova));
-      else if(earned>0) setNova(p=>p+earned);
-      // API returns nextAvailableAt ISO string — derive cooldown seconds from it
-      let cd;
-      if(result.nextAvailableAt){
-        cd = Math.max(0, Math.round((new Date(result.nextAvailableAt).getTime() - Date.now()) / 1000));
-      } else {
-        cd = result.cooldownSec ?? Math.floor(Math.random()*(7200-25+1))+25;
-      }
-      setSlotsCooldown(cd);
-      const cooldownUntil = Date.now() + cd * 1000;
-      localStorage.setItem("nm_slot_cooldown_until", String(cooldownUntil));
-      clearInterval(slotTimer.current);
-      slotTimer.current=setInterval(()=>{setSlotsCooldown(s=>{if(s<=1){clearInterval(slotTimer.current);localStorage.removeItem("nm_slot_cooldown_until");return 0;}return s-1;});},1000);
-    }).catch(e=>{
-      setSpinning(false);
-      console.warn("Spin failed:", e);
-    });
-  }
-
-  function rollDice(){
-    if(adsEnabled && adTriggers["dice_roll"] && typeof show_11059350==="function"){show_11059350().catch(()=>{});}
-    setRolling(true);setDiceResult(null);
-    // Animate dice while API call runs
-    let t=0;
-    const iv=setInterval(()=>{
-      setDiceVal(Math.floor(Math.random()*6)+1);t++;
-      if(t>=16){clearInterval(iv);}
-    },80);
-    // Call the API — server is authoritative for result and nova balance
-    api.rollDice().then(result=>{
-      // API returns { value, reward } — value is the dice face, reward is nova earned
-      const face = result.value ?? result.face ?? Math.floor(Math.random()*6)+1;
-      setDiceVal(face);setRolling(false);
-      const earned = result.reward ?? result.novaEarned ?? 0;
-      setDiceResult(earned);
-      if(result.nova!=null) setNova(Number(result.nova));
-      else if(earned>0) setNova(p=>p+earned);
-      const today=new Date().toISOString().slice(0,10);
-      localStorage.setItem("nm_dice_rolled_date",today);
-      setDiceUsed(true);
-    }).catch(e=>{
-      setRolling(false);
-      console.warn("Dice roll failed:", e);
-    });
-  }
-
 
 
   // ── Shop: buy a tier via TonConnect wallet ───────────────────────────────
@@ -1332,73 +1186,7 @@ export default function EarnX(){
         {tab==="tasks"&&(
           <div style={{padding:"20px 16px",animation:"slideUp 0.3s ease"}}>
             <div style={{fontFamily:"'Orbitron'",fontWeight:700,fontSize:18,color:T.gold,marginBottom:4,letterSpacing:2}}>MISSIONS</div>
-            <div style={{fontSize:14,color:T.muted,marginBottom:20}}>Play games & invite friends to earn NOVA</div>
-
-            <div style={{fontWeight:700,fontSize:11,letterSpacing:2,color:T.muted,fontFamily:"'Orbitron'",marginBottom:10}}>FREE NOVA GAMES</div>
-            <div style={{display:"flex",gap:8,marginBottom:16}}>
-              {[{id:"slots",label:"🎰 Fruit Slots"},{id:"dice",label:"🎲 Daily Roll"}].map(g=>(
-                <button key={g.id} onClick={()=>setSubTab(g.id)} style={{flex:1,padding:"10px",background:subTab===g.id?`linear-gradient(135deg,${T.gold},${T.goldDim})`:"transparent",color:subTab===g.id?"#000":T.muted,border:`1px solid ${subTab===g.id?T.gold:"#1e2a1e"}`,borderRadius:10,fontFamily:"'Rajdhani'",fontWeight:700,fontSize:13,cursor:"pointer",transition:"all 0.2s"}}>{g.label}</button>
-              ))}
-            </div>
-
-            {subTab==="slots"&&(
-              <div style={{background:T.card,border:"1px solid #1e2a1e",borderRadius:16,padding:18,marginBottom:16}}>
-                <div style={{textAlign:"center",marginBottom:12}}>
-                  <div style={{fontFamily:"'Orbitron'",fontWeight:700,color:T.gold,fontSize:15}}>FRUIT SLOTS</div>
-                  <div style={{fontSize:12,color:T.muted,marginTop:2}}>Spin · Win NOVA · Timer: 25s–2h</div>
-                </div>
-                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6,marginBottom:12}}>
-                  {[["⚡⚡⚡","25 NOVA",true],["💎💎💎","25 NOVA",false],["🔮🔮🔮","10 NOVA",false],["🌟🌟🌟","10 NOVA",false],["🔥🔥🔥","10 NOVA",false],["Any 2×","3 NOVA",false]].map(([icon,reward,hot])=>(
-                    <div key={icon} className="prize-card" style={{background:hot?T.goldFaint:"rgba(255,255,255,0.03)",border:`1px solid ${hot?T.goldDim:"#1e2a1e"}`,borderRadius:10,padding:"8px 4px",textAlign:"center"}}>
-                      <div style={{fontSize:icon.includes("×")?11:18,fontWeight:700,color:icon.includes("×")?T.muted:"auto",marginBottom:2}}>{icon}</div>
-                      <div style={{fontSize:10,fontWeight:700,color:T.gold,fontFamily:"'Orbitron'"}}>{reward}</div>
-                    </div>
-                  ))}
-                </div>
-                <div style={{background:"#050d05",borderRadius:14,padding:12,marginBottom:12,display:"flex",gap:8,justifyContent:"center",border:"1px solid #0f1e0f"}}>
-                  {reels.map((sym,i)=><SlotReel key={i} symbol={sym} spinning={spinning}/>)}
-                </div>
-                {slotsResult!==null&&(
-                  <div style={{textAlign:"center",marginBottom:10,animation:"popIn 0.3s ease",color:slotsResult>0?T.green:T.muted,fontFamily:"'Orbitron'",fontWeight:700,fontSize:13}}>
-                    {slotsResult>0?`⚡ +${slotsResult} NOVA!`:"No match — try again!"}
-                  </div>
-                )}
-                <button onClick={spinSlots} disabled={spinning||slotsCooldown>0} className="btn-gold" style={{width:"100%",padding:"13px",background:spinning||slotsCooldown>0?"#1a1a1a":`linear-gradient(135deg,${T.gold},${T.goldDim})`,color:spinning||slotsCooldown>0?T.muted:"#000",border:spinning||slotsCooldown>0?"1px solid #1e2a1e":"none",borderRadius:12,fontFamily:"'Rajdhani'",fontWeight:700,fontSize:15,cursor:spinning||slotsCooldown>0?"not-allowed":"pointer"}}>
-                  {spinning?"Spinning...":slotsCooldown>0?`⏱ ${formatTime(slotsCooldown)}`:"🎰 Spin Now"}
-                </button>
-              </div>
-            )}
-
-            {subTab==="dice"&&(
-              <div style={{background:T.card,border:"1px solid #1e2a1e",borderRadius:16,padding:18,marginBottom:16}}>
-                <div style={{textAlign:"center",marginBottom:12}}>
-                  <div style={{fontFamily:"'Orbitron'",fontWeight:700,color:T.gold,fontSize:15}}>DAILY ROLL</div>
-                  <div style={{fontSize:12,color:T.muted,marginTop:2}}>Roll once every 24h · Win NOVA</div>
-                </div>
-                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6,marginBottom:18}}>
-                  {[1,2,3,4,5,6].map(f=>(
-                    <div key={f} className="prize-card" style={{background:"rgba(255,255,255,0.03)",border:`1px solid #1e2a1e`,borderRadius:10,padding:"8px 4px",textAlign:"center"}}>
-                      <div style={{display:"flex",justifyContent:"center",marginBottom:4}}><DiceFace value={f} size={30}/></div>
-                      <div style={{fontSize:10,fontWeight:700,color:T.gold,fontFamily:"'Orbitron'"}}>{[5,10,15,20,30,50][f-1]} NOVA</div>
-                    </div>
-                  ))}
-                </div>
-                <div style={{display:"flex",justifyContent:"center",marginBottom:14}}>
-                  <div style={{animation:rolling?"diceRoll 0.15s linear infinite":"float 2s ease-in-out infinite"}}>
-                    <DiceFace value={diceVal} size={88}/>
-                  </div>
-                </div>
-                {diceResult!==null&&(
-                  <div style={{textAlign:"center",marginBottom:10,animation:"popIn 0.3s ease",color:T.green,fontFamily:"'Orbitron'",fontWeight:700,fontSize:13}}>
-                    🎲 Rolled {diceVal}! +{diceResult} NOVA!
-                  </div>
-                )}
-                <button onClick={rollDice} disabled={rolling||diceUsed} className="btn-gold" style={{width:"100%",padding:"13px",background:rolling||diceUsed?"#1a1a1a":`linear-gradient(135deg,${T.gold},${T.goldDim})`,color:rolling||diceUsed?T.muted:"#000",border:rolling||diceUsed?"1px solid #1e2a1e":"none",borderRadius:12,fontFamily:"'Rajdhani'",fontWeight:700,fontSize:15,cursor:rolling||diceUsed?"not-allowed":"pointer"}}>
-                  {rolling?"Rolling...":diceUsed?"Come back tomorrow!":"🎲 Roll Dice"}
-                </button>
-              </div>
-            )}
-
+            <div style={{fontSize:14,color:T.muted,marginBottom:20}}>Complete missions & invite friends to earn NOVA</div>
             <div style={{fontWeight:700,fontSize:11,letterSpacing:2,color:T.muted,fontFamily:"'Orbitron'",margin:"4px 0 10px"}}>INVITE MILESTONES</div>
             {[[1,1200,"1.2K"],[5,2400,"2.4K"],[25,6000,"6K"],[50,12000,"12K"],[100,24000,"24K"]].map(([n,novaAmt,reward])=>{
               const reached = qualifiedFriends >= n;
