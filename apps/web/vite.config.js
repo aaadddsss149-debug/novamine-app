@@ -1,7 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
-// Vite config for NovaMine web (Telegram Mini App)
+// Vite config for EarnX web (Telegram Mini App)
 // - Outputs to dist/ for Vercel
 // - Dev server on 5173, opens via ngrok / Vercel preview for Telegram
 export default defineConfig({
