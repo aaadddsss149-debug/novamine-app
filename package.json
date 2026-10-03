@@ -1,8 +1,8 @@
 {
-  "name": "novamine-app",
+  "name": "earnx-app",
   "version": "0.1.0",
   "private": true,
-  "description": "NovaMine — Telegram Mini App for mining NOVA and earning TON",
+  "description": "EarnX — Telegram Mini App for mining NOVA and earning TON",
   "workspaces": [
     "apps/*",
     "packages/*"
