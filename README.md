@@ -1,6 +1,6 @@
 # EarnX
 
-A Telegram Mini App for earning NOVA and TON through EarnX missions, referrals and rewards. Stack: **Vercel** (web) + **Render** (API + Telegram bot) + **Supabase** (Postgres + Auth + RLS).
+A Telegram Mini App for earning EARNX and TON through EarnX missions, referrals and rewards. Stack: **Vercel** (web) + **Render** (API + Telegram bot) + **Supabase** (Postgres + Auth + RLS).
 
 ```
 ┌──────────────┐    ┌──────────────┐    ┌──────────────┐
@@ -77,7 +77,7 @@ Work through this checklist. I've left clear placeholders everywhere.
 ### 5. Test it
 
 - Open `t.me/<your-bot-username>` → tap **/start** → tap the **Open EarnX** button.
-- The Mini App should load, auth should happen invisibly, and you should see your NOVA balance start at 0.
+- The Mini App should load, auth should happen invisibly, and you should see your EARNX balance start at 0.
 
 ---
 
