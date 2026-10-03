@@ -215,7 +215,7 @@ export async function startBot(app: Express) {
               `⛏️ *Your EarnX rewards are ready, ${u.first_name || "Miner"}!*\n\nYour mining session has rewards waiting. Open EarnX and collect them.`,
               {
                 parse_mode: "Markdown",
-                reply_markup: new InlineKeyboard().url("⚡ Claim NOVA", miniAppLink()),
+                reply_markup: new InlineKeyboard().url("⚡ Claim EARNX", miniAppLink()),
               }
             );
 
