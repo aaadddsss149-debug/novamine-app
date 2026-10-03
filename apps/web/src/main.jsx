@@ -1,4 +1,4 @@
-import React from "react";
+
 import { createRoot } from "react-dom/client";
 import { TonConnectUIProvider } from "@tonconnect/ui-react";
 import React, { lazy, Suspense } from "react";
