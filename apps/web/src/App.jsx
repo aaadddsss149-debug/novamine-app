@@ -923,7 +923,7 @@ export default function EarnX(){
             <button className="ex-btn" disabled={dailyAdCount>=20||taskBusy==="daily_ads"} onClick={()=>runTask({id:"daily_ads",reward:0.0013,category:"ADS"})} style={{width:"100%",marginTop:12,padding:12,borderRadius:12,background:dailyAdCount>=20?"#eef1f5":"#5d57e9",color:dailyAdCount>=20?"#8d96a7":"#fff"}}>{dailyAdCount>=20?"✓ 20/20":taskBusy==="daily_ads"?"…":TC.watch+" · +0.0013 TON"}</button>
           </div>
           <div className="ex-card" style={{padding:16}}><b>{TC.refMilestones}</b>{[1,3,5,10].map(n=>{const done=refStats.total>=n;return <div key={n} style={{display:"flex",alignItems:"center",gap:10,padding:"11px 0",borderTop:"1px solid #eef0f5",marginTop:7}}><span style={{width:30,height:30,borderRadius:"50%",background:done?"#eafbf4":"#f3f5f8",color:done?"#18a76a":"#8d96a7",display:"grid",placeItems:"center",fontWeight:800,fontSize:11}}>{done?"✓":n}</span><span style={{flex:1,fontSize:12}}>{n} referral{n>1?"s":""}</span><small style={{color:done?"#18a76a":"#8d96a7"}}>{done?TC.completedLabel:TC.locked}</small></div>})}</div>
-        </div>
+        </div>}
 
         {tab==="team"&&<div>
           <div style={{marginBottom:15}}><div style={{fontSize:25,fontWeight:800}}>Refer & earn</div><div style={{fontSize:12,color:"#8d96a7"}}>Invite friends and grow together</div></div>
