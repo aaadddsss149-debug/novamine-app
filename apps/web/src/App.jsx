@@ -725,9 +725,22 @@ export default function EarnX(){
       });
 
       const purchase = await api.buyShopTier(tier.id, connectedAddress, paymentComment);
-      setNova(Number(purchase.nova ?? nova));
-      setMiningPower(Number(purchase.miningPower ?? miningPower));
-      alert(`✅ Payment confirmed! +${tier.power} EARNX has been added to your account.`);
+      if (purchase?.status === "pending") {
+        setBuyError("Payment was sent, but TON is still confirming it. No EARNX was added yet. Wait a few seconds and try the plan again.");
+        return;
+      }
+      if (purchase?.status !== "confirmed") {
+        setBuyError("Payment was not confirmed. No EARNX was added.");
+        return;
+      }
+      const fresh = await api.me();
+      if (fresh?.user) {
+        setNova(Number(fresh.user.nova ?? 0));
+        setHashes(Number(fresh.user.hashes ?? 0));
+        setTonBalance(Number(fresh.user.ton_balance ?? 0));
+        setMiningPower(miningPowerFromNova(Number(fresh.user.nova ?? 0)));
+      }
+      alert("Payment confirmed! +" + tier.power + " EARNX has been added to your account.");
     } catch(e){
       if(e?.message?.includes("User declined") || e?.message?.includes("Cancel")){
       } else {
@@ -795,7 +808,7 @@ export default function EarnX(){
 
       {showGift&&<div style={{position:"fixed",inset:0,zIndex:1001,background:"rgba(20,25,40,.55)",backdropFilter:"blur(8px)",display:"flex",alignItems:"center",justifyContent:"center",padding:18}}>
         <div className="ex-card" style={{padding:28,width:"100%",maxWidth:350,textAlign:"center"}}>
-          {!giftOpened?<><div onClick={()=>{setGiftOpened(true);api.claimGift?.().catch(()=>{})}} style={{fontSize:75,cursor:"pointer"}}>🎁</div><b style={{fontSize:20}}>Welcome to EarnX</b><div style={{fontSize:12,color:"#8d96a7",marginTop:5}}>Tap the gift to reveal your bonus.</div></>:<><div style={{fontSize:50}}>🎉</div><b style={{fontSize:20}}>Reward unlocked</b><div style={{fontSize:12,color:"#8d96a7",marginTop:5}}>Welcome bonus</div><div style={{fontSize:34,fontWeight:800,color:"#5d57e9",margin:"8px 0 16px"}}>+{welcomeTon} TON</div><button className="ex-btn" onClick={()=>{setShowGift(false);setGiftUnclaimed(false);setTonBalance(p=>p+welcomeTon)}} style={{width:"100%",padding:13,borderRadius:14,background:"linear-gradient(135deg,#5d57e9,#857fff)",color:"#fff"}}>Claim reward</button></>}
+          {!giftOpened?<><div onClick={async()=>{try{await api.claimGift?.(); const fresh=await api.me(); if(fresh?.user){setTonBalance(Number(fresh.user.ton_balance ?? 0));setNova(Number(fresh.user.nova ?? 0));setHashes(Number(fresh.user.hashes ?? 0));setMiningPower(miningPowerFromNova(Number(fresh.user.nova ?? 0)));} setGiftOpened(true);}catch(e){setBuyError(e?.message||"Could not claim the welcome gift.");}}} style={{fontSize:75,cursor:"pointer"}}>🎁</div><b style={{fontSize:20}}>Welcome to EarnX</b><div style={{fontSize:12,color:"#8d96a7",marginTop:5}}>Tap the gift to reveal your bonus.</div></>:<><div style={{fontSize:50}}>🎉</div><b style={{fontSize:20}}>Reward unlocked</b><div style={{fontSize:12,color:"#8d96a7",marginTop:5}}>Welcome bonus</div><div style={{fontSize:34,fontWeight:800,color:"#5d57e9",margin:"8px 0 16px"}}>+{welcomeTon} TON</div><button className="ex-btn" onClick={async()=>{try{const fresh=await api.me();if(fresh?.user){setTonBalance(Number(fresh.user.ton_balance ?? 0));setNova(Number(fresh.user.nova ?? 0));setHashes(Number(fresh.user.hashes ?? 0));setMiningPower(miningPowerFromNova(Number(fresh.user.nova ?? 0)));}}catch(_){} setShowGift(false);setGiftUnclaimed(false);}} style={{width:"100%",padding:13,borderRadius:14,background:"linear-gradient(135deg,#5d57e9,#857fff)",color:"#fff"}}>Claim reward</button></>}
         </div>
       </div>}
 
