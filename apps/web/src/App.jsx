@@ -338,7 +338,6 @@ export default function EarnX(){
               setMiningPower(miningPowerFromNova(Number(u.nova ?? 0)));
             })
             .subscribe();
-        }
         // Restore mining session from API if active
         if(data?.mining?.startedAt){
           const started = new Date(data.mining.startedAt).getTime();
