@@ -284,7 +284,7 @@ adminRouter.patch("/purchases/:id", requireAdmin, async (req: any, res: any) => 
 adminRouter.get("/ad-config", requireAdmin, async (_req: any, res: any) => {
   try {
     const { data, error } = await supabaseAdmin.from("app_config")
-      .select("key,value").in("key", ["ads_enabled", "ad_triggers"]);
+      .select("key,value").in("key", ["ads_enabled", "ad_triggers", "adsgram_block_id"]);
     if (error) throw error;
 
     const cfg: Record<string, any> = {};
@@ -292,19 +292,28 @@ adminRouter.get("/ad-config", requireAdmin, async (_req: any, res: any) => {
     res.json({
       adsEnabled: cfg.ads_enabled ?? true,
       adTriggers: cfg.ad_triggers ?? { start_mining: true, collect_mining: true, spin_slot: true, dice_roll: true },
+      adBlockId: typeof cfg.adsgram_block_id === "string" ? cfg.adsgram_block_id : "",
     });
   } catch {
-    res.json({ adsEnabled: true, adTriggers: {} });
+    res.json({ adsEnabled: false, adTriggers: {}, adBlockId: "" });
   }
 });
 
 adminRouter.patch("/ad-config", requireAdmin, async (req: any, res: any) => {
   try {
-    const { adsEnabled, adTriggers } = req.body;
+    const { adsEnabled, adTriggers, adBlockId } = req.body;
+    if (typeof adsEnabled !== "boolean" || typeof adTriggers !== "object") {
+      return res.status(400).json({ error: "Invalid ad configuration" });
+    }
+    if (adBlockId !== undefined && typeof adBlockId !== "string") {
+      return res.status(400).json({ error: "Invalid AdsGram block id" });
+    }
     const { error: e1 } = await supabaseAdmin.from("app_config").upsert({ key: "ads_enabled", value: adsEnabled });
     const { error: e2 } = await supabaseAdmin.from("app_config").upsert({ key: "ad_triggers", value: adTriggers });
+    const { error: e3 } = await supabaseAdmin.from("app_config").upsert({ key: "adsgram_block_id", value: String(adBlockId ?? "") });
     if (e1) throw e1;
     if (e2) throw e2;
+    if (e3) throw e3;
     res.json({ ok: true });
   } catch (e: any) {
     res.status(500).json({ error: e.message });
