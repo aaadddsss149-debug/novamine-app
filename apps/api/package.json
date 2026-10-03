@@ -1,5 +1,5 @@
 {
-  "name": "@novamine/api",
+  "name": "@earnx/api",
   "version": "0.1.0",
   "private": true,
   "description": "EarnX backend — Express API + grammy Telegram bot",
