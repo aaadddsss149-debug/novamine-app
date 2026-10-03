@@ -4,12 +4,9 @@
  * Runs once per day (scheduled in index.ts).
  *
  * What it does:
- * *  1. For every pending/active referral this month, counts distinct active
- *     days from the deployed activity_feed table.
- *  2. Updates active_days_this_month on the referrals row.
- *  3. If active_days_this_month >= 10, flips status to "active".
- *  4. If a new month has started, resets active_days_this_month back to 0
- *     and flips "active" rows back to "pending" so users must re-qualify.
+ * *  Counts distinct active days from production mining_sessions and updates referrals.
+ *  The deployed referrals schema has no month_key column, so month rollover is
+ *  represented by recalculating the current month's active days each run.
  */
 
 import { supabaseAdmin } from "../lib/supabase.js";
@@ -27,7 +24,7 @@ export async function updateReferralStatus() {
     // 1. Fetch all referrals
     const { data: referrals, error: refErr } = await supabaseAdmin
       .from("referrals")
-      .select("id, referred_id, status, active_days_this_month, month_key");
+      .select("id, referred_id, status, active_days_this_month");
 
     if (refErr) throw refErr;
     if (!referrals || referrals.length === 0) {
@@ -80,19 +77,15 @@ export async function updateReferralStatus() {
       const newStatus  = activeDays >= 10 ? "active" : "pending";
 
       // Reset active_days if we're in a new month
-      const isNewMonth = ref.month_key && ref.month_key !== monthKey;
-
       const updates: any = {
-        active_days_this_month: isNewMonth ? activeDays : activeDays,
-        status: isNewMonth ? (activeDays >= 10 ? "active" : "pending") : newStatus,
-        month_key: monthKey,
+        active_days_this_month: activeDays,
+        status: newStatus,
       };
 
       // Only write if something changed
       const changed =
         ref.active_days_this_month !== activeDays ||
-        ref.status !== updates.status ||
-        ref.month_key !== monthKey;
+        ref.status !== updates.status;
 
       if (changed) {
         const { error: updateErr } = await supabaseAdmin
