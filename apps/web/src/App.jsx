@@ -676,12 +676,22 @@ export default function EarnX(){
       const nanotons = BigInt(Math.round(Number(tier.cost) * 1_000_000_000)).toString();
       const randomId = globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
       const paymentComment = `EarnX Shop|${userDbId.current}|${tier.id}|${randomId}`;
-      const { beginCell } = await import("@ton/core");
-      const payloadCell = beginCell()
-        .storeUint(0, 32)
-        .storeStringTail(paymentComment)
-        .endCell();
-      const payload = btoa(String.fromCharCode(...payloadCell.toBoc()));
+      // Build the standard TON text-comment payload without importing @ton/core
+      // in the browser. This keeps the payment button reliable inside Telegram WebView.
+      const commentBytes = new TextEncoder().encode(paymentComment);
+      const body = new Uint8Array(4 + commentBytes.length);
+      body[0] = 0; body[1] = 0; body[2] = 0; body[3] = 0;
+      body.set(commentBytes, 4);
+      let binary = "";
+      for (let i = 0; i < body.length; i++) binary += String.fromCharCode(body[i]);
+      const payload = btoa(binary);
+
+      console.log("[EarnX] Opening TON payment", {
+        receiver: receiverWallet,
+        amount: nanotons,
+        wallet: connectedAddress,
+        tier: tier.id
+      });
 
       await tonConnectUI.sendTransaction({
         network: "-239",
@@ -700,7 +710,8 @@ export default function EarnX(){
     } catch(e){
       if(e?.message?.includes("User declined") || e?.message?.includes("Cancel")){
       } else {
-        setBuyError(e?.message ?? "Payment failed or is still being confirmed. Please try again.");
+        console.error("[EarnX] Shop payment error:", e);
+      setBuyError(e?.message ?? "Payment failed or is still being confirmed. Please try again.");
       }
     } finally {
       setBuyingTierId(null);
@@ -810,7 +821,7 @@ export default function EarnX(){
           <div style={{marginBottom:15}}><div style={{fontSize:25,fontWeight:800}}>Wallet</div><div style={{fontSize:12,color:"#8d96a7"}}>Manage your EarnX and TON</div></div>
           <div className="ex-card" style={{padding:18,marginBottom:11}}><small style={{color:"#8d96a7"}}>Available TON</small><div style={{fontSize:31,fontWeight:800,margin:"2px 0 14px"}}>{tonBalance.toFixed(5)} TON</div><div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:9}}><button className="ex-btn" onClick={()=>setShowSwap(true)} style={{padding:12,borderRadius:13,background:"#f0efff",color:"#5d57e9"}}>↔ Convert</button><button className="ex-btn" onClick={()=>setShowWithdraw(true)} style={{padding:12,borderRadius:13,background:"#5d57e9",color:"#fff"}}>Withdraw</button></div></div>
           <div className="ex-card" style={{padding:18,marginBottom:11}}><small style={{color:"#8d96a7"}}>EarnX credits</small><div style={{fontSize:28,fontWeight:800}}>{novaDisplay} EARNX</div><div style={{fontSize:11,color:"#8d96a7",marginTop:4}}>Mining power: <b style={{color:"#5d57e9"}}>{miningPower.toLocaleString()}</b></div></div>
-          <div className="ex-card" style={{padding:16}}><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:5}}><div><b>EarnX Shop</b><div style={{fontSize:10,color:"#8d96a7"}}>Boost your mining rate</div></div><TonConnectButton style={{height:30}}/></div>{displayTiers.slice(0,4).map(item=><div key={item.id} style={{display:"flex",alignItems:"center",gap:9,borderTop:"1px solid #eef0f5",padding:"11px 0"}}><span style={{width:38,height:38,borderRadius:12,background:"#f0efff",display:"grid",placeItems:"center"}}>⚡</span><span style={{flex:1}}><b style={{fontSize:12}}>{item.power} EARNX</b><small style={{display:"block",color:"#8d96a7"}}>{item.daily} TON/day</small></span><button className="ex-btn" onClick={()=>handleBuyTier(item)} style={{padding:"8px 10px",borderRadius:10,background:"#202637",color:"#fff",fontSize:10}}>{item.cost} TON</button></div>)}{displayTiers.length===0&&<div style={{padding:15,textAlign:"center",color:"#8d96a7"}}>Shop is loading…</div>}</div>
+          <div className="ex-card" style={{padding:16}}>{buyError&&<div style={{background:"#fff1f1",border:"1px solid #ffd0d0",borderRadius:10,padding:"10px 12px",marginBottom:10,fontSize:11,color:"#c62828"}}>{buyError}</div>}<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:5}}><div><b>EarnX Shop</b><div style={{fontSize:10,color:"#8d96a7"}}>Boost your mining rate</div></div><TonConnectButton style={{height:30}}/></div>{displayTiers.slice(0,4).map(item=><div key={item.id} style={{display:"flex",alignItems:"center",gap:9,borderTop:"1px solid #eef0f5",padding:"11px 0"}}><span style={{width:38,height:38,borderRadius:12,background:"#f0efff",display:"grid",placeItems:"center"}}>⚡</span><span style={{flex:1}}><b style={{fontSize:12}}>{item.power} EARNX</b><small style={{display:"block",color:"#8d96a7"}}>{item.daily} TON/day</small></span><button className="ex-btn" onClick={()=>handleBuyTier(item)} style={{padding:"8px 10px",borderRadius:10,background:"#202637",color:"#fff",fontSize:10}}>{item.cost} TON</button></div>)}{displayTiers.length===0&&<div style={{padding:15,textAlign:"center",color:"#8d96a7"}}>Shop is loading…</div>}</div>
         </div>}
 
         {tab==="profile"&&<div>
