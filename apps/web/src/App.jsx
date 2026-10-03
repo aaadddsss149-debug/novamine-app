@@ -283,7 +283,7 @@ export default function EarnX(){
   const [adBlockId,setAdBlockId]=useState("");
   const [userLoaded,setUserLoaded]=useState(false);
   const [shopTiers,setShopTiers]=useState(SHOP.TIERS);
-  const [shopWallet,setShopWallet]=useState("");
+  const [shopWallet,setShopWallet]=useState("");\n  const [taskItems,setTaskItems]=useState([]);\n  const [tasksLoading,setTasksLoading]=useState(false);\n  const [taskBusy,setTaskBusy]=useState(null);
   const userDbId=useRef(null);
   const [showWithdraw,setShowWithdraw]=useState(false);
   const [showSwap,setShowSwap]=useState(false);
@@ -563,6 +563,35 @@ export default function EarnX(){
     }
   }
 
+  useEffect(()=>{
+    if(tab !== "tasks" || !userLoaded) return;
+    let alive=true;
+    setTasksLoading(true);
+    api.tasks().then(r=>{ if(alive) setTaskItems(Array.isArray(r?.tasks)?r.tasks:[]); }).catch(()=>{ if(alive) setTaskItems([]); }).finally(()=>{ if(alive) setTasksLoading(false); });
+    return ()=>{alive=false;};
+  },[tab,userLoaded]);
+
+  async function runTask(task){
+    if(task.done || taskBusy) return;
+    setTaskBusy(task.id);
+    try{
+      const category=String(task.category||"").toUpperCase();
+      if(category.includes("AD")){
+        await new Promise(resolve=>watchAd(resolve,"start_mining"));
+      }else if(task.url){
+        window.open(task.url,"_blank","noopener,noreferrer");
+      }
+      const result=await api.claimTask(task.id);
+      setTaskItems(prev=>prev.map(t=>t.id===task.id?{...t,done:true}:t));
+      if(result?.nova!=null) setNova(Number(result.nova));
+      try{ const fresh=await api.me(); if(fresh?.user){ setNova(Number(fresh.user.nova??0)); setHashes(Number(fresh.user.hashes??0)); setTonBalance(Number(fresh.user.ton_balance??0)); setMiningPower(miningPowerFromNova(Number(fresh.user.nova??0))); } }catch(_){}
+      alert("✅ Task completed! +"+Number(result?.reward??task.reward??0).toLocaleString()+" EARNX");
+    }catch(e){
+      if(e?.status===409) setTaskItems(prev=>prev.map(t=>t.id===task.id?{...t,done:true}:t));
+      else alert(e?.message||"Task could not be completed.");
+    }finally{setTaskBusy(null);}
+  }
+
   function startMining(){
     // Watch ad first, then start 24h mining session
     watchAd(async ()=>{
@@ -819,8 +848,8 @@ export default function EarnX(){
         </div>}
 
         {tab==="tasks"&&<div>
-          <div style={{marginBottom:15}}><div style={{fontSize:25,fontWeight:800}}>Tasks</div><div style={{fontSize:12,color:"#8d96a7"}}>Simple ways to grow your EarnX balance</div></div>
-          {[["▶","Start earning","Start a 24-hour mining session",startMining,"Start"]].map(([ic,t,sub,fn,lab])=><div className="ex-card" key={t} style={{padding:15,display:"flex",alignItems:"center",gap:12,marginBottom:10}}><div style={{width:44,height:44,borderRadius:14,background:"#f0efff",display:"grid",placeItems:"center",fontSize:20}}>{ic}</div><div style={{flex:1}}><b style={{fontSize:14}}>{t}</b><div style={{fontSize:10,color:"#8d96a7"}}>{sub}</div></div><button className="ex-btn" onClick={fn} style={{padding:"9px 12px",borderRadius:10,background:"#f0efff",color:"#5d57e9"}}>{lab}</button></div>)}
+          <div style={{marginBottom:15}}><div style={{fontSize:25,fontWeight:800}}>Tasks</div><div style={{fontSize:12,color:"#8d96a7"}}>Complete Telegram tasks and watch ads to earn EARNX</div></div>
+          {tasksLoading?<div className="ex-card" style={{padding:22,textAlign:"center",color:"#8d96a7"}}>Loading tasks…</div>:taskItems.length===0?<div className="ex-card" style={{padding:25,textAlign:"center",color:"#8d96a7"}}>No tasks available right now.</div>:taskItems.map(task=>{const isAd=String(task.category||"").toUpperCase().includes("AD");return <div className="ex-card" key={task.id} style={{padding:15,display:"flex",alignItems:"center",gap:12,marginBottom:10,opacity:task.done?.65:1}}><div style={{width:44,height:44,borderRadius:14,background:isAd?"#fff5e8":"#f0efff",display:"grid",placeItems:"center",fontSize:20}}>{isAd?"📺":"📣"}</div><div style={{flex:1,minWidth:0}}><b style={{fontSize:14,display:"block"}}>{task.label}</b><div style={{fontSize:10,color:"#8d96a7",marginTop:3}}>+{Number(task.reward||0).toLocaleString()} EARNX · {task.category||"TG TASKS"}</div></div><button className="ex-btn" disabled={task.done||taskBusy===task.id} onClick={()=>runTask(task)} style={{padding:"9px 12px",borderRadius:10,background:task.done?"#eafbf4":"#f0efff",color:task.done?"#18a76a":"#5d57e9",whiteSpace:"nowrap"}}>{task.done?"✓ Done":taskBusy===task.id?"…":isAd?"Watch":"Open"}</button></div>})}
           <div className="ex-card" style={{padding:16}}><b>Referral milestones</b>{[1,3,5,10].map(n=>{const done=refStats.total>=n;return <div key={n} style={{display:"flex",alignItems:"center",gap:10,padding:"11px 0",borderTop:"1px solid #eef0f5",marginTop:7}}><span style={{width:30,height:30,borderRadius:"50%",background:done?"#eafbf4":"#f3f5f8",color:done?"#18a76a":"#8d96a7",display:"grid",placeItems:"center",fontWeight:800,fontSize:11}}>{done?"✓":n}</span><span style={{flex:1,fontSize:12}}>{n} referral{n>1?"s":""}</span><small style={{color:done?"#18a76a":"#8d96a7"}}>{done?"Completed":"Locked"}</small></div>})}</div>
         </div>}
 
