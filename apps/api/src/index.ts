@@ -68,7 +68,7 @@ app.get("/adsgram/reward", async (req, res) => {
     if ((count ?? 0) >= 20) return res.json({ok:true,credited:false,reason:"daily_limit"});
     const { data:event,error:eventError } = await supabaseAdmin.from("adsgram_reward_events").insert({telegram_id:telegramId,source:"adsgram"}).select("id").single();
     if (eventError) throw eventError;
-    const rewardTon = 0.0022;
+    const rewardTon = 0.0013;
     const { data:updated,error:updateError } = await supabaseAdmin.from("users").update({ton_balance:Number(user.ton_balance||0)+rewardTon})
       .eq("id",user.id).select("ton_balance").single();
     if (updateError) throw updateError;
@@ -86,7 +86,7 @@ app.get("/adsgram/daily-status", async (req,res)=>{
     const {supabaseAdmin}=await import("./lib/supabase.js");
     const {count}=await supabaseAdmin.from("adsgram_reward_events").select("id",{count:"exact",head:true})
       .eq("telegram_id",telegramId).gte("received_at",new Date(Date.now()-24*60*60*1000).toISOString());
-    res.json({ok:true,dailyCount:count??0,dailyLimit:20,rewardTon:0.0022});
+    res.json({ok:true,dailyCount:count??0,dailyLimit:20,rewardTon:0.0013});
   }catch{res.status(500).json({ok:false});}
 });
 
