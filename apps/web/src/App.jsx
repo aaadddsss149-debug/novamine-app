@@ -7,6 +7,7 @@ import { api } from "./lib/api.js";
 import { supabase } from "./lib/supabase.js";
 import { miningPowerFromNova, tierFromNova, MINING, SHOP } from "@earnx/shared";
 import { useTonConnectUI, useTonAddress, TonConnectButton } from "@tonconnect/ui-react";
+import { beginCell } from "@ton/core";
 
 const T = {
   bg:"#080b0f", card:"#0d1117", gold:"#55e7ff", goldDim:"#7c5cff",
@@ -697,15 +698,14 @@ export default function EarnX(){
       const nanotons = BigInt(Math.round(Number(tier.cost) * 1_000_000_000)).toString();
       const randomId = globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
       const paymentComment = `EarnX Shop|${userDbId.current}|${tier.id}|${randomId}`;
-      // Build the standard TON text-comment payload without importing @ton/core
-      // in the browser. This keeps the payment button reliable inside Telegram WebView.
-      const commentBytes = new TextEncoder().encode(paymentComment);
-      const body = new Uint8Array(4 + commentBytes.length);
-      body[0] = 0; body[1] = 0; body[2] = 0; body[3] = 0;
-      body.set(commentBytes, 4);
-      let binary = "";
-      for (let i = 0; i < body.length; i++) binary += String.fromCharCode(body[i]);
-      const payload = btoa(binary);
+      // TON Connect expects message payload to be a base64-encoded BOC cell.
+      // Raw base64 comment bytes are not a valid TON cell and are rejected by validation.
+      const payload = beginCell()
+        .storeUint(0, 32)
+        .storeStringTail(paymentComment)
+        .endCell()
+        .toBoc()
+        .toString("base64");
 
       console.log("[EarnX] Opening TON payment", {
         receiver: receiverWallet,
