@@ -329,6 +329,7 @@ export default function EarnX(){
   const [taskItems,setTaskItems]=useState([]);
   const [tasksLoading,setTasksLoading]=useState(false);
   const [taskBusy,setTaskBusy]=useState(null);
+  const [dailyAdCount,setDailyAdCount]=useState(0);
   const userDbId=useRef(null);
   const [showWithdraw,setShowWithdraw]=useState(false);
   const [showSwap,setShowSwap]=useState(false);
@@ -616,25 +617,36 @@ export default function EarnX(){
   useEffect(()=>{
     if(tab !== "tasks" || !userLoaded) return;
     let alive=true;
+    const userId=window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
     setTasksLoading(true);
-    api.tasks().then(r=>{ if(alive) setTaskItems(Array.isArray(r?.tasks)?r.tasks:[]); }).catch(()=>{ if(alive) setTaskItems([]); }).finally(()=>{ if(alive) setTasksLoading(false); });
+    fetch((import.meta.env.VITE_API_BASE_URL??"")+"/adsgram/daily-status?userid="+encodeURIComponent(String(userId||"")))
+      .then(r=>r.json()).then(x=>{ if(alive) setDailyAdCount(Number(x?.dailyCount||0)); })
+      .catch(()=>{ if(alive) setDailyAdCount(0); })
+      .finally(()=>{ if(alive) setTasksLoading(false); });
+    setTaskItems([{id:"daily_ads",label:"Watch Ads",reward:0.0022,category:"ADS",active:true,done:false}]);
     return ()=>{alive=false;};
   },[tab,userLoaded]);
 
   async function runTask(task){
-    if(task.done || taskBusy) return;
+    if(taskBusy || dailyAdCount>=20) return;
     setTaskBusy(task.id);
     try{
-      if(task.url) window.open(task.url,"_blank","noopener,noreferrer");
-      const result=await api.claimTask(task.id);
-      setTaskItems(prev=>prev.map(t=>t.id===task.id?{...t,done:true}:t));
-      if(result?.nova!=null) setNova(Number(result.nova));
-      const fresh=await api.me(); if(fresh?.user){ setNova(Number(fresh.user.nova??0)); setHashes(Number(fresh.user.hashes??0)); setTonBalance(Number(fresh.user.ton_balance??0)); setMiningPower(miningPowerFromNova(Number(fresh.user.nova??0))); }
-      alert("✅ "+TC.completed+Number(result?.reward??task.reward??0).toLocaleString()+" EARNX");
-    }catch(e){
-      if(e?.status===409) setTaskItems(prev=>prev.map(t=>t.id===task.id?{...t,done:true}:t));
-      else alert(e?.message||"Task could not be completed.");
-    }finally{setTaskBusy(null);}
+      await new Promise((resolve,reject)=>{
+        const before=dailyAdCount;
+        watchAd(async ()=>{
+          try{
+            const uid=window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
+            const r=await fetch((import.meta.env.VITE_API_BASE_URL??"")+"/adsgram/daily-status?userid="+encodeURIComponent(String(uid||"")));
+            const x=await r.json();
+            setDailyAdCount(Number(x?.dailyCount||before));
+            resolve();
+          }catch(e){reject(e);}
+        },"start_mining");
+      });
+      const fresh=await api.me();
+      if(fresh?.user) setTonBalance(Number(fresh.user.ton_balance??0));
+    }catch(e){ alert(e?.message||"Ad could not be completed."); }
+    finally{setTaskBusy(null);}
   }
 
   function startMining(){
@@ -900,9 +912,18 @@ export default function EarnX(){
 
         {tab==="tasks"&&<div>
           <div style={{marginBottom:15}}><div style={{fontSize:25,fontWeight:800}}>{TC.title}</div><div style={{fontSize:12,color:"#8d96a7"}}>{TC.sub}</div></div>
-          {tasksLoading?<div className="ex-card" style={{padding:22,textAlign:"center",color:"#8d96a7"}}>{TC.loading}</div>:taskItems.length===0?<div className="ex-card" style={{padding:25,textAlign:"center",color:"#8d96a7"}}>{TC.empty}</div>:taskItems.map(task=>{const isAd=String(task.category||"").toUpperCase().includes("AD");return <div className="ex-card" key={task.id} style={{padding:15,display:"flex",alignItems:"center",gap:12,marginBottom:10,opacity:task.done?.65:1}}><div style={{width:44,height:44,borderRadius:14,background:isAd?"#fff5e8":"#f0efff",display:"grid",placeItems:"center",fontSize:20}}>{isAd?"📺":"📣"}</div><div style={{flex:1,minWidth:0}}><b style={{fontSize:14,display:"block"}}>{task.label}</b><div style={{fontSize:10,color:"#8d96a7",marginTop:3}}>+{Number(task.reward||0).toLocaleString()} EARNX · {task.category||"TG TASKS"}</div></div><button className="ex-btn" disabled={task.done||taskBusy===task.id} onClick={()=>runTask(task)} style={{padding:"9px 12px",borderRadius:10,background:task.done?"#eafbf4":"#f0efff",color:task.done?"#18a76a":"#5d57e9",whiteSpace:"nowrap"}}>{task.done?"✓ "+TC.done:taskBusy===task.id?"…":isAd?TC.watch:TC.open}</button></div>})}
+          <div className="ex-card" style={{padding:18,marginBottom:12,background:"linear-gradient(135deg,#fff8ee,#ffffff)"}}>
+            <div style={{display:"flex",alignItems:"center",gap:12}}>
+              <div style={{width:50,height:50,borderRadius:15,background:"#fff0d8",display:"grid",placeItems:"center",fontSize:24}}>📺</div>
+              <div style={{flex:1}}><b style={{fontSize:15}}>Watch Ads</b><div style={{fontSize:11,color:"#8d96a7",marginTop:3}}>AdsGram · Block 51781</div></div>
+              <b style={{color:"#18a76a",fontSize:12}}>+0.0022 TON</b>
+            </div>
+            <div style={{marginTop:14,height:8,borderRadius:8,background:"#edf0f4",overflow:"hidden"}}><div style={{height:"100%",width:(Math.min(20,dailyAdCount)/20*100)+"%",background:"linear-gradient(90deg,#5d57e9,#18a76a)",borderRadius:8}}/></div>
+            <div style={{display:"flex",justifyContent:"space-between",marginTop:8,fontSize:11,color:"#7f8998"}}><span>{dailyAdCount}/20 {lang==="ar"?"إعلان اليوم":"ads today"}</span><span>0.0022 TON / ad</span></div>
+            <button className="ex-btn" disabled={dailyAdCount>=20||taskBusy==="daily_ads"} onClick={()=>runTask({id:"daily_ads",reward:0.0022,category:"ADS"})} style={{width:"100%",marginTop:12,padding:12,borderRadius:12,background:dailyAdCount>=20?"#eef1f5":"#5d57e9",color:dailyAdCount>=20?"#8d96a7":"#fff"}}>{dailyAdCount>=20?"✓ 20/20":taskBusy==="daily_ads"?"…":TC.watch+" · +0.0022 TON"}</button>
+          </div>
           <div className="ex-card" style={{padding:16}}><b>{TC.refMilestones}</b>{[1,3,5,10].map(n=>{const done=refStats.total>=n;return <div key={n} style={{display:"flex",alignItems:"center",gap:10,padding:"11px 0",borderTop:"1px solid #eef0f5",marginTop:7}}><span style={{width:30,height:30,borderRadius:"50%",background:done?"#eafbf4":"#f3f5f8",color:done?"#18a76a":"#8d96a7",display:"grid",placeItems:"center",fontWeight:800,fontSize:11}}>{done?"✓":n}</span><span style={{flex:1,fontSize:12}}>{n} referral{n>1?"s":""}</span><small style={{color:done?"#18a76a":"#8d96a7"}}>{done?TC.completedLabel:TC.locked}</small></div>})}</div>
-        </div>}
+        </div>
 
         {tab==="team"&&<div>
           <div style={{marginBottom:15}}><div style={{fontSize:25,fontWeight:800}}>Refer & earn</div><div style={{fontSize:12,color:"#8d96a7"}}>Invite friends and grow together</div></div>
