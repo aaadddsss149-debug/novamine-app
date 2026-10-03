@@ -438,7 +438,7 @@ function UsersPanel({ notify }) {
                 </div>
                 <div style={{ textAlign: "center" }}>
                   <div style={{ fontSize: 13, fontWeight: 700, color: S.text, fontFamily: "'JetBrains Mono'" }}>{MINING.hashesPerSession(miningPowerFromNova(u.nova)).toFixed(8)}</div>
-                  <div style={{ fontSize: 10, color: S.muted }}>HASHES/SESSION</div>
+                  <div style={{ fontSize: 10, color: S.muted }}>ENERGY/SESSION</div>
                 </div>
               </div>
               <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
@@ -452,7 +452,7 @@ function UsersPanel({ notify }) {
       {editUser && (
         <Modal title={`Edit: ${editUser.first_name || editUser.username}`} onClose={() => setEditUser(null)}>
           <div style={{ display: "grid", gap: 12 }}>
-            <label style={{ fontSize: 12, color: S.mutedLight }}>TON Balance <span style={{color:"#39ff8a",fontSize:10}}>(auto-fills EARNX & HASHES)</span></label>
+            <label style={{ fontSize: 12, color: S.mutedLight }}>TON Balance <span style={{color:"#39ff8a",fontSize:10}}>(auto-fills EARNX & ENERGY)</span></label>
             <Input value={editVals.ton_balance} onChange={v => {
               const ton = Number(v) || 0;
               setEditVals(p => ({
@@ -464,7 +464,7 @@ function UsersPanel({ notify }) {
             }} type="number" />
             <label style={{ fontSize: 12, color: S.mutedLight }}>EARNX Balance</label>
             <Input value={editVals.nova} onChange={v => setEditVals(p => ({ ...p, nova: v }))} type="number" />
-            <label style={{ fontSize: 12, color: S.mutedLight }}>HASHES</label>
+            <label style={{ fontSize: 12, color: S.mutedLight }}>ENERGY</label>
             <Input value={editVals.hashes ?? 0} onChange={v => setEditVals(p => ({ ...p, hashes: v }))} type="number" />
             <label style={{ fontSize: 12, color: S.mutedLight }}>Mining Power (auto from EARNX)</label>
             <div style={{ background: "#080c12", border: "1px solid #1e2a1e", borderRadius: 6, color: "#39ff8a", padding: "7px 12px", fontSize: 13, fontWeight: 700 }}>
