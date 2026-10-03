@@ -324,18 +324,20 @@ function AnalyticsPanel({ notify }) {
   useEffect(() => {
     adminFetch("/analytics", { method: "GET" })
       .then(d => {
+        const payload = d && typeof d === "object" ? d : {};
         const now = Date.now(), DAY = 86400000;
-        const users = d.users || [];
-        const purchases = d.purchases || [];
-        const withdrawals = d.withdrawals || [];
+        const users = Array.isArray(payload.users) ? payload.users : [];
+        const purchases = Array.isArray(payload.purchases) ? payload.purchases : [];
+        const withdrawals = Array.isArray(payload.withdrawals) ? payload.withdrawals : [];
+        const sessions = Array.isArray(payload.sessions) ? payload.sessions : [];
         setData({
           totalUsers: users.length,
           activeToday: users.filter(u => now - new Date(u.last_seen_at) < DAY).length,
           activeWeek: users.filter(u => now - new Date(u.last_seen_at) < 7 * DAY).length,
-          totalRevenue: purchases.filter(p => p.status === "confirmed").reduce((s, p) => s + Number(p.ton_paid), 0).toFixed(3),
+          totalRevenue: purchases.filter(p => p.status === "confirmed").reduce((s, p) => s + Number(p.ton_paid || 0), 0).toFixed(3),
           pendingWithdrawals: withdrawals.filter(w => w.status === "pending").length,
           pendingPurchases: purchases.filter(p => p.status === "pending").length,
-          totalSessions: d.sessions?.length || 0,
+          totalSessions: sessions.length,
         });
       })
       .catch(e => notify(e.message, "error"))
@@ -343,6 +345,15 @@ function AnalyticsPanel({ notify }) {
   }, []);
 
   if (loading) return <LoadingScreen />;
+  if (!data) return (
+    <div className="fade-in">
+      <SectionHeader icon="📊" title="Analytics Overview" sub="Live data from your Supabase database" />
+      <Card>
+        <div style={{ color: S.red, fontWeight: 700, marginBottom: 8 }}>Analytics could not be loaded.</div>
+        <div style={{ color: S.mutedLight, fontSize: 12 }}>Check the API logs or Supabase connection, then reload the dashboard.</div>
+      </Card>
+    </div>
+  );
 
   return (
     <div className="fade-in">
