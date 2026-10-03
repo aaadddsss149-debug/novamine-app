@@ -50,6 +50,43 @@ app.use("/auth", authRouter);
 app.use("/leaderboard", leaderboardRouter);
 
 // Public ad-config endpoint (no auth — frontend reads this to know if ads are enabled)
+// AdsGram Reward URL webhook.
+// AdsGram replaces [userId] with the Telegram user ID and calls this endpoint
+// after the rewarded ad flow. We only record the server-side confirmation here;
+// the actual reward is granted by the authenticated Mini App callback, so this
+// endpoint cannot be abused to mint NOVA by calling it directly.
+app.get("/adsgram/reward", async (req, res) => {
+  try {
+    const rawUserId = String(req.query.userid ?? "").trim();
+    if (!/^\\d{5,20}$/.test(rawUserId)) {
+      return res.status(400).json({ ok: false, error: "invalid_userid" });
+    }
+
+    const telegramId = Number(rawUserId);
+    const { supabaseAdmin } = await import("./lib/supabase.js");
+
+    const { data: user } = await supabaseAdmin
+      .from("users")
+      .select("id")
+      .eq("telegram_id", telegramId)
+      .maybeSingle();
+
+    if (!user) {
+      return res.status(404).json({ ok: false, error: "user_not_found" });
+    }
+
+    await supabaseAdmin.from("adsgram_reward_events").insert({
+      telegram_id: telegramId,
+      source: "adsgram",
+    });
+
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error("[adsgram] reward callback failed:", err);
+    return res.status(500).json({ ok: false });
+  }
+});
+
 app.get("/ad-config-public", async (_req, res) => {
   try {
     const { supabaseAdmin } = await import("./lib/supabase.js");
