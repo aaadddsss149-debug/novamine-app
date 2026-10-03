@@ -13,9 +13,6 @@ meRouter.get("/", requireAuth, async (req, res, next) => {
 
     // Run all queries in parallel — previously sequential, causing 6 round-trips
     // to Supabase before the response could be sent. Now they all fire at once.
-    const startOfUtcDay = new Date();
-    startOfUtcDay.setUTCHours(0, 0, 0, 0);
-
     const [
       { data: user, error },
       { data: session },
@@ -78,12 +75,6 @@ meRouter.get("/", requireAuth, async (req, res, next) => {
           ? new Date(session.claim_ready_at).getTime() <= Date.now()
           : false,
       } : null,
-      slots: { nextAvailableAt: lastSpin?.next_available_at ?? null },
-      dice: {
-        todayRolled: !!todayDice,
-        todayValue: todayDice?.value ?? null,
-        todayReward: todayDice?.reward ?? null,
-      },
       referrals: {
         total: totalReferred ?? 0,
         qualified: qualifiedFriends ?? 0,
