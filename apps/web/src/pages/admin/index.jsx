@@ -16,7 +16,8 @@ async function adminFetch(path, opts = {}, secret) {
     body: opts.body ? JSON.stringify(opts.body) : undefined,
   });
   const text = await res.text();
-  const data = text ? JSON.parse(text) : null;
+  let data = null;
+  try { data = text ? JSON.parse(text) : null; } catch { throw new Error(`Server returned an invalid response (HTTP ${res.status})`); }
   if (!res.ok) {
     const err = new Error(data?.error || `HTTP ${res.status}`);
     err.status = res.status;
@@ -522,7 +523,7 @@ function TasksPanel({ notify }) {
         <div style={{flex:1}}>
           <div style={{fontWeight:800,fontSize:16}}>Watch Ads</div>
           <div style={{fontSize:12,color:S.mutedLight}}>Rewarded AdsGram · Block ID 51781 · limit 20/day</div>
-          <div style={{fontSize:12,color:S.gold,marginTop:5}}>Reward: 0.00001 TON per completed ad</div>
+          <div style={{fontSize:12,color:S.gold,marginTop:5}}>Reward: 0.0013 TON per completed ad</div>
         </div>
         <Badge color={S.green}>ACTIVE</Badge>
       </div>
