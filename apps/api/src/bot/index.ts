@@ -10,19 +10,25 @@ function botUsername() {
 function miniAppLink(startParam?: string | null) {
   const u = botUsername();
   if (!u) return config.bot.publicUrl.replace(/\/$/, "");
-  return `https://t.me/${u}/app${startParam ? `?startapp=${encodeURIComponent(startParam)}` : ""}`;
+  return `https://t.me/${u}${startParam ? `?startapp=${encodeURIComponent(startParam)}` : ""}`;
 }
 
-function appKeyboard(startParam?: string | null) {
-  return new InlineKeyboard()
-    .webApp("🚀 Open EarnX", config.bot.appUrl || config.bot.publicUrl.replace(/\/api\/?$/, ""))
-    .row()
-    .url(
-      "👥 Invite Friends",
-      `https://t.me/share/url?url=${encodeURIComponent(
-        `https://t.me/${botUsername()}?startapp=ref_`
+function appKeyboard(referrerTelegramId?: number | null) {
+  const username = botUsername();
+  const inviteUrl = username && referrerTelegramId
+    ? `https://t.me/share/url?url=${encodeURIComponent(
+        `https://t.me/${username}?startapp=ref_${referrerTelegramId}`
       )}&text=${encodeURIComponent("⚡ Join me on EarnX and start earning NOVA!")}`
-    );
+    : null;
+
+  const keyboard = new InlineKeyboard()
+    .webApp("🚀 Open EarnX", config.bot.appUrl || config.bot.publicUrl.replace(/\/api\/?$/, ""));
+
+  if (inviteUrl) {
+    keyboard.row().url("👥 Invite Friends", inviteUrl);
+  }
+
+  return keyboard;
 }
 
 export async function startBot(app: Express) {
