@@ -1,6 +1,6 @@
-// NovaMine v4 - circular nav + all NOVA labels - All NOVA labels correct
+// EarnX v4 - circular nav + all NOVA labels - All NOVA labels correct
 import { useState, useEffect, useRef } from "react";
-import NovaMineAdmin from "./pages/admin/index.jsx";
+import EarnXAdmin from "./pages/admin/index.jsx";
 import { getTelegramUser, initTelegram } from "./lib/telegram.js";
 import { authenticate } from "./lib/auth.js";
 import { api } from "./lib/api.js";
@@ -296,9 +296,9 @@ function WithdrawModal({onClose,tonBalance,qualifiedFriends,onGoSwap,onInvite,on
 
 
 // ── MAIN APP ──────────────────────────────────────────────────────────────────
-export default function NovaMine(){
+export default function EarnX(){
   if (window.location.pathname === "/admin") {
-    return <NovaMineAdmin />;
+    return <EarnXAdmin />;
   }
   const [tab,setTab]=useState("power");
   const [nova,setNova]=useState(0);          // new users start at 0
@@ -514,7 +514,7 @@ export default function NovaMine(){
   },[]);
   // ─────────────────────────────────────────────────────────────────────────
   // BOT_USERNAME — can be overridden via VITE_BOT_USERNAME in .env
-  const BOT_USERNAME = import.meta.env.VITE_BOT_USERNAME || "NovaMinerVerseBot";
+  const BOT_USERNAME = import.meta.env.VITE_BOT_USERNAME || "EarnXrVerseBot";
   const tgUser = getTelegramUser();
   const myTelegramId = tgUser?.id ?? null;
   const referralLink = myTelegramId
@@ -528,7 +528,7 @@ export default function NovaMine(){
     const tg = window.Telegram?.WebApp;
     if (tg?.openTelegramLink) {
       // Opens the Telegram share sheet pre-filled with the referral link
-      const text = encodeURIComponent("Join me on NovaMine and start mining NOVA! 🚀");
+      const text = encodeURIComponent("Join me on EarnX and start mining NOVA! 🚀");
       tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(referralLink)}&text=${text}`);
     } else {
       // Fallback for desktop/dev: just copy
