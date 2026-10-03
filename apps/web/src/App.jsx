@@ -684,7 +684,7 @@ export default function EarnX(){
       const purchase = await api.buyShopTier(tier.id, tonWalletAddress, paymentComment);
       setNova(Number(purchase.nova ?? nova));
       setMiningPower(Number(purchase.miningPower ?? miningPower));
-      alert(`✅ Payment confirmed! +${Number(tier.power).toLocaleString()} EARNX has been added to your account.`);
+      alert(`✅ Payment confirmed! +${tier.power} EARNX has been added to your account.`);
     } catch(e){
       if(e?.message?.includes("User declined") || e?.message?.includes("Cancel")){
       } else {
