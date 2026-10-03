@@ -48,10 +48,6 @@ export const api = {
   startMining: () => request("/mining/start", { method: "POST" }),
   claimMining: () => request("/mining/claim", { method: "POST" }),
 
-  // Games
-  spinSlots: () => request("/games/slots/spin", { method: "POST" }),
-  rollDice: () => request("/games/dice/roll", { method: "POST" }),
-
   // Swap & withdraw
   swap: (hashes) => request("/swap", { method: "POST", body: { hashes } }),
   requestWithdraw: (amount, walletAddress) =>
