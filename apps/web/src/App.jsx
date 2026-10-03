@@ -514,7 +514,7 @@ export default function EarnX(){
   },[]);
   // ─────────────────────────────────────────────────────────────────────────
   // BOT_USERNAME — can be overridden via VITE_BOT_USERNAME in .env
-  const BOT_USERNAME = import.meta.env.VITE_BOT_USERNAME || "EarnXrVerseBot";
+  const BOT_USERNAME = import.meta.env.VITE_BOT_USERNAME || "earnxtop1_bot";
   const tgUser = getTelegramUser();
   const myTelegramId = tgUser?.id ?? null;
   const referralLink = myTelegramId
