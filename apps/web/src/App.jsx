@@ -279,10 +279,10 @@ export default function EarnX(){
   const [miningPower,setMiningPower]=useState(1000);
   const [adsEnabled,setAdsEnabled]=useState(false);
   const [adTriggers,setAdTriggers]=useState({start_mining:false,collect_mining:false});
+  const [adBlockId,setAdBlockId]=useState("");
   const [userLoaded,setUserLoaded]=useState(false);
   const [shopTiers,setShopTiers]=useState(SHOP.TIERS);
   const [shopWallet,setShopWallet]=useState("");
-  const ADSGRAM_BLOCK_ID = import.meta.env.VITE_ADSGRAM_BLOCK_ID || "";
   const userDbId=useRef(null);
   const [showWithdraw,setShowWithdraw]=useState(false);
   const [showSwap,setShowSwap]=useState(false);
@@ -458,6 +458,7 @@ export default function EarnX(){
         if(cfg){
           setAdsEnabled(!!cfg.adsEnabled);
           setAdTriggers(cfg.adTriggers ?? {});
+          setAdBlockId(String(cfg.adBlockId ?? import.meta.env.VITE_ADSGRAM_BLOCK_ID ?? "").trim());
         }
       })
       .catch(()=>{});
@@ -560,12 +561,12 @@ export default function EarnX(){
   async function watchAd(onComplete, trigger="start_mining"){
     // AdsGram Rewarded: only continue when the rewarded ad is actually completed.
     if(!(adsEnabled && adTriggers[trigger])) { onComplete(); return; }
-    if(!ADSGRAM_BLOCK_ID || !window.Adsgram?.init){
+    if(!adBlockId || !window.Adsgram?.init){
       alert("Rewarded ads are not configured yet. Please try again later.");
       return;
     }
     try{
-      const controller=window.Adsgram.init({blockId:ADSGRAM_BLOCK_ID});
+      const controller=window.Adsgram.init({blockId:adBlockId});
       const result=await controller.show();
       if(result?.done !== false) onComplete();
       else alert("Ad was not completed, so no reward was granted.");
