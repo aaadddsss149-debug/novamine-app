@@ -55,8 +55,8 @@ export const api = {
 
   // Shop
   listShopTiers: () => request("/shop"),
-  buyShopTier: (tierId, txHash) =>
-    request("/shop/buy", { method: "POST", body: { tierId, txHash } }),
+  buyShopTier: (tierId, senderAddress, paymentComment) =>
+    request("/shop/buy", { method: "POST", body: { tierId, senderAddress, paymentComment } }),
 
   // Referrals / team
   referrals: () => request("/referrals"),
