@@ -700,12 +700,14 @@ export default function EarnX(){
       const paymentComment = `EarnX Shop|${userDbId.current}|${tier.id}|${randomId}`;
       // TON Connect expects message payload to be a base64-encoded BOC cell.
       // Raw base64 comment bytes are not a valid TON cell and are rejected by validation.
-      const payload = beginCell()
+      const boc = beginCell()
         .storeUint(0, 32)
         .storeStringTail(paymentComment)
         .endCell()
-        .toBoc()
-        .toString("base64");
+        .toBoc();
+      let bocBinary = "";
+      for (let i = 0; i < boc.length; i++) bocBinary += String.fromCharCode(boc[i]);
+      const payload = btoa(bocBinary);
 
       console.log("[EarnX] Opening TON payment", {
         receiver: receiverWallet,
