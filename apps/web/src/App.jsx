@@ -285,7 +285,6 @@ export default function EarnX(){
   const userDbId=useRef(null);
   const [showWithdraw,setShowWithdraw]=useState(false);
   const [showSwap,setShowSwap]=useState(false);
-  const [showAd,setShowAd]=useState(false);
   const [adCallback,setAdCallback]=useState(null);
   const [adProgress,setAdProgress]=useState(0);
   const [adSkippable,setAdSkippable]=useState(false);
