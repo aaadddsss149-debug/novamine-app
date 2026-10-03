@@ -16,9 +16,7 @@ function miniAppLink(startParam?: string | null) {
 function appKeyboard(referrerTelegramId?: number | null) {
   const username = botUsername();
   const inviteUrl = username && referrerTelegramId
-    ? `https://t.me/share/url?url=${encodeURIComponent(
-        `https://t.me/${username}?startapp=ref_${referrerTelegramId}`
-      )}&text=${encodeURIComponent("⚡ Join me on EarnX and start earning NOVA!")}`
+    ? `https://t.me/share/url?url=${encodeURIComponent(\n        `https://t.me/${username}?startapp=ref_${referrerTelegramId}`\n      )}&text=${encodeURIComponent("🚀 Join me on EarnX and start earning rewards!")}`
     : null;
 
   const keyboard = new InlineKeyboard()
@@ -55,12 +53,12 @@ export async function startBot(app: Express) {
 
     await ctx.reply(
       [
-        `⚡ *Welcome to EarnX, ${firstName}!*`,
+        `🚀 *Welcome to EarnX, ${firstName}!*`,
         "",
-        "A Telegram rewards hub where you can complete tasks, watch rewarded ads, invite friends and build your NOVA balance.",
+        "Your all-in-one Telegram rewards hub — complete missions, watch rewarded ads, invite friends and grow your EarnX balance.",
         referralLine,
         "",
-        "👇 Open the Mini App to start earning.",
+        "👇 Open the Mini App and start earning.",
       ].join("\n"),
       {
         parse_mode: "Markdown",
@@ -103,7 +101,7 @@ export async function startBot(app: Express) {
       [
         `⚡ *EarnX Balance — ${user.first_name || "Miner"}*`,
         "",
-        `🪙 NOVA: *${Number(user.nova || 0).toLocaleString()}*`,
+        `⚡ EARNX: *${Number(user.nova || 0).toLocaleString()}*`,
         `💎 TON: *${Number(user.ton_balance || 0).toFixed(6)}*`,
         `⚡ Power: *${Number(user.mining_power || 0).toLocaleString()}*`,
         "",
@@ -165,7 +163,7 @@ export async function startBot(app: Express) {
     await bot.api.setMyCommands([
       { command: "start", description: "Open EarnX" },
       { command: "app", description: "Launch the Mini App" },
-      { command: "balance", description: "Check NOVA & TON" },
+      { command: "balance", description: "Check EARNX & TON" },
       { command: "invite", description: "Get your referral link" },
       { command: "help", description: "EarnX help" },
     ]);
@@ -214,7 +212,7 @@ export async function startBot(app: Express) {
           try {
             await bot.api.sendMessage(
               u.telegram_id,
-              `⛏️ *Your NOVA is ready, ${u.first_name || "Miner"}!*\n\nYour mining session has rewards waiting. Open EarnX and collect them.`,
+              `⛏️ *Your EarnX rewards are ready, ${u.first_name || "Miner"}!*\n\nYour mining session has rewards waiting. Open EarnX and collect them.`,
               {
                 parse_mode: "Markdown",
                 reply_markup: new InlineKeyboard().url("⚡ Claim NOVA", miniAppLink()),
@@ -251,7 +249,7 @@ export async function startBot(app: Express) {
           try {
             await bot.api.sendMessage(
               u.telegram_id,
-              `🌟 *EarnX misses you, ${u.first_name || "Miner"}!*\n\nYour tasks and rewards are waiting. Come back and keep building your NOVA balance.`,
+              `🌟 *EarnX misses you, ${u.first_name || "Miner"}!*\n\nYour tasks and rewards are waiting. Come back and keep building your EarnX balance.`,
               {
                 parse_mode: "Markdown",
                 reply_markup: new InlineKeyboard().url("🚀 Open EarnX", miniAppLink()),
