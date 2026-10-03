@@ -15,7 +15,7 @@ function miniAppLink(startParam?: string | null) {
 
 function appKeyboard(startParam?: string | null) {
   return new InlineKeyboard()
-    .url("🚀 Open EarnX", miniAppLink(startParam))
+    .webApp("🚀 Open EarnX", config.bot.appUrl || config.bot.publicUrl.replace(/\/api\/?$/, ""))
     .row()
     .url("👥 Invite Friends", miniAppLink("ref_"));
 }
@@ -160,9 +160,12 @@ export async function startBot(app: Express) {
     ]);
 
     if (username) {
+      const appUrl = config.bot.appUrl || config.bot.publicUrl.replace(/\/api\/?$/, "");
       await bot.api.setChatMenuButton({
         menu_button: {
-          type: "commands",
+          type: "web_app",
+          text: "🚀 Open EarnX",
+          web_app: { url: appUrl },
         },
       });
     }
