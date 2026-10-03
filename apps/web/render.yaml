@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: earnx-web
+    runtime: static
+    buildCommand: npm run build:web
+    staticPublishPath: ./apps/web/dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
