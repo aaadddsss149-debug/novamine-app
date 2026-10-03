@@ -518,7 +518,7 @@ export default function EarnX(){
   const tgUser = getTelegramUser();
   const myTelegramId = tgUser?.id ?? null;
   const referralLink = myTelegramId
-    ? `https://t.me/${BOT_USERNAME}/app?startapp=ref_${myTelegramId}`
+    ? `https://t.me/${BOT_USERNAME}?startapp=ref_${myTelegramId}`
     : null;
 
   const [copiedLink, setCopiedLink] = useState(false);
