@@ -5,7 +5,7 @@ import { getTelegramUser, initTelegram } from "./lib/telegram.js";
 import { authenticate } from "./lib/auth.js";
 import { api } from "./lib/api.js";
 import { supabase } from "./lib/supabase.js";
-import { miningPowerFromNova, tierFromNova, MINING } from "@earnx/shared";
+import { miningPowerFromNova, tierFromNova, MINING, SHOP } from "@earnx/shared";
 import { useTonConnectUI, useTonAddress, TonConnectButton } from "@tonconnect/ui-react";
 
 const T = {
@@ -121,19 +121,19 @@ function SwapModal({onClose,hashes,onSwapComplete}){
     <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.88)",zIndex:1000,display:"flex",alignItems:"flex-end",justifyContent:"center"}} onClick={onClose}>
       <div onClick={e=>e.stopPropagation()} style={{background:T.card,border:`1px solid ${T.goldDim}`,borderRadius:"24px 24px 0 0",padding:24,width:"100%",maxWidth:430,animation:"slideUp 0.3s ease",boxShadow:`0 -8px 40px ${T.goldGlow}`}}>
         <div style={{width:40,height:4,background:"#2a2a2a",borderRadius:2,margin:"0 auto 20px"}}/>
-        <div style={{fontFamily:"'Orbitron'",fontWeight:700,fontSize:18,color:T.gold,marginBottom:4}}>SWAP HASHES → TON</div>
-        <div style={{fontSize:13,color:T.muted,marginBottom:20}}>Convert your mined hashes to TON</div>
+        <div style={{fontFamily:"'Orbitron'",fontWeight:700,fontSize:18,color:T.gold,marginBottom:4}}>SWAP ENERGY → TON</div>
+        <div style={{fontSize:13,color:T.muted,marginBottom:20}}>Convert your mined energy to TON</div>
         <div style={{background:T.goldFaint,border:`1px solid ${T.goldDim}`,borderRadius:12,padding:14,marginBottom:16,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
           <div style={{fontSize:12,color:T.muted}}>Exchange Rate</div>
           <div style={{fontFamily:"'Orbitron'",fontSize:12,color:T.gold,fontWeight:700}}>1 HASH = {rate} TON</div>
         </div>
         <div style={{background:"rgba(0,0,0,0.4)",border:"1px solid #1e2a1e",borderRadius:12,padding:14,marginBottom:8}}>
-          <div style={{fontSize:11,color:T.muted,marginBottom:6,letterSpacing:1}}>FROM (EARNX Credits)</div>
+          <div style={{fontSize:11,color:T.muted,marginBottom:6,letterSpacing:1}}>FROM (ENERGY)</div>
           <div style={{display:"flex",alignItems:"center",gap:10}}>
             <input type="number" placeholder="0.00" value={amount} onChange={e=>{setAmount(e.target.value);setSwapError(null);}} style={{flex:1,background:"transparent",border:"none",outline:"none",fontFamily:"'Orbitron'",fontSize:22,fontWeight:700,color:T.text,width:"100%"}}/>
             <button onClick={()=>setAmount(hashes.toFixed(8))} style={{background:T.goldFaint,border:`1px solid ${T.goldDim}`,borderRadius:8,padding:"4px 10px",color:T.gold,fontSize:11,cursor:"pointer",fontFamily:"'Rajdhani'",fontWeight:700}}>MAX</button>
           </div>
-          <div style={{fontSize:11,color:T.muted,marginTop:4}}>Available: {hashes.toFixed(8)} HASHES</div>
+          <div style={{fontSize:11,color:T.muted,marginTop:4}}>Available: {hashes.toFixed(8)} ENERGY</div>
         </div>
         <div style={{textAlign:"center",color:T.gold,marginBottom:8}}>↕</div>
         <div style={{background:"rgba(57,255,138,0.05)",border:`1px solid ${T.greenDim}`,borderRadius:12,padding:14,marginBottom:20}}>
@@ -145,7 +145,7 @@ function SwapModal({onClose,hashes,onSwapComplete}){
         <button className="btn-gold shimmer-btn" onClick={handleConfirmSwap} disabled={swapping||!amount} style={{width:"100%",padding:16,border:"none",borderRadius:14,fontFamily:"'Rajdhani'",fontWeight:700,fontSize:16,cursor:swapping?"not-allowed":"pointer",color:"#000",opacity:(!amount||swapping)?0.7:1}}>
           {swapping?"⏳ Swapping…":"⚡ Confirm Swap"}
         </button>
-        <div style={{textAlign:"center",fontSize:11,color:T.muted,marginTop:10}}>You must swap HASHES → TON before withdrawing</div>
+        <div style={{textAlign:"center",fontSize:11,color:T.muted,marginTop:10}}>Convert ENERGY → TON before withdrawing</div>
       </div>
     </div>
   );
@@ -280,8 +280,8 @@ export default function EarnX(){
   const [adsEnabled,setAdsEnabled]=useState(false);
   const [adTriggers,setAdTriggers]=useState({start_mining:false,collect_mining:false});
   const [userLoaded,setUserLoaded]=useState(false);
-  const [shopTiers,setShopTiers]=useState([]);
-  const [shopWallet,setShopWallet]=useState("");
+  const [shopTiers,setShopTiers]=useState(SHOP.TIERS);
+  const [shopWallet,setShopWallet]=useState("");\n  const ADSGRAM_BLOCK_ID = import.meta.env.VITE_ADSGRAM_BLOCK_ID || "";
   const userDbId=useRef(null);
   const [showWithdraw,setShowWithdraw]=useState(false);
   const [showSwap,setShowSwap]=useState(false);
@@ -376,7 +376,7 @@ export default function EarnX(){
         // ── Load shop tiers from API — no auth required, always runs ──
         try {
           const shopData = await api.listShopTiers();
-          if(shopData?.tiers?.length) setShopTiers(shopData.tiers);
+          setShopTiers(shopData?.tiers?.length ? shopData.tiers : SHOP.TIERS);
           if(shopData?.walletAddress) setShopWallet(shopData.walletAddress);
         } catch(_) {}
 
@@ -448,7 +448,7 @@ export default function EarnX(){
   // ── Load ad config from API ───────────────────────────────────────────────
   // Also load shop tiers independently so they show even if auth is slow
   useEffect(()=>{
-    api.listShopTiers().then(d=>{ if(d?.tiers?.length) setShopTiers(d.tiers); if(d?.walletAddress) setShopWallet(d.walletAddress); }).catch(()=>{});
+    api.listShopTiers().then(d=>{ setShopTiers(d?.tiers?.length ? d.tiers : SHOP.TIERS); if(d?.walletAddress) setShopWallet(d.walletAddress); }).catch(()=>setShopTiers(SHOP.TIERS));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   },[]);
 
@@ -559,12 +559,21 @@ export default function EarnX(){
   },[]);
 
   // ── REWARDED AD ENGINE ──
-  function watchAd(onComplete, trigger="start_mining"){
-    // Only show ad if master toggle ON and this trigger is enabled
-    if(adsEnabled && adTriggers[trigger] && typeof show_11059350==="function"){
-      show_11059350().then(()=>{ onComplete(); }).catch(()=>{ onComplete(); });
-    } else {
-      onComplete();
+  async function watchAd(onComplete, trigger="start_mining"){
+    // AdsGram Rewarded: only continue when the rewarded ad is actually completed.
+    if(!(adsEnabled && adTriggers[trigger])) { onComplete(); return; }
+    if(!ADSGRAM_BLOCK_ID || !window.Adsgram?.init){
+      alert("Rewarded ads are not configured yet. Please try again later.");
+      return;
+    }
+    try{
+      const controller=window.Adsgram.init({blockId:ADSGRAM_BLOCK_ID});
+      const result=await controller.show();
+      if(result?.done !== false) onComplete();
+      else alert("Ad was not completed, so no reward was granted.");
+    }catch(err){
+      console.warn("[EarnX] AdsGram reward not completed:",err);
+      alert("The ad could not be completed. No reward was granted.");
     }
   }
 
@@ -817,7 +826,7 @@ export default function EarnX(){
       {/* HEADER */}
       <div style={{position:"sticky",top:0,zIndex:100,background:`${T.bg}ee`,backdropFilter:"blur(12px)",borderBottom:`1px solid ${T.goldFaint}`,padding:"12px 16px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
         <div style={{display:"flex",alignItems:"center",gap:10}}>
-          <div style={{width:36,height:36,borderRadius:10,background:`linear-gradient(135deg,${T.gold},${T.goldDim})`,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Orbitron'",fontWeight:900,fontSize:14,color:"#000",boxShadow:`0 0 16px ${T.goldGlow}`}}>N</div>
+          <div style={{width:36,height:36,borderRadius:10,background:`linear-gradient(135deg,${T.gold},${T.goldDim})`,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Orbitron'",fontWeight:900,fontSize:14,color:"#000",boxShadow:`0 0 16px ${T.goldGlow}`}}>X</div>
           <span style={{fontFamily:"'Orbitron'",fontWeight:700,fontSize:16,color:T.gold,letterSpacing:2}}>EARNX</span>
         </div>
         <div style={{display:"flex",gap:8,alignItems:"center"}}>
@@ -946,7 +955,7 @@ export default function EarnX(){
               </div>
             </div>
 
-            {/* ── HASHES MINED card (styled like Dulce CANDY's CANDIES MINED) ── */}
+            {/* ── ENERGY MINED card (styled like Dulce CANDY's CANDIES MINED) ── */}
             <div style={{background:T.card,border:"1px solid #1e2a1e",borderRadius:16,padding:18,marginBottom:14}}>
               {/* ⭐ HASHES MINED ⭐ badge — mirrors CANDIES MINED badge */}
               <div style={{display:"flex",alignItems:"center",justifyContent:"center",marginBottom:14}}>
@@ -976,7 +985,7 @@ export default function EarnX(){
               {/* Mining state — idle / active countdown / claim ready */}
               {!miningActive && !claimReady && (
                 <button onClick={startMining} className="btn-gold" style={{width:"100%",padding:"14px",background:`linear-gradient(135deg,${T.gold},${T.goldDim})`,border:"none",borderRadius:12,fontFamily:"'Rajdhani'",fontWeight:700,fontSize:15,cursor:"pointer",color:"#000",display:"flex",alignItems:"center",justifyContent:"center",gap:8,boxShadow:`0 4px 20px ${T.goldGlow}`,marginBottom:10}}>
-                  ▶ START HASHES PRODUCTION · Watch Ad
+                  ▶ START ENERGY PRODUCTION · Watch Ad
                 </button>
               )}
               {miningActive && !claimReady && (
@@ -993,13 +1002,13 @@ export default function EarnX(){
               )}
               {claimReady && (
                 <button onClick={claimHashes} className="shimmer-btn btn-gold" style={{width:"100%",padding:"14px",border:"none",borderRadius:12,fontFamily:"'Rajdhani'",fontWeight:700,fontSize:15,cursor:"pointer",color:"#000",display:"flex",alignItems:"center",justifyContent:"center",gap:8,marginBottom:10}}>
-                  🎁 Claim Hashes · Watch Ad
+                  🎁 Claim Energy · Watch Ad
                 </button>
               )}
 
               {/* Swap button */}
               <button onClick={()=>setShowSwap(true)} className="btn-gold swap-card" style={{width:"100%",padding:"12px",background:`linear-gradient(135deg,rgba(245,200,66,0.1),rgba(245,200,66,0.05))`,border:`1px solid ${T.goldDim}`,borderRadius:10,color:T.gold,fontFamily:"'Rajdhani'",fontWeight:700,fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
-                <Icon name="swap" size={16}/> SWAP HASHES → TON
+                <Icon name="swap" size={16}/> SWAP ENERGY → TON
               </button>
             </div>
 
@@ -1251,56 +1260,6 @@ export default function EarnX(){
       </div>
 
       {/* MODALS */}
-      {showAd&&(
-        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.97)",zIndex:2000,display:"flex",flexDirection:"column",animation:"adFadeIn 0.3s ease"}}>
-          {/* Fake Ad Banner */}
-          <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:24,position:"relative"}}>
-            {/* Ad label */}
-            <div style={{position:"absolute",top:16,left:16,background:"rgba(255,255,255,0.1)",borderRadius:6,padding:"3px 10px",fontSize:11,color:"rgba(255,255,255,0.5)",letterSpacing:1}}>AD</div>
-            {/* Skip timer */}
-            <div style={{position:"absolute",top:16,right:16}}>
-              {adSkippable?(
-                <button onClick={closeAd} className="btn-gold" style={{background:`linear-gradient(135deg,${T.gold},${T.goldDim})`,border:"none",borderRadius:8,padding:"6px 14px",fontFamily:"'Rajdhani'",fontWeight:700,fontSize:13,cursor:"pointer",color:"#000",animation:"adSkipPulse 1s ease-in-out infinite"}}>
-                  Skip Ad ▶
-                </button>
-              ):(
-                <div style={{background:"rgba(255,255,255,0.08)",borderRadius:8,padding:"6px 14px",fontSize:12,color:"rgba(255,255,255,0.4)"}}>
-                  Skip in {Math.max(0,5-Math.floor(adProgress/20))}s
-                </div>
-              )}
-            </div>
-
-            {/* Ad creative - generic sponsor placeholder */}
-            <div style={{width:"100%",maxWidth:340,background:"linear-gradient(135deg,#1a1a2e,#16213e)",borderRadius:20,padding:32,textAlign:"center",border:"1px solid rgba(255,255,255,0.1)",boxShadow:"0 0 60px rgba(77,166,255,0.15)"}}>
-              <div style={{fontSize:56,marginBottom:16}}>🚀</div>
-              <div style={{fontFamily:"'Orbitron'",fontWeight:900,fontSize:22,color:"#4da6ff",marginBottom:8,letterSpacing:2}}>CRYPTOBOOST</div>
-              <div style={{fontSize:14,color:"rgba(255,255,255,0.6)",marginBottom:20,lineHeight:1.6}}>Supercharge your crypto portfolio with AI-powered signals</div>
-              <div style={{background:"rgba(77,166,255,0.15)",border:"1px solid rgba(77,166,255,0.3)",borderRadius:10,padding:"10px 20px",display:"inline-block",fontSize:13,color:"#4da6ff",fontWeight:700}}>
-                Start Free Trial →
-              </div>
-            </div>
-
-            {/* Reward reminder */}
-            <div style={{marginTop:24,background:"rgba(245,200,66,0.08)",border:`1px solid ${T.goldDim}`,borderRadius:12,padding:"12px 20px",display:"flex",alignItems:"center",gap:10}}>
-              <span style={{color:T.gold,fontSize:20}}>⚡</span>
-              <div>
-                <div style={{fontFamily:"'Orbitron'",fontSize:12,color:T.gold,fontWeight:700}}>REWARD UNLOCKING</div>
-                <div style={{fontSize:11,color:T.muted,marginTop:2}}>Watch the full ad to continue</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Progress bar */}
-          <div style={{padding:"0 0 32px"}}>
-            <div style={{background:"rgba(255,255,255,0.08)",height:4,borderRadius:2,margin:"0 24px 10px",overflow:"hidden"}}>
-              <div style={{height:"100%",background:`linear-gradient(90deg,${T.gold},${T.green})`,borderRadius:2,width:`${adProgress}%`,transition:"width 0.1s linear"}}/>
-            </div>
-            <div style={{textAlign:"center",fontSize:11,color:"rgba(255,255,255,0.3)"}}>
-              {adProgress<100?"Ad playing...":"Ad complete — tap Skip to continue"}
-            </div>
-          </div>
-        </div>
-      )}
       {showSwap&&<SwapModal onClose={()=>setShowSwap(false)} hashes={hashes} onSwapComplete={(r)=>{if(r?.hashes!=null)setHashes(Number(r.hashes));if(r?.tonBalance!=null)setTonBalance(Number(r.tonBalance));}}/>}
       {showWithdraw&&<WithdrawModal onClose={()=>setShowWithdraw(false)} tonBalance={tonBalance} qualifiedFriends={qualifiedFriends} onGoSwap={()=>setShowSwap(true)} onInvite={handleShareReferral} onWithdrawComplete={()=>{setTonBalance(0);setShowWithdraw(false);}} minWithdrawTon={minWithdrawTon}/>}
     </div>
