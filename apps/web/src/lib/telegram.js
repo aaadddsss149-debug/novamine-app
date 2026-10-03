@@ -1,5 +1,5 @@
 // Thin wrapper around window.Telegram.WebApp with a dev-mode mock so we can
-// run NovaMine in a regular browser during development. Telegram injects this
+// run EarnX in a regular browser during development. Telegram injects this
 // object via the <script src="telegram-web-app.js"> tag in index.html.
 
 const isDev = import.meta.env.DEV;
