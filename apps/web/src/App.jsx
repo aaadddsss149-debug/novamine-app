@@ -283,7 +283,10 @@ export default function EarnX(){
   const [adBlockId,setAdBlockId]=useState("");
   const [userLoaded,setUserLoaded]=useState(false);
   const [shopTiers,setShopTiers]=useState(SHOP.TIERS);
-  const [shopWallet,setShopWallet]=useState("");\n  const [taskItems,setTaskItems]=useState([]);\n  const [tasksLoading,setTasksLoading]=useState(false);\n  const [taskBusy,setTaskBusy]=useState(null);
+  const [shopWallet,setShopWallet]=useState("");
+  const [taskItems,setTaskItems]=useState([]);
+  const [tasksLoading,setTasksLoading]=useState(false);
+  const [taskBusy,setTaskBusy]=useState(null);
   const userDbId=useRef(null);
   const [showWithdraw,setShowWithdraw]=useState(false);
   const [showSwap,setShowSwap]=useState(false);
