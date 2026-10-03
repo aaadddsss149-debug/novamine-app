@@ -71,6 +71,7 @@ miningRouter.post("/claim", requireAuth, async (req, res, next) => {
 
     const power = Number(user.mining_power ?? MINING.DEFAULT_POWER);
     const hashesEarned = MINING.hashesPerSession(power);
+    const tonEarned = Number(MINING.dailyTon(power));
 
     await supabaseAdmin
       .from("mining_sessions")
@@ -79,14 +80,13 @@ miningRouter.post("/claim", requireAuth, async (req, res, next) => {
 
     const { data: updated, error: upErr } = await supabaseAdmin
       .from("users")
-      .update({ hashes: Number(user.hashes ?? 0) + hashesEarned })
+      .update({ hashes: Number(user.hashes ?? 0) + hashesEarned, ton_balance: Number(user.ton_balance ?? 0) + tonEarned })
       .eq("id", userId)
       .select("hashes, ton_balance")
       .single();
     if (upErr) throw upErr;
 
-    // Award NOVA bonus for every claim — atomic RPC preferred; manual fallback
-    // if the RPC is unavailable so the claim never silently drops nova.
+    // NOVA remains an internal mining-power ledger; user earnings are credited directly in TON.
     let novaAfterClaim: number | null = null;
     const { data: novaData, error: rpcError } = await supabaseAdmin.rpc("increment_user_nova", {
       p_user_id: userId,
@@ -113,7 +113,7 @@ miningRouter.post("/claim", requireAuth, async (req, res, next) => {
     res.json({
       sessionId: session.id,
       hashesEarned,
-      novaEarned: MINING.NOVA_PER_CLAIM,
+      tonEarned,
       hashes: updated.hashes,
       tonBalance: updated.ton_balance,
       nova: novaAfterClaim,
