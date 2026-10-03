@@ -18,7 +18,7 @@ tasksRouter.get("/", requireAuth, async (req, res, next) => {
     //    so the screen is never empty.
     const { data: dbTasks } = await supabaseAdmin
       .from("tasks")
-      .select("id, label, reward, action, url, active")
+      .select("id, label, reward, action, url, category, active")
       .eq("active", true);
 
     const rawTasks =
