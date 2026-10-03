@@ -2,7 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { requireAuth } from "../middleware/auth.js";
 import { supabaseAdmin } from "../lib/supabase.js";
-import { SHOP } from "@novamine/shared";
+import { SHOP } from "@earnx/shared";
 
 export const shopRouter = Router();
 
