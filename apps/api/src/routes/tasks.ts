@@ -67,73 +67,33 @@ tasksRouter.post("/:id/claim", requireAuth, async (req, res, next) => {
     const { id } = Params.parse(req.params);
     const userId = (req as any).auth!.sub;
 
-    // 1. Look up task — DB first, then hardcoded fallback.
-    let task: { id: string; label: string; reward: number } | null = null;
+    const { data, error } = await supabaseAdmin.rpc("claim_task", {
+      p_user_id: userId,
+      p_task_id: id,
+    });
 
-    const { data: dbTask } = await supabaseAdmin
-      .from("tasks")
-      .select("id, label, reward")
-      .eq("id", id)
-      .maybeSingle();
-
-    if (dbTask) {
-      task = {
-        id: dbTask.id,
-        label: dbTask.label ?? "Task",
-        reward: Number(dbTask.reward ?? 0),
-      };
-    } else {
-      const found = TASKS.LIST.find((t) => String(t.id) === id);
-      if (found) task = { id: found.id, label: found.label, reward: found.reward };
-    }
-
-    if (!task) return res.status(404).json({ error: "Unknown task" });
-
-    // 2. Check not already claimed.
-    const { data: existing } = await supabaseAdmin
-      .from("tasks_completed")
-      .select("task_id")
-      .eq("user_id", userId)
-      .eq("task_id", task.id)
-      .maybeSingle();
-
-    if (existing) return res.status(409).json({ error: "Task already claimed" });
-
-    // 3. Mark completed.
-    await supabaseAdmin
-      .from("tasks_completed")
-      .insert({ user_id: userId, task_id: task.id });
-
-    // 4. Credit NOVA — RPC first, manual fallback if RPC unavailable.
-    if (task.reward > 0) {
-      const { error: rpcError } = await supabaseAdmin.rpc("increment_user_nova", {
-        p_user_id: userId,
-        p_amount: task.reward,
-      });
-
-      if (rpcError) {
-        const { data: user } = await supabaseAdmin
-          .from("users")
-          .select("nova")
-          .eq("id", userId)
-          .single();
-        if (user) {
-          await supabaseAdmin
-            .from("users")
-            .update({ nova: Number(user.nova ?? 0) + task.reward })
-            .eq("id", userId);
-        }
+    if (error) {
+      const msg = String(error.message || "");
+      if (msg.includes("TASK_ALREADY_CLAIMED")) {
+        return res.status(409).json({ error: "Task already claimed" });
       }
+      if (msg.includes("TASK_NOT_FOUND")) {
+        return res.status(404).json({ error: "Unknown task" });
+      }
+      if (msg.includes("USER_NOT_FOUND")) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      throw error;
     }
 
-    // 5. Return updated NOVA so the frontend balance stays in sync.
-    const { data: updated } = await supabaseAdmin
-      .from("users")
-      .select("nova")
-      .eq("id", userId)
-      .single();
+    const row = Array.isArray(data) ? data[0] : data;
+    if (!row) return res.status(500).json({ error: "Task claim returned no result" });
 
-    res.json({ taskId: task.id, reward: task.reward, nova: updated?.nova ?? null });
+    res.json({
+      taskId: row.task_id,
+      reward: Number(row.reward ?? 0),
+      nova: Number(row.nova ?? 0),
+    });
   } catch (err) {
     next(err);
   }
