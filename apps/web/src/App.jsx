@@ -625,16 +625,11 @@ export default function EarnX(){
     if(task.done || taskBusy) return;
     setTaskBusy(task.id);
     try{
-      const category=String(task.category||"").toUpperCase();
-      if(category.includes("AD")){
-        await new Promise(resolve=>watchAd(resolve,"start_mining"));
-      }else if(task.url){
-        window.open(task.url,"_blank","noopener,noreferrer");
-      }
+      if(task.url) window.open(task.url,"_blank","noopener,noreferrer");
       const result=await api.claimTask(task.id);
       setTaskItems(prev=>prev.map(t=>t.id===task.id?{...t,done:true}:t));
       if(result?.nova!=null) setNova(Number(result.nova));
-      try{ const fresh=await api.me(); if(fresh?.user){ setNova(Number(fresh.user.nova??0)); setHashes(Number(fresh.user.hashes??0)); setTonBalance(Number(fresh.user.ton_balance??0)); setMiningPower(miningPowerFromNova(Number(fresh.user.nova??0))); } }catch(_){}
+      const fresh=await api.me(); if(fresh?.user){ setNova(Number(fresh.user.nova??0)); setHashes(Number(fresh.user.hashes??0)); setTonBalance(Number(fresh.user.ton_balance??0)); setMiningPower(miningPowerFromNova(Number(fresh.user.nova??0))); }
       alert("✅ "+TC.completed+Number(result?.reward??task.reward??0).toLocaleString()+" EARNX");
     }catch(e){
       if(e?.status===409) setTaskItems(prev=>prev.map(t=>t.id===task.id?{...t,done:true}:t));
