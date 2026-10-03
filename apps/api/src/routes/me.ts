@@ -37,21 +37,6 @@ meRouter.get("/", requireAuth, async (req, res, next) => {
         .maybeSingle(),
 
       supabaseAdmin
-        .from("slot_spins")
-        .select("next_available_at")
-        .eq("user_id", userId)
-        .order("spun_at", { ascending: false })
-        .limit(1)
-        .maybeSingle(),
-
-      supabaseAdmin
-        .from("dice_rolls")
-        .select("id, value, reward, rolled_at")
-        .eq("user_id", userId)
-        .gte("rolled_at", startOfUtcDay.toISOString())
-        .maybeSingle(),
-
-      supabaseAdmin
         .from("referrals")
         .select("id", { count: "exact", head: true })
         .eq("referrer_id", userId)
