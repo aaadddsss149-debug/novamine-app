@@ -2,7 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { requireAuth } from "../middleware/auth.js";
 import { supabaseAdmin } from "../lib/supabase.js";
-import { WITHDRAW } from "@novamine/shared";
+import { WITHDRAW } from "@earnx/shared";
 
 export const withdrawRouter = Router();
 
