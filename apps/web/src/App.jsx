@@ -322,6 +322,9 @@ export default function EarnX(){
         initTelegram();
         const authResult = await authenticate();
         authResultRef.current = authResult;
+        // The Telegram auth endpoint already returns the real database user id.
+        // Keep it immediately so shop payments do not depend on /me finishing first.
+        if (authResult?.user?.id) userDbId.current = authResult.user.id;
         const data = await api.me();
         if(data?.user){
           const realNova = Number(data.user.nova ?? 0);
