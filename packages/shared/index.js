@@ -91,48 +91,6 @@ export const SHOP = {
   ],
 };
 
-// ── SLOT MACHINE ─────────────────────────────────────────────────────────────
-export const SLOTS = {
-  SYMBOLS: ["⚡", "💎", "🔮", "🌟", "🔥", "🪙"],
-  TRIPLE_REWARDS: {
-    "⚡⚡⚡": 25, "💎💎💎": 25, "🔮🔮🔮": 10,
-    "🌟🌟🌟": 10, "🔥🔥🔥": 10, "🪙🪙🪙": 10,
-  },
-  TWO_MATCH_REWARD: 3,
-  COOLDOWN_MIN_SEC: 25,
-  COOLDOWN_MAX_SEC: 7200,
-  rollOutcome() {
-    const r = Math.random();
-    let reels;
-    if (r < 0.12) {
-      reels = ["⚡", "⚡", "⚡"];
-    } else if (r < 0.35) {
-      const pool = SLOTS.SYMBOLS.slice(1);
-      const sym = pool[Math.floor(Math.random() * pool.length)];
-      reels = [sym, sym, sym];
-    } else {
-      reels = [randSym(), randSym(), randSym()];
-    }
-    const combo = reels.join("");
-    let reward = SLOTS.TRIPLE_REWARDS[combo] ?? 0;
-    if (reward === 0 &&
-      (reels[0] === reels[1] || reels[1] === reels[2] || reels[0] === reels[2])) {
-      reward = SLOTS.TWO_MATCH_REWARD;
-    }
-    return { reels, reward };
-  },
-};
-
-function randSym() {
-  return SLOTS.SYMBOLS[Math.floor(Math.random() * SLOTS.SYMBOLS.length)];
-}
-
-// ── DAILY DICE ───────────────────────────────────────────────────────────────
-export const DICE = {
-  REWARDS: { 1: 5, 2: 10, 3: 15, 4: 20, 5: 30, 6: 50 },
-  rewardFor(value) { return DICE.REWARDS[value] ?? 0; },
-};
-
 // ── TASKS ────────────────────────────────────────────────────────────────────
 export const TASKS = {
   LIST: [
