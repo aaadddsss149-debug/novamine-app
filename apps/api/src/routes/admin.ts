@@ -1,32 +1,74 @@
 // apps/api/src/routes/admin.ts
-// All admin actions — protected by ADMIN_SECRET env var via x-admin-secret header.
-// No Supabase keys are ever sent to the browser.
+// Admin API — protected by ADMIN_SECRET. Never expose Supabase service keys to the browser.
 
+import crypto from "node:crypto";
 import { Router } from "express";
 import { supabaseAdmin } from "../lib/supabase.js";
 
 export const adminRouter = Router();
 
-// ── Auth middleware ──────────────────────────────────────────────────────────
+function getAdminSecret(req: any): string {
+  const value = req.headers["x-admin-secret"];
+  return Array.isArray(value) ? String(value[0] ?? "") : String(value ?? "");
+}
+
+function secretsMatch(provided: string, expected: string): boolean {
+  const a = Buffer.from(provided);
+  const b = Buffer.from(expected);
+  if (a.length !== b.length) return false;
+  return crypto.timingSafeEqual(a, b);
+}
+
 function requireAdmin(req: any, res: any, next: any) {
-  const secret = req.headers["x-admin-secret"];
-  const expected = process.env.ADMIN_SECRET;
-  if (!expected) return res.status(500).json({ error: "ADMIN_SECRET not configured on server" });
-  if (secret !== expected) return res.status(401).json({ error: "Unauthorized" });
+  const expected = process.env.ADMIN_SECRET?.trim();
+
+  if (!expected) {
+    return res.status(503).json({
+      ok: false,
+      error: "ADMIN_SECRET is not configured on the API server",
+      code: "ADMIN_NOT_CONFIGURED",
+    });
+  }
+
+  const provided = getAdminSecret(req);
+  if (!provided || !secretsMatch(provided, expected)) {
+    return res.status(401).json({ ok: false, error: "Unauthorized", code: "ADMIN_UNAUTHORIZED" });
+  }
+
   next();
 }
 
-// ── Login check ──────────────────────────────────────────────────────────────
 adminRouter.post("/login", (req: any, res: any) => {
-  const { secret } = req.body;
-  if (secret === process.env.ADMIN_SECRET) {
-    res.json({ ok: true });
-  } else {
-    res.status(401).json({ ok: false, error: "Wrong password" });
+  res.setHeader("Cache-Control", "no-store");
+
+  const expected = process.env.ADMIN_SECRET?.trim();
+  if (!expected) {
+    return res.status(503).json({
+      ok: false,
+      error: "ADMIN_SECRET is not configured on the API server. Add it to Render → novamine-api → Environment.",
+      code: "ADMIN_NOT_CONFIGURED",
+    });
   }
+
+  const provided = typeof req.body?.secret === "string" ? req.body.secret : "";
+  if (!provided || !secretsMatch(provided, expected)) {
+    return res.status(401).json({
+      ok: false,
+      error: "Wrong admin password",
+      code: "ADMIN_WRONG_PASSWORD",
+    });
+  }
+
+  return res.json({ ok: true });
 });
 
-// ── Analytics ─────────────────────────────────────────────────────────────── 
+// Lightweight server-side verification for the admin UI.
+adminRouter.get("/verify", requireAdmin, (_req: any, res: any) => {
+  res.setHeader("Cache-Control", "no-store");
+  res.json({ ok: true });
+});
+
+// ── Analytics ───────────────────────────────────────────────────────────────
 adminRouter.get("/analytics", requireAdmin, async (_req: any, res: any) => {
   try {
     const [users, purchases, withdrawals, sessions] = await Promise.all([
@@ -35,16 +77,23 @@ adminRouter.get("/analytics", requireAdmin, async (_req: any, res: any) => {
       supabaseAdmin.from("withdrawals").select("amount_ton,status"),
       supabaseAdmin.from("mining_sessions").select("id,claimed_at").not("claimed_at", "is", null),
     ]);
+    if (users.error) throw users.error;
+    if (purchases.error) throw purchases.error;
+    if (withdrawals.error) throw withdrawals.error;
+    if (sessions.error) throw sessions.error;
+
     res.json({
       users: users.data ?? [],
       purchases: purchases.data ?? [],
       withdrawals: withdrawals.data ?? [],
       sessions: sessions.data ?? [],
     });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
-// ── Users ─────────────────────────────────────────────────────────────────── 
+// ── Users ───────────────────────────────────────────────────────────────────
 adminRouter.get("/users", requireAdmin, async (_req: any, res: any) => {
   try {
     const { data, error } = await supabaseAdmin
@@ -53,8 +102,10 @@ adminRouter.get("/users", requireAdmin, async (_req: any, res: any) => {
       .order("last_seen_at", { ascending: false })
       .limit(300);
     if (error) throw error;
-    res.json(data);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+    res.json(data ?? []);
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
 adminRouter.patch("/users/:id", requireAdmin, async (req: any, res: any) => {
@@ -63,14 +114,20 @@ adminRouter.patch("/users/:id", requireAdmin, async (req: any, res: any) => {
     const { nova, ton_balance, mining_power } = req.body;
     const { error } = await supabaseAdmin
       .from("users")
-      .update({ nova: Number(nova), ton_balance: Number(ton_balance), mining_power: Number(mining_power) })
+      .update({
+        nova: Number(nova),
+        ton_balance: Number(ton_balance),
+        mining_power: Number(mining_power),
+      })
       .eq("id", id);
     if (error) throw error;
     res.json({ ok: true });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
-// ── Withdrawals ───────────────────────────────────────────────────────────── 
+// ── Withdrawals ─────────────────────────────────────────────────────────────
 adminRouter.get("/withdrawals", requireAdmin, async (_req: any, res: any) => {
   try {
     const { data, error } = await supabaseAdmin
@@ -79,9 +136,9 @@ adminRouter.get("/withdrawals", requireAdmin, async (_req: any, res: any) => {
       .order("requested_at", { ascending: false })
       .limit(200);
     if (error) throw error;
-    // Enrich with user info
+
     const ids = [...new Set((data ?? []).map((r: any) => r.user_id))];
-    let userMap: Record<string, any> = {};
+    const userMap: Record<string, any> = {};
     if (ids.length) {
       const { data: users } = await supabaseAdmin
         .from("users")
@@ -90,43 +147,57 @@ adminRouter.get("/withdrawals", requireAdmin, async (_req: any, res: any) => {
       (users ?? []).forEach((u: any) => { userMap[u.id] = u; });
     }
     res.json({ withdrawals: data ?? [], userMap });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
 adminRouter.patch("/withdrawals/:id", requireAdmin, async (req: any, res: any) => {
   try {
     const { id } = req.params;
-    const { action, notes } = req.body; // action: 'approve' | 'reject'
+    const { action, notes } = req.body;
 
     const { data: row, error: fetchErr } = await supabaseAdmin
       .from("withdrawals")
       .select("user_id,amount_ton,status")
       .eq("id", id)
       .single();
+
     if (fetchErr || !row) return res.status(404).json({ error: "Not found" });
     if (row.status !== "pending") return res.status(400).json({ error: "Already processed" });
 
     if (action === "approve") {
-      await supabaseAdmin.from("withdrawals")
-        .update({ status: "sent", processed_at: new Date().toISOString() })
+      const { error } = await supabaseAdmin.from("withdrawals")
+        .update({ status: "sent", processed_at: new Date().toISOString(), notes: notes ?? null })
         .eq("id", id);
+      if (error) throw error;
     } else if (action === "reject") {
-      // Refund TON to user
-      const { data: user } = await supabaseAdmin.from("users").select("ton_balance").eq("id", row.user_id).single();
+      const { data: user, error: userErr } = await supabaseAdmin
+        .from("users").select("ton_balance").eq("id", row.user_id).single();
+      if (userErr) throw userErr;
+
       if (user) {
-        await supabaseAdmin.from("users")
+        const { error: refundErr } = await supabaseAdmin.from("users")
           .update({ ton_balance: Number(user.ton_balance) + Number(row.amount_ton) })
           .eq("id", row.user_id);
+        if (refundErr) throw refundErr;
       }
-      await supabaseAdmin.from("withdrawals")
+
+      const { error } = await supabaseAdmin.from("withdrawals")
         .update({ status: "rejected", notes: notes ?? null, processed_at: new Date().toISOString() })
         .eq("id", id);
+      if (error) throw error;
+    } else {
+      return res.status(400).json({ error: "Invalid action" });
     }
+
     res.json({ ok: true });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
-// ── Shop Purchases ────────────────────────────────────────────────────────── 
+// ── Shop Purchases ──────────────────────────────────────────────────────────
 adminRouter.get("/purchases", requireAdmin, async (_req: any, res: any) => {
   try {
     const { data, error } = await supabaseAdmin
@@ -135,8 +206,9 @@ adminRouter.get("/purchases", requireAdmin, async (_req: any, res: any) => {
       .order("created_at", { ascending: false })
       .limit(200);
     if (error) throw error;
+
     const ids = [...new Set((data ?? []).map((r: any) => r.user_id))];
-    let userMap: Record<string, any> = {};
+    const userMap: Record<string, any> = {};
     if (ids.length) {
       const { data: users } = await supabaseAdmin
         .from("users")
@@ -145,97 +217,129 @@ adminRouter.get("/purchases", requireAdmin, async (_req: any, res: any) => {
       (users ?? []).forEach((u: any) => { userMap[u.id] = u; });
     }
     res.json({ purchases: data ?? [], userMap });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
 adminRouter.patch("/purchases/:id", requireAdmin, async (req: any, res: any) => {
   try {
     const { id } = req.params;
-    const { action } = req.body; // 'confirm' | 'reject'
+    const { action } = req.body;
 
     const { data: row, error } = await supabaseAdmin
       .from("shop_purchases")
       .select("user_id,nova_granted,status")
       .eq("id", id)
       .single();
+
     if (error || !row) return res.status(404).json({ error: "Not found" });
     if (row.status !== "pending") return res.status(400).json({ error: "Already processed" });
 
     if (action === "confirm") {
-      const { data: user } = await supabaseAdmin.from("users")
-        .select("nova,mining_power").eq("id", row.user_id).single();
+      const { data: user, error: userErr } = await supabaseAdmin
+        .from("users").select("nova,mining_power").eq("id", row.user_id).single();
+      if (userErr) throw userErr;
+
       if (user) {
-        await supabaseAdmin.from("users").update({
+        const { error: updateErr } = await supabaseAdmin.from("users").update({
           nova: Number(user.nova) + Number(row.nova_granted),
           mining_power: Number(user.mining_power) + Number(row.nova_granted),
         }).eq("id", row.user_id);
+        if (updateErr) throw updateErr;
       }
-      await supabaseAdmin.from("shop_purchases")
+
+      const { error: statusErr } = await supabaseAdmin.from("shop_purchases")
         .update({ status: "confirmed", confirmed_at: new Date().toISOString() })
         .eq("id", id);
-    } else {
-      await supabaseAdmin.from("shop_purchases")
+      if (statusErr) throw statusErr;
+    } else if (action === "reject") {
+      const { error: statusErr } = await supabaseAdmin.from("shop_purchases")
         .update({ status: "rejected" }).eq("id", id);
+      if (statusErr) throw statusErr;
+    } else {
+      return res.status(400).json({ error: "Invalid action" });
     }
+
     res.json({ ok: true });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
-// ── Ad Config ─────────────────────────────────────────────────────────────── 
+// ── Ad Config ───────────────────────────────────────────────────────────────
 adminRouter.get("/ad-config", requireAdmin, async (_req: any, res: any) => {
   try {
-    const { data } = await supabaseAdmin.from("app_config")
+    const { data, error } = await supabaseAdmin.from("app_config")
       .select("key,value").in("key", ["ads_enabled", "ad_triggers"]);
+    if (error) throw error;
+
     const cfg: Record<string, any> = {};
     (data ?? []).forEach((r: any) => { cfg[r.key] = r.value; });
     res.json({
       adsEnabled: cfg.ads_enabled ?? true,
       adTriggers: cfg.ad_triggers ?? { start_mining: true, collect_mining: true, spin_slot: true, dice_roll: true },
     });
-  } catch { res.json({ adsEnabled: true, adTriggers: {} }); }
+  } catch {
+    res.json({ adsEnabled: true, adTriggers: {} });
+  }
 });
 
 adminRouter.patch("/ad-config", requireAdmin, async (req: any, res: any) => {
   try {
     const { adsEnabled, adTriggers } = req.body;
-    await supabaseAdmin.from("app_config").upsert({ key: "ads_enabled", value: adsEnabled });
-    await supabaseAdmin.from("app_config").upsert({ key: "ad_triggers", value: adTriggers });
+    const { error: e1 } = await supabaseAdmin.from("app_config").upsert({ key: "ads_enabled", value: adsEnabled });
+    const { error: e2 } = await supabaseAdmin.from("app_config").upsert({ key: "ad_triggers", value: adTriggers });
+    if (e1) throw e1;
+    if (e2) throw e2;
     res.json({ ok: true });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
 // ── Reward Config ────────────────────────────────────────────────────────────
 adminRouter.get("/reward-config", requireAdmin, async (_req: any, res: any) => {
   try {
-    const { data } = await supabaseAdmin.from("app_config")
-      .select("key,value")
-      .in("key", ["welcome_ton", "referral_ton", "min_withdraw_ton"]);
+    const { data, error } = await supabaseAdmin.from("app_config")
+      .select("key,value").in("key", ["welcome_ton", "referral_ton", "min_withdraw_ton"]);
+    if (error) throw error;
+
     const cfg: Record<string, any> = {};
     (data ?? []).forEach((r: any) => { cfg[r.key] = r.value; });
     res.json({
-      welcomeTon:    Number(cfg.welcome_ton    ?? 1.5),
-      referralTon:   Number(cfg.referral_ton   ?? 0.005),
+      welcomeTon: Number(cfg.welcome_ton ?? 1.5),
+      referralTon: Number(cfg.referral_ton ?? 0.005),
       minWithdrawTon: Number(cfg.min_withdraw_ton ?? 2.0),
     });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
 adminRouter.patch("/reward-config", requireAdmin, async (req: any, res: any) => {
   try {
-    const { welcomeTon, referralTon, minWithdrawTon } = req.body;
     const updates = [
-      { key: "welcome_ton",     value: Number(welcomeTon) },
-      { key: "referral_ton",    value: Number(referralTon) },
-      { key: "min_withdraw_ton",value: Number(minWithdrawTon) },
+      { key: "welcome_ton", value: Number(req.body?.welcomeTon) },
+      { key: "referral_ton", value: Number(req.body?.referralTon) },
+      { key: "min_withdraw_ton", value: Number(req.body?.minWithdrawTon) },
     ];
+
+    if (updates.some((u) => !Number.isFinite(u.value) || u.value < 0)) {
+      return res.status(400).json({ error: "Invalid reward settings" });
+    }
+
     for (const u of updates) {
-      await supabaseAdmin.from("app_config").upsert(u);
+      const { error } = await supabaseAdmin.from("app_config").upsert(u);
+      if (error) throw error;
     }
     res.json({ ok: true });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
-// ── Shop Tiers (DB-backed) ────────────────────────────────────────────────── 
+// ── Shop Tiers ──────────────────────────────────────────────────────────────
 adminRouter.get("/shop-tiers", requireAdmin, async (_req: any, res: any) => {
   try {
     const { data, error } = await supabaseAdmin
@@ -244,15 +348,16 @@ adminRouter.get("/shop-tiers", requireAdmin, async (_req: any, res: any) => {
       .order("price_ton", { ascending: true });
     if (error) throw error;
     res.json(data ?? []);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
 adminRouter.put("/shop-tiers", requireAdmin, async (req: any, res: any) => {
   try {
-    const { tiers } = req.body; // array of tier objects
+    const { tiers } = req.body;
     if (!Array.isArray(tiers)) return res.status(400).json({ error: "tiers must be an array" });
 
-    // Upsert all tiers
     const rows = tiers.map((t: any) => ({
       id: t.id,
       label: t.label,
@@ -263,10 +368,15 @@ adminRouter.put("/shop-tiers", requireAdmin, async (req: any, res: any) => {
       hot: !!t.hot,
       active: true,
     }));
+
+    if (rows.some((r: any) => !r.id || !Number.isFinite(r.nova_power) || !Number.isFinite(r.price_ton))) {
+      return res.status(400).json({ error: "Invalid shop tier data" });
+    }
+
     const { error } = await supabaseAdmin.from("shop_tiers").upsert(rows);
     if (error) throw error;
     res.json({ ok: true });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
 });
-
-
