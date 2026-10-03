@@ -191,7 +191,7 @@ function SwapModal({onClose,hashes,onSwapComplete}){
   );
 }
 
-function WithdrawModal({onClose,tonBalance,qualifiedFriends,onGoSwap,onInvite,onWithdrawComplete,minWithdrawTon}){
+function WithdrawModal({onClose,tonBalance,qualifiedFriends,onInvite,onWithdrawComplete,minWithdrawTon}){
   const MIN=minWithdrawTon??2.0;
   const NEEDED=5;
   const hasMin=tonBalance>=MIN;
@@ -215,7 +215,7 @@ function WithdrawModal({onClose,tonBalance,qualifiedFriends,onGoSwap,onInvite,on
           <div style={{textAlign:"center",marginBottom:20}}>
             <div style={{fontSize:48,marginBottom:12}}>🔒</div>
             <div style={{fontFamily:"'Orbitron'",fontWeight:700,fontSize:18,color:T.gold,marginBottom:8}}>NOT ENOUGH TON</div>
-            <div style={{fontSize:13,color:T.muted,lineHeight:1.6}}>You need a minimum of <span style={{color:T.gold,fontWeight:700}}>{MIN} TON</span> to withdraw.<br/>Keep mining and swapping EARNX to grow your balance.</div>
+            <div style={{fontSize:13,color:T.muted,lineHeight:1.6}}>You need a minimum of <span style={{color:T.gold,fontWeight:700}}>{MIN} TON</span> to withdraw.<br/>Keep mining to grow your TON balance.</div>
           </div>
           <div style={{background:"rgba(0,0,0,0.4)",border:"1px solid #1e2a1e",borderRadius:14,padding:16,marginBottom:16}}>
             <div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}>
@@ -230,9 +230,7 @@ function WithdrawModal({onClose,tonBalance,qualifiedFriends,onGoSwap,onInvite,on
             </div>
           </div>
           <div style={{display:"flex",flexDirection:"column",gap:8}}>
-            <button className="btn-gold" onClick={()=>{onClose();onGoSwap();}} style={{width:"100%",padding:14,background:`linear-gradient(135deg,${T.gold},${T.goldDim})`,border:"none",borderRadius:12,fontFamily:"'Rajdhani'",fontWeight:700,fontSize:15,cursor:"pointer",color:"#000",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
-              <Icon name="swap" size={16}/> Swap ENERGY → TON
-            </button>
+            
             <button onClick={onClose} style={{width:"100%",padding:12,background:"transparent",border:"1px solid #1e2a1e",borderRadius:12,fontFamily:"'Rajdhani'",fontWeight:600,fontSize:14,cursor:"pointer",color:T.muted}}>Keep Mining</button>
           </div>
         </div>
@@ -345,7 +343,7 @@ export default function EarnX(){
   });
   const miningActive = miningStartedAt !== null && (Date.now() - miningStartedAt) < MINING_DURATION_MS;
   const claimReady   = miningStartedAt !== null && (Date.now() - miningStartedAt) >= MINING_DURATION_MS;
-  const miningSessionReward=Number(MINING.hashesPerSession(miningPower)||0);
+  const miningSessionReward=Number(MINING.dailyTon(miningPower)||0);
   const miningElapsed=Math.max(0,Math.min(MINING_DURATION_MS,(miningTick||Date.now())-(miningStartedAt||Date.now())));
   const miningAccumulated=miningActive?miningSessionReward*(miningElapsed/MINING_DURATION_MS):(claimReady?miningSessionReward:0);
   const miningTimer=useRef(null);
@@ -817,7 +815,7 @@ export default function EarnX(){
         setTonBalance(Number(fresh.user.ton_balance ?? 0));
         setMiningPower(miningPowerFromNova(Number(fresh.user.nova ?? 0)));
       }
-      alert("Payment confirmed! +" + tier.power + " EARNX has been added to your account.");
+      alert("Payment confirmed! Your TON mining rate has been increased.");
     } catch(e){
       if(e?.message?.includes("User declined") || e?.message?.includes("Cancel")){
       } else {
@@ -860,7 +858,7 @@ export default function EarnX(){
     {id:"profile",icon:"user",label:"Profile"},
   ];
 
-  const novaDisplay=nova>=1000000?`${(nova/1000000).toFixed(2)}M`:nova>=1000?`${(nova/1000).toFixed(1)}K`:nova;
+  const novaDisplay=tonBalance.toFixed(5)+" TON";
 
   return(
     <div style={{background:"#f7f8fc",minHeight:"100vh",maxWidth:430,margin:"0 auto",fontFamily:"'DM Sans',sans-serif",color:"#202637",position:"relative"}}>
@@ -891,7 +889,7 @@ export default function EarnX(){
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"end",marginBottom:14}}><div><div style={{fontSize:12,color:"#8d96a7"}}>{C.welcome}</div><div style={{fontSize:25,fontWeight:800,letterSpacing:-.7}}>{tgUser?.first_name||"EarnX member"} 👋</div></div><div style={{fontSize:10,color:"#18a76a",fontWeight:800}}>● LIVE</div></div>
           <section style={{borderRadius:25,padding:21,color:"#fff",background:"linear-gradient(135deg,#5d57e9,#716af1 55%,#8982ff)",boxShadow:"0 14px 34px rgba(93,87,233,.23)",position:"relative",overflow:"hidden",marginBottom:14}}>
             <div style={{position:"absolute",width:190,height:190,borderRadius:"50%",background:"rgba(255,255,255,.09)",right:-65,top:-90}}/>
-            <div style={{fontSize:12,opacity:.8}}>{C.totalBalance}</div><div style={{fontSize:39,fontWeight:800,letterSpacing:-1.5,margin:"3px 0 2px"}}>{novaDisplay}</div><div style={{fontSize:10,opacity:.72}}>{C.earnxCredits}</div>
+            <div style={{fontSize:12,opacity:.8}}>{C.totalBalance}</div><div style={{fontSize:39,fontWeight:800,letterSpacing:-1.5,margin:"3px 0 2px"}}>{novaDisplay}</div><div style={{fontSize:10,opacity:.72}}>TON</div>
             <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8,marginTop:19}}><div><b>{tonBalance.toFixed(3)}</b><div style={{fontSize:9,opacity:.7}}>TON</div></div><div><b>{refStats.total}</b><div style={{fontSize:9,opacity:.7}}>{C.referrals}</div></div><div><b>{qualifiedFriends}</b><div style={{fontSize:9,opacity:.7}}>{L.active}</div></div></div>
           </section>
 
@@ -903,9 +901,9 @@ export default function EarnX(){
               <div style={{background:"#f6f7fb",borderRadius:15,padding:13}}><div style={{fontSize:9,color:"#8d96a7"}}>{C.tonBalance}</div><b style={{fontSize:20,color:"#18a76a"}}>{tonBalance.toFixed(5)}</b><div style={{fontSize:9,color:"#8d96a7"}}>TON</div></div>
               <div style={{background:"#f6f7fb",borderRadius:15,padding:13}}><div style={{fontSize:9,color:"#8d96a7"}}>{C.miningPower}</div><b style={{fontSize:20,color:"#202637"}}>{miningPower.toLocaleString()}</b><div style={{fontSize:9,color:"#8d96a7"}}>{C.power}</div></div>
             </div>
-            <div style={{background:"#f0efff",borderRadius:15,padding:12,display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:11}}><div><div style={{fontSize:9,color:"#8d96a7"}}>{C.nextReward}</div><b style={{fontSize:18,color:"#5d57e9"}}>+{MINING.hashesPerSession(miningPower).toFixed(4)} EARNX</b></div><div style={{fontSize:10,color:"#8d96a7",textAlign:"right"}}>{C.session}</div></div>
+            <div style={{background:"#f0efff",borderRadius:15,padding:12,display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:11}}><div><div style={{fontSize:9,color:"#8d96a7"}}>{C.nextReward}</div><b style={{fontSize:18,color:"#5d57e9"}}>+{MINING.dailyTon(miningPower).toFixed(5)} TON</b></div><div style={{fontSize:10,color:"#8d96a7",textAlign:"right"}}>{C.session}</div></div>
             {!miningActive&&!claimReady&&<button className="ex-btn" onClick={startMining} style={{width:"100%",padding:14,borderRadius:14,background:"linear-gradient(135deg,#5d57e9,#817bff)",color:"#fff"}}>{C.start}</button>}
-            {miningActive&&!claimReady&&<div style={{background:"#effbf6",border:"1px solid #ccefe0",borderRadius:14,padding:"16px 12px",textAlign:"center"}}><div style={{fontSize:10,color:"#678176",marginBottom:3}}>{C.accumulated}</div><b style={{fontSize:28,color:"#18a76a"}}>+{miningAccumulated.toFixed(4)} EARNX</b><div style={{fontSize:10,color:"#678176",marginTop:6}}>{C.progress} · {formatTime(Math.max(0,Math.ceil((MINING_DURATION_MS-(Date.now()-miningStartedAt))/1000)))}</div></div>}
+            {miningActive&&!claimReady&&<div style={{background:"#effbf6",border:"1px solid #ccefe0",borderRadius:14,padding:"16px 12px",textAlign:"center"}}><div style={{fontSize:10,color:"#678176",marginBottom:3}}>{C.accumulated}</div><b style={{fontSize:28,color:"#18a76a"}}>+{miningAccumulated.toFixed(5)} TON</b><div style={{fontSize:10,color:"#678176",marginTop:6}}>{C.progress} · {formatTime(Math.max(0,Math.ceil((MINING_DURATION_MS-(Date.now()-miningStartedAt))/1000)))}</div></div>}
             {claimReady&&<button className="ex-btn" onClick={claimHashes} style={{width:"100%",padding:14,borderRadius:14,background:"linear-gradient(135deg,#18a76a,#36c98d)",color:"#fff"}}>🎁 {C.collect}</button>}
           </div>
 
@@ -918,7 +916,7 @@ export default function EarnX(){
           <div className="ex-card" style={{padding:18,marginBottom:12,background:"linear-gradient(135deg,#fff8ee,#ffffff)"}}>
             <div style={{display:"flex",alignItems:"center",gap:12}}>
               <div style={{width:50,height:50,borderRadius:15,background:"#fff0d8",display:"grid",placeItems:"center",fontSize:24}}>📺</div>
-              <div style={{flex:1}}><b style={{fontSize:15}}>Watch Ads</b><div style={{fontSize:11,color:"#8d96a7",marginTop:3}}>AdsGram · Reward</div></div>
+              <div style={{flex:1}}><b style={{fontSize:15}}>Watch Ads</b><div style={{fontSize:11,color:"#8d96a7",marginTop:3}}>Reward Ad</div></div>
               <b style={{color:"#18a76a",fontSize:12}}>+0.0013 TON</b>
             </div>
             <div style={{marginTop:14,height:8,borderRadius:8,background:"#edf0f4",overflow:"hidden"}}><div style={{height:"100%",width:(Math.min(20,dailyAdCount)/20*100)+"%",background:"linear-gradient(90deg,#5d57e9,#18a76a)",borderRadius:8}}/></div>
@@ -952,8 +950,7 @@ export default function EarnX(){
       {showLanguage&&<div onClick={()=>setShowLanguage(false)} style={{position:"fixed",inset:0,zIndex:1200,background:"rgba(20,25,40,.5)",backdropFilter:"blur(8px)",display:"flex",alignItems:"flex-end",justifyContent:"center"}}><div onClick={e=>e.stopPropagation()} className="ex-card" style={{width:"100%",maxWidth:430,maxHeight:"78vh",overflowY:"auto",padding:18,borderRadius:"24px 24px 0 0"}}><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}><b style={{fontSize:20}}>🌐 {L.chooseLanguage}</b><button onClick={()=>setShowLanguage(false)} className="ex-btn" style={{border:0,background:"#f1f2f6",borderRadius:10,width:34,height:34}}>×</button></div><div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>{Object.entries(LANGUAGES).map(([id,v])=><button key={id} onClick={()=>setLanguage(id)} className="ex-btn" style={{padding:"12px 10px",borderRadius:13,border:lang===id?"2px solid #5d57e9":"1px solid #e5e8ef",background:lang===id?"#f0efff":"#fff",textAlign:"left",color:"#202637"}}><span style={{fontSize:18,marginRight:7}}>{v.flag}</span>{v.name}</button>)}</div></div></div>}
       <nav className="ex-nav"><div style={{display:"flex",maxWidth:430,margin:"0 auto"}}>{navItems.map(item=>{const icon=item.id==="home"?"⌂":item.id==="tasks"?"☷":item.id==="team"?"👥":item.id==="wallet"?"▣":"●";return <button key={item.id} className={tab===item.id?"active":""} onClick={()=>setTab(item.id)}><span style={{fontSize:21,lineHeight:1}}>{icon}</span><span>{item.label}</span></button>})}</div></nav>
 
-      {showSwap&&<SwapModal onClose={()=>setShowSwap(false)} hashes={hashes} onSwapComplete={(rr)=>{if(rr?.hashes!=null)setHashes(Number(rr.hashes));if(rr?.tonBalance!=null)setTonBalance(Number(rr.tonBalance));}}/>}
-      {showWithdraw&&<WithdrawModal onClose={()=>setShowWithdraw(false)} tonBalance={tonBalance} qualifiedFriends={qualifiedFriends} onGoSwap={()=>setShowSwap(true)} onInvite={handleShareReferral} onWithdrawComplete={()=>{setTonBalance(0);setShowWithdraw(false);}} minWithdrawTon={minWithdrawTon}/>}
+      {showWithdraw&&<WithdrawModal onClose={()=>setShowWithdraw(false)} tonBalance={tonBalance} qualifiedFriends={qualifiedFriends} onInvite={handleShareReferral} onWithdrawComplete={()=>{setTonBalance(0);setShowWithdraw(false);}} minWithdrawTon={minWithdrawTon}/>}
     </div>
   );
 }
