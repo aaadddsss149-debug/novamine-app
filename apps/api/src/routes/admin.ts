@@ -82,11 +82,11 @@ adminRouter.get("/analytics", requireAdmin, async (_req: any, res: any) => {
     errors: {},
   };
 
-  const queries: Array<[string, Promise<any>]> = [
-    ["users", supabaseAdmin.from("users").select("id,nova,ton_balance,mining_power,created_at,last_seen_at")],
-    ["purchases", supabaseAdmin.from("shop_purchases").select("ton_paid,status,created_at")],
-    ["withdrawals", supabaseAdmin.from("withdrawals").select("amount_ton,status")],
-    ["sessions", supabaseAdmin.from("mining_sessions").select("id,claimed_at").not("claimed_at", "is", null)],
+  const queries: Array<[string, any]> = [
+    ["users", supabaseAdmin.from("users").select("id,nova,ton_balance,mining_power,created_at,last_seen_at")] as const,
+    ["purchases", supabaseAdmin.from("shop_purchases").select("ton_paid,status,created_at")] as const,
+    ["withdrawals", supabaseAdmin.from("withdrawals").select("amount_ton,status")] as const,
+    ["sessions", supabaseAdmin.from("mining_sessions").select("id,claimed_at").not("claimed_at", "is", null)] as const,
   ];
 
   for (const [name, query] of queries) {
