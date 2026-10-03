@@ -171,8 +171,10 @@ export async function startBot(app: Express) {
   }
 
   // ── Notification scheduler ───────────────────────────────────────────────
+  // Disabled by default until the notification timestamp columns are present in Supabase.
+  // Enable with ENABLE_BOT_NOTIFICATIONS=true after applying the notification schema migration.
   async function runNotifications() {
-    if (!config.isProd) return;
+    if (!config.isProd || process.env.ENABLE_BOT_NOTIFICATIONS !== "true") return;
 
     try {
       const now = new Date();
