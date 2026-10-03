@@ -42,7 +42,7 @@ app.use(
 );
 
 // Healthcheck (Render pings this)
-app.get("/", (_req, res) => res.json({ ok: true, service: "novamine-api" }));
+app.get("/", (_req, res) => res.json({ ok: true, service: "earnx-api" }));
 app.get("/health", (_req, res) => res.json({ ok: true, ts: Date.now() }));
 
 // Public routes
