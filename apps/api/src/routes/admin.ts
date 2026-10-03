@@ -280,6 +280,46 @@ adminRouter.patch("/purchases/:id", requireAdmin, async (req: any, res: any) => 
   }
 });
 
+// ── Tasks Manager ──────────────────────────────────────────────────────────
+adminRouter.get("/tasks", requireAdmin, async (_req: any, res: any) => {
+  try {
+    const { data, error } = await supabaseAdmin.from("tasks").select("*").order("created_at", { ascending: false });
+    if (error) throw error;
+    res.json(data ?? []);
+  } catch (e: any) { res.status(500).json({ error: e.message }); }
+});
+
+adminRouter.post("/tasks", requireAdmin, async (req: any, res: any) => {
+  try {
+    const { id, label, reward, action, url, category, active } = req.body ?? {};
+    if (!id || !label) return res.status(400).json({ error: "id and label are required" });
+    const row = { id: String(id).trim(), label: String(label).trim(), reward: Math.max(0, Math.floor(Number(reward ?? 0))), action: String(action || "Open"), url: url ? String(url).trim() : null, category: String(category || "TG TASKS"), active: active !== false, updated_at: new Date().toISOString() };
+    const { data, error } = await supabaseAdmin.from("tasks").insert(row).select("*").single();
+    if (error) throw error;
+    res.json(data);
+  } catch (e: any) { res.status(500).json({ error: e.message }); }
+});
+
+adminRouter.patch("/tasks/:id", requireAdmin, async (req: any, res: any) => {
+  try {
+    const updates: any = {};
+    for (const key of ["label","action","url","category","active"]) if (req.body?.[key] !== undefined) updates[key] = req.body[key] === null ? null : String(req.body[key]);
+    if (req.body?.reward !== undefined) updates.reward = Math.max(0, Math.floor(Number(req.body.reward)));
+    updates.updated_at = new Date().toISOString();
+    const { data, error } = await supabaseAdmin.from("tasks").update(updates).eq("id", req.params.id).select("*").single();
+    if (error) throw error;
+    res.json(data);
+  } catch (e: any) { res.status(500).json({ error: e.message }); }
+});
+
+adminRouter.delete("/tasks/:id", requireAdmin, async (req: any, res: any) => {
+  try {
+    const { error } = await supabaseAdmin.from("tasks").delete().eq("id", req.params.id);
+    if (error) throw error;
+    res.json({ ok: true });
+  } catch (e: any) { res.status(500).json({ error: e.message }); }
+});
+
 // ── Ad Config ───────────────────────────────────────────────────────────────
 adminRouter.get("/ad-config", requireAdmin, async (_req: any, res: any) => {
   try {
