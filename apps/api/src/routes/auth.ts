@@ -62,7 +62,6 @@ authRouter.post("/telegram", async (req, res, next) => {
           photo_url: tg.photo_url ?? null,
           referrer_id: referrerId,
           ton_balance: welcomeTon,    // welcome gift credited on signup
-          gift_claimed: false,        // tracks whether popup has been shown
         })
         .select("id")
         .single();
@@ -110,7 +109,7 @@ authRouter.post("/telegram", async (req, res, next) => {
     // rely on the re-read which can race and return the wrong value.
     const { data: freshUser } = await supabaseAdmin
       .from("users")
-      .select("gift_claimed, ton_balance")
+      .select("ton_balance")
       .eq("id", userId)
       .single();
 
@@ -126,7 +125,10 @@ authRouter.post("/telegram", async (req, res, next) => {
       // FIX: new users always get false (gift not yet claimed), regardless of
       // whether the re-read raced. Existing users fall back to true (safe —
       // suppresses the popup if the read somehow fails).
-      giftClaimed: existing ? (freshUser?.gift_claimed ?? true) : false,
+      // The deployed users table currently does not include gift_claimed.
+      // Keep auth compatible with the live schema; registration must not fail
+      // just because the optional welcome-popup flag is absent.
+      giftClaimed: true,
       user: {
         id: userId,
         telegramId: tg.id,
