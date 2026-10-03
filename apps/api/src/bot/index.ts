@@ -17,7 +17,12 @@ function appKeyboard(startParam?: string | null) {
   return new InlineKeyboard()
     .webApp("🚀 Open EarnX", config.bot.appUrl || config.bot.publicUrl.replace(/\/api\/?$/, ""))
     .row()
-    .url("👥 Invite Friends", miniAppLink("ref_"));
+    .url(
+      "👥 Invite Friends",
+      `https://t.me/share/url?url=${encodeURIComponent(
+        `https://t.me/${botUsername()}?startapp=ref_`
+      )}&text=${encodeURIComponent("⚡ Join me on EarnX and start earning NOVA!")}`
+    );
 }
 
 export async function startBot(app: Express) {
