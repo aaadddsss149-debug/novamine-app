@@ -281,7 +281,8 @@ export default function EarnX(){
   const [adTriggers,setAdTriggers]=useState({start_mining:false,collect_mining:false});
   const [userLoaded,setUserLoaded]=useState(false);
   const [shopTiers,setShopTiers]=useState(SHOP.TIERS);
-  const [shopWallet,setShopWallet]=useState("");\n  const ADSGRAM_BLOCK_ID = import.meta.env.VITE_ADSGRAM_BLOCK_ID || "";
+  const [shopWallet,setShopWallet]=useState("");
+  const ADSGRAM_BLOCK_ID = import.meta.env.VITE_ADSGRAM_BLOCK_ID || "";
   const userDbId=useRef(null);
   const [showWithdraw,setShowWithdraw]=useState(false);
   const [showSwap,setShowSwap]=useState(false);
