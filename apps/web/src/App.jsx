@@ -1,4 +1,4 @@
-// EarnX v4 - circular nav + all NOVA labels - All NOVA labels correct
+// EarnX v4 - circular nav + all EARNX labels - All EARNX labels correct
 import { useState, useEffect, useRef } from "react";
 import EarnXAdmin from "./pages/admin/index.jsx";
 import { getTelegramUser, initTelegram } from "./lib/telegram.js";
@@ -9,9 +9,9 @@ import { miningPowerFromNova, tierFromNova, MINING } from "@earnx/shared";
 import { useTonConnectUI, useTonAddress, TonConnectButton } from "@tonconnect/ui-react";
 
 const T = {
-  bg:"#080b0f", card:"#0d1117", gold:"#f5c842", goldDim:"#c9a227",
-  goldGlow:"rgba(245,200,66,0.18)", goldFaint:"rgba(245,200,66,0.07)",
-  green:"#39ff8a", greenDim:"#1a7a42", text:"#f0ede6", muted:"#6b7a6b",
+  bg:"#080b0f", card:"#0d1117", gold:"#55e7ff", goldDim:"#7c5cff",
+  goldGlow:"rgba(85,231,255,0.18)", goldFaint:"rgba(85,231,255,0.07)",
+  green:"#6dffb8", greenDim:"#176b52", text:"#f0ede6", muted:"#6b7a6b",
   red:"#ff4d4d", blue:"#4da6ff",
 };
 
@@ -32,9 +32,9 @@ const css = `
   body{background:#080b0f;}
   ::-webkit-scrollbar{width:4px;}
   ::-webkit-scrollbar-track{background:#080b0f;}
-  ::-webkit-scrollbar-thumb{background:#c9a227;border-radius:2px;}
+  ::-webkit-scrollbar-thumb{background:#7c5cff;border-radius:2px;}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
-  @keyframes glow{0%,100%{box-shadow:0 0 8px rgba(245,200,66,0.18)}50%{box-shadow:0 0 32px rgba(245,200,66,0.4)}}
+  @keyframes glow{0%,100%{box-shadow:0 0 8px rgba(85,231,255,0.18)}50%{box-shadow:0 0 32px rgba(245,200,66,0.4)}}
   @keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
   @keyframes scanline{0%{transform:translateY(-100%)}100%{transform:translateY(100vh)}}
   @keyframes reelSpin{0%{transform:translateY(-6px)}50%{transform:translateY(6px)}100%{transform:translateY(-6px)}}
@@ -50,11 +50,11 @@ const css = `
   .btn-gold{transition:all 0.2s;}
   .btn-gold:hover:not(:disabled){transform:translateY(-1px);filter:brightness(1.1);}
   .card-hover{transition:all 0.25s;cursor:pointer;}
-  .card-hover:hover{transform:translateY(-2px);border-color:#c9a227 !important;box-shadow:0 8px 32px rgba(245,200,66,0.18) !important;}
+  .card-hover:hover{transform:translateY(-2px);border-color:#7c5cff !important;box-shadow:0 8px 32px rgba(85,231,255,0.18) !important;}
   .activity-item{animation:activitySlide 0.4s ease;}
   .prize-card{transition:all 0.15s;}
   .prize-card:hover{transform:scale(1.04);}
-  .shimmer-btn{background:linear-gradient(90deg,#f5c842 0%,#fff8d6 40%,#f5c842 60%,#c9a227 100%);background-size:200% 100%;animation:shimmer 2s linear infinite;}
+  .shimmer-btn{background:linear-gradient(90deg,#55e7ff 0%,#fff8d6 40%,#55e7ff 60%,#7c5cff 100%);background-size:200% 100%;animation:shimmer 2s linear infinite;}
   .swap-card{animation:swapPulse 2s ease-in-out infinite;}
   @keyframes adProgress{from{width:0%}to{width:100%}}
   @keyframes adFadeIn{from{opacity:0;transform:scale(0.95)}to{opacity:1;transform:scale(1)}}
@@ -96,7 +96,7 @@ function genActivity(){
   const types=[
     {icon:"⛏️",color:T.green, text:`${u} mined`,   value:`+${(Math.random()*0.002+0.0001).toFixed(6)} TON`},
     {icon:"💰",color:T.gold,  text:`${u} withdrew`, value:`${(Math.random()*2+0.8).toFixed(2)} TON`},
-    {icon:"⚡",color:T.blue,  text:`${u} bought`,   value:`${["100K","500K","1.25M"][Math.floor(Math.random()*3)]} NOVA`},
+    {icon:"⚡",color:T.blue,  text:`${u} bought`,   value:`${["100K","500K","1.25M"][Math.floor(Math.random()*3)]} EARNX`},
     {icon:"🚀",color:"#c084fc",text:`${u} invited`,  value:`a new member`},
   ];
   return {...types[Math.floor(Math.random()*types.length)],time:"just now",id:Date.now()+Math.random()};
@@ -128,7 +128,7 @@ function SwapModal({onClose,hashes,onSwapComplete}){
           <div style={{fontFamily:"'Orbitron'",fontSize:12,color:T.gold,fontWeight:700}}>1 HASH = {rate} TON</div>
         </div>
         <div style={{background:"rgba(0,0,0,0.4)",border:"1px solid #1e2a1e",borderRadius:12,padding:14,marginBottom:8}}>
-          <div style={{fontSize:11,color:T.muted,marginBottom:6,letterSpacing:1}}>FROM (NOVA Hashes)</div>
+          <div style={{fontSize:11,color:T.muted,marginBottom:6,letterSpacing:1}}>FROM (EARNX Credits)</div>
           <div style={{display:"flex",alignItems:"center",gap:10}}>
             <input type="number" placeholder="0.00" value={amount} onChange={e=>{setAmount(e.target.value);setSwapError(null);}} style={{flex:1,background:"transparent",border:"none",outline:"none",fontFamily:"'Orbitron'",fontSize:22,fontWeight:700,color:T.text,width:"100%"}}/>
             <button onClick={()=>setAmount(hashes.toFixed(8))} style={{background:T.goldFaint,border:`1px solid ${T.goldDim}`,borderRadius:8,padding:"4px 10px",color:T.gold,fontSize:11,cursor:"pointer",fontFamily:"'Rajdhani'",fontWeight:700}}>MAX</button>
@@ -175,7 +175,7 @@ function WithdrawModal({onClose,tonBalance,qualifiedFriends,onGoSwap,onInvite,on
           <div style={{textAlign:"center",marginBottom:20}}>
             <div style={{fontSize:48,marginBottom:12}}>🔒</div>
             <div style={{fontFamily:"'Orbitron'",fontWeight:700,fontSize:18,color:T.gold,marginBottom:8}}>NOT ENOUGH TON</div>
-            <div style={{fontSize:13,color:T.muted,lineHeight:1.6}}>You need a minimum of <span style={{color:T.gold,fontWeight:700}}>{MIN} TON</span> to withdraw.<br/>Keep mining and swapping NOVA to grow your balance.</div>
+            <div style={{fontSize:13,color:T.muted,lineHeight:1.6}}>You need a minimum of <span style={{color:T.gold,fontWeight:700}}>{MIN} TON</span> to withdraw.<br/>Keep mining and swapping EARNX to grow your balance.</div>
           </div>
           <div style={{background:"rgba(0,0,0,0.4)",border:"1px solid #1e2a1e",borderRadius:14,padding:16,marginBottom:16}}>
             <div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}>
@@ -331,7 +331,7 @@ export default function EarnX(){
           const realNova = Number(data.user.nova ?? 0);
           const realHashes = Number(data.user.hashes ?? 0);
           const realTon = Number(data.user.ton_balance ?? 0);
-          // Always recalculate mining power from NOVA — never trust the DB value
+          // Always recalculate mining power from EARNX — never trust the DB value
           const realPower = miningPowerFromNova(realNova);
           setNova(realNova);
           setHashes(realHashes);
@@ -479,7 +479,7 @@ export default function EarnX(){
     const tg = window.Telegram?.WebApp;
     if (tg?.openTelegramLink) {
       // Opens the Telegram share sheet pre-filled with the referral link
-      const text = encodeURIComponent("Join me on EarnX and start mining NOVA! 🚀");
+      const text = encodeURIComponent("Join me on EarnX and start mining EARNX! 🚀");
       tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(referralLink)}&text=${text}`);
     } else {
       // Fallback for desktop/dev: just copy
@@ -509,7 +509,7 @@ export default function EarnX(){
   const [activities,setActivities]=useState(()=>Array.from({length:6},()=>genActivity()));
 
 
-  // ── Auto-update mining power when NOVA changes ───────────────────────────
+  // ── Auto-update mining power when EARNX changes ───────────────────────────
   useEffect(()=>{
     if(!userLoaded) return; // don't run before initial data is loaded
     const newPower = miningPowerFromNova(nova);
@@ -677,7 +677,7 @@ export default function EarnX(){
       // Submit the boc (transaction bag-of-cells) as proof to our API
       const txHash = result.boc;
       const purchase = await api.buyShopTier(tier.id, txHash);
-      alert(`✅ Payment sent! Purchase ID: ${purchase.purchaseId}\nYour NOVA boost will be applied after admin confirms (~24h).`);
+      alert(`✅ Payment sent! Purchase ID: ${purchase.purchaseId}\nYour EARNX boost will be applied after admin confirms (~24h).`);
     } catch(e){
       if(e?.message?.includes("User declined") || e?.message?.includes("Cancel")){
         // user cancelled in wallet — no error needed
@@ -833,7 +833,7 @@ export default function EarnX(){
 
       <div style={{padding:"0 0 80px",position:"relative",zIndex:1}}>
 
-        {/* ══ NOVA/POWER TAB ══ */}
+        {/* ══ EARNX/POWER TAB ══ */}
         {tab==="power"&&(
           <div style={{padding:"16px 16px 0",animation:"slideUp 0.3s ease"}}>
 
@@ -855,7 +855,7 @@ export default function EarnX(){
               >
                 <div style={{fontSize:40,animation:"float 2s ease-in-out infinite"}}>🎁</div>
                 <div>
-                  <div style={{fontFamily:"'Orbitron'",fontSize:13,color:"#f5c842",fontWeight:700,letterSpacing:1}}>WELCOME GIFT</div>
+                  <div style={{fontFamily:"'Orbitron'",fontSize:13,color:"#55e7ff",fontWeight:700,letterSpacing:1}}>WELCOME GIFT</div>
                   <div style={{fontSize:12,color:"#8a9a8a",marginTop:3}}>Tap to claim your {welcomeTon} TON reward!</div>
                 </div>
                 <div style={{marginLeft:"auto",fontSize:20}}>›</div>
@@ -881,7 +881,7 @@ export default function EarnX(){
                     {novaDisplay}
                   </div>
                   {/* Decimal subtle */}
-                  <div style={{fontSize:11,letterSpacing:3,color:T.goldDim,fontFamily:"'Orbitron'",marginTop:4,marginBottom:6}}>NOVA</div>
+                  <div style={{fontSize:11,letterSpacing:3,color:T.goldDim,fontFamily:"'Orbitron'",marginTop:4,marginBottom:6}}>EARNX</div>
                   {/* Mining tier badge */}
                   <div style={{fontSize:11,color:T.gold,fontWeight:700,background:"rgba(245,200,66,0.12)",borderRadius:20,padding:"2px 12px",marginBottom:6,fontFamily:"'Rajdhani'"}}>
                     {tierFromNova(nova).label}
@@ -905,14 +905,14 @@ export default function EarnX(){
               </div>
             </div>
 
-            {/* ── NOVA display (styled like Dulce CANDY's SUGAR block) ── */}
+            {/* ── EARNX display (styled like Dulce CANDY's SUGAR block) ── */}
             <div style={{background:T.card,border:`1px solid ${T.goldDim}`,borderRadius:16,padding:18,marginBottom:14}}>
-              {/* Big NOVA balance — formatted like CANDY shows "1.0K SUGAR" */}
+              {/* Big EARNX balance — formatted like CANDY shows "1.0K SUGAR" */}
               <div style={{textAlign:"center",marginBottom:14}}>
                 <div style={{fontFamily:"'Orbitron'",fontWeight:900,fontSize:38,color:T.gold,textShadow:`0 0 30px ${T.goldGlow}`,lineHeight:1}}>
                   {nova>=1000000?`${(nova/1000000).toFixed(1)}M`:nova>=1000?`${(nova/1000).toFixed(1)}K`:nova.toLocaleString()}
                 </div>
-                <div style={{fontSize:12,letterSpacing:4,color:T.goldDim,fontFamily:"'Orbitron'",marginTop:4}}>NOVA</div>
+                <div style={{fontSize:12,letterSpacing:4,color:T.goldDim,fontFamily:"'Orbitron'",marginTop:4}}>EARNX</div>
               </div>
 
               {/* 1H / 1D / 30D rate cards — dynamic based on mining power */}
@@ -935,13 +935,13 @@ export default function EarnX(){
                 })()}
               </div>
 
-              {/* Add NOVA / Free NOVA — mirrors "Add SUGAR / Free SUGAR" */}
+              {/* Add EARNX / Free EARNX — mirrors "Add SUGAR / Free SUGAR" */}
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
                 <button className="btn-gold" onClick={()=>setTab("shop")} style={{padding:"12px",background:`linear-gradient(135deg,${T.gold},${T.goldDim})`,color:"#000",border:"none",borderRadius:12,fontFamily:"'Rajdhani'",fontWeight:700,fontSize:13,cursor:"pointer",boxShadow:`0 4px 14px ${T.goldGlow}`,display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
-                  ⚡ Add NOVA
+                  ⚡ Add EARNX
                 </button>
                 <button className="btn-gold" onClick={()=>setTab("tasks")} style={{padding:"12px",background:"transparent",border:`1px solid ${T.goldDim}`,color:T.gold,borderRadius:12,fontFamily:"'Rajdhani'",fontWeight:700,fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
-                  🎁 Free NOVA
+                  🎁 Free EARNX
                 </button>
               </div>
             </div>
@@ -1045,7 +1045,7 @@ export default function EarnX(){
         {/* ══ SHOP TAB ══ */}
         {tab==="shop"&&(
           <div style={{padding:"20px 16px",animation:"slideUp 0.3s ease"}}>
-            <div style={{fontFamily:"'Orbitron'",fontWeight:700,fontSize:18,color:T.gold,marginBottom:4,letterSpacing:2}}>NOVA SHOP</div>
+            <div style={{fontFamily:"'Orbitron'",fontWeight:700,fontSize:18,color:T.gold,marginBottom:4,letterSpacing:2}}>EARNX SHOP</div>
             <div style={{fontSize:14,color:T.muted,marginBottom:12}}>Boost your mining rate with TON</div>
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16,padding:"10px 14px",background:T.card,borderRadius:12,border:`1px solid ${T.goldDim}`}}>
               <div style={{fontSize:12,color:T.muted}}>{tonWalletAddress?`Wallet: ${tonWalletAddress.slice(0,6)}…${tonWalletAddress.slice(-4)}`:"Connect wallet to buy"}</div>
@@ -1065,7 +1065,7 @@ export default function EarnX(){
                       </div>
                       <div>
                         <div style={{fontFamily:"'Orbitron'",fontWeight:700,fontSize:17,color:T.gold}}>{item.power}</div>
-                        <div style={{fontSize:11,color:T.muted}}>NOVA</div>
+                        <div style={{fontSize:11,color:T.muted}}>EARNX</div>
                         <div style={{fontSize:11,color:T.muted,marginTop:1}}>Daily: <span style={{color:T.green}}>{item.daily} TON</span></div>
                       </div>
                     </div>
@@ -1092,7 +1092,7 @@ export default function EarnX(){
                 </div>
                 <div style={{flex:1}}>
                   <div style={{fontWeight:700,fontSize:14,color:i<3?T.gold:T.text}}>{user.name}</div>
-                  <div style={{fontSize:11,color:T.muted}}>{user.power} NOVA</div>
+                  <div style={{fontSize:11,color:T.muted}}>{user.power} EARNX</div>
                 </div>
                 <div style={{textAlign:"right"}}>
                   <div style={{fontFamily:"'Orbitron'",fontSize:11,color:T.green}}>{user.daily}</div>
@@ -1104,7 +1104,7 @@ export default function EarnX(){
               <div style={{width:36,height:36,borderRadius:8,background:"#1a2a1a",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,color:T.muted,fontFamily:"'Orbitron'",fontWeight:700,flexShrink:0}}>--</div>
               <div style={{flex:1}}>
                 <div style={{fontWeight:700,fontSize:14,color:T.gold}}>You <span style={{fontSize:11,color:T.goldDim}}>← You</span></div>
-                <div style={{fontSize:11,color:T.muted}}>{novaDisplay} NOVA</div>
+                <div style={{fontSize:11,color:T.muted}}>{novaDisplay} EARNX</div>
               </div>
               <div style={{textAlign:"right"}}>
                 <div style={{fontFamily:"'Orbitron'",fontSize:11,color:T.green}}>0.00036</div>
@@ -1120,7 +1120,7 @@ export default function EarnX(){
             <div style={{background:"linear-gradient(135deg,#0f1e0f,#0a1a0a)",border:`1px solid ${T.goldDim}`,borderRadius:20,padding:22,marginBottom:16,boxShadow:`0 0 32px ${T.goldGlow}`}}>
               <div style={{fontFamily:"'Orbitron'",fontWeight:700,fontSize:15,color:T.gold,marginBottom:16,letterSpacing:1}}>YOUR REFERRAL REWARDS</div>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:18}}>
-                {[["⭐","+6,000","NOVA","Premium"],["👤","+3,000","NOVA","Per Referral"],["💰","15%","COMM","On Purchases"]].map(([icon,val,unit,label])=>(
+                {[["⭐","+6,000","EARNX","Premium"],["👤","+3,000","EARNX","Per Referral"],["💰","15%","COMM","On Purchases"]].map(([icon,val,unit,label])=>(
                   <div key={label} style={{background:"rgba(0,0,0,0.4)",borderRadius:12,padding:"12px 8px",textAlign:"center",border:"1px solid rgba(245,200,66,0.1)"}}>
                     <div style={{fontSize:20,marginBottom:4}}>{icon}</div>
                     <div style={{fontFamily:"'Orbitron'",fontWeight:900,fontSize:15,color:T.gold}}>{val}</div>
@@ -1130,7 +1130,7 @@ export default function EarnX(){
                 ))}
               </div>
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:8,marginBottom:16,background:"rgba(0,0,0,0.3)",borderRadius:10,padding:12}}>
-                {[[String(refStats.total),"REFERRED"],[String(refStats.valid),"VALID"],[String(refStats.pending),"PENDING"],[refStats.nova.toFixed(0),"NOVA"]].map(([v,l])=>(
+                {[[String(refStats.total),"REFERRED"],[String(refStats.valid),"VALID"],[String(refStats.pending),"PENDING"],[refStats.nova.toFixed(0),"EARNX"]].map(([v,l])=>(
                   <div key={l} style={{textAlign:"center"}}>
                     <div style={{fontFamily:"'Orbitron'",fontWeight:700,fontSize:15,color:T.gold}}>{v}</div>
                     <div style={{fontSize:9,color:T.muted,letterSpacing:1}}>{l}</div>
@@ -1191,7 +1191,7 @@ export default function EarnX(){
         {tab==="tasks"&&(
           <div style={{padding:"20px 16px",animation:"slideUp 0.3s ease"}}>
             <div style={{fontFamily:"'Orbitron'",fontWeight:700,fontSize:18,color:T.gold,marginBottom:4,letterSpacing:2}}>MISSIONS</div>
-            <div style={{fontSize:14,color:T.muted,marginBottom:20}}>Complete missions & invite friends to earn NOVA</div>
+            <div style={{fontSize:14,color:T.muted,marginBottom:20}}>Complete missions & invite friends to earn EARNX</div>
             <div style={{fontWeight:700,fontSize:11,letterSpacing:2,color:T.muted,fontFamily:"'Orbitron'",margin:"4px 0 10px"}}>INVITE MILESTONES</div>
             {[[1,1200,"1.2K"],[5,2400,"2.4K"],[25,6000,"6K"],[50,12000,"12K"],[100,24000,"24K"]].map(([n,novaAmt,reward])=>{
               const reached = qualifiedFriends >= n;
@@ -1204,7 +1204,7 @@ export default function EarnX(){
                 </div>
                 <div style={{flex:1}}>
                   <div style={{fontWeight:700,fontSize:13,color:claimed?T.muted:T.text}}>Invite {n} Friend{n>1?"s":""}</div>
-                  <div style={{fontSize:11,color:T.gold}}>⚡ +{reward} NOVA</div>
+                  <div style={{fontSize:11,color:T.gold}}>⚡ +{reward} EARNX</div>
                   <div style={{marginTop:4,height:3,background:"#1e2a1e",borderRadius:2}}>
                     <div style={{width:`${progress}%`,height:"100%",background:`linear-gradient(90deg,${T.gold},${T.green})`,borderRadius:2,transition:"width 0.5s"}}/>
                   </div>
