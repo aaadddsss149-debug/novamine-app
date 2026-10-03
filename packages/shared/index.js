@@ -1,4 +1,4 @@
-// Single source of truth for NovaMine's economy constants.
+// Single source of truth for EarnX's economy constants.
 // Imported by both apps/web (via Vite) and apps/api (via TypeScript NodeNext).
 // Keep this file pure (no I/O, no env) so it can run in any environment.
 
@@ -136,8 +136,8 @@ export const DICE = {
 // ── TASKS ────────────────────────────────────────────────────────────────────
 export const TASKS = {
   LIST: [
-    { id: "join_channel",        label: "Join NovaMine Channel",   reward: 500,  action: "Join",      url: "https://t.me/NovaMineChannel" },
-    { id: "join_chat",           label: "Join Community Chat",     reward: 500,  action: "Claim",     url: "https://t.me/NovaMineChat" },
+    { id: "join_channel",        label: "Join EarnX Channel",   reward: 500,  action: "Join",      url: "https://t.me/EarnXChannel" },
+    { id: "join_chat",           label: "Join Community Chat",     reward: 500,  action: "Claim",     url: "https://t.me/EarnXChat" },
     { id: "start_partner_alpha", label: "Start Partner Bot Alpha", reward: 1000, action: "Start Bot", url: "https://t.me/PartnerAlphaBot" },
     { id: "start_partner_beta",  label: "Start Partner Bot Beta",  reward: 500,  action: "Start Bot", url: "https://t.me/PartnerBetaBot" },
   ],
