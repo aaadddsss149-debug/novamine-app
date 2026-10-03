@@ -505,13 +505,13 @@ function UsersPanel({ notify }) {
 
 // ─── TASK MANAGER ────────────────────────────────────────────────────────────
 function TasksPanel({ notify }) {
-  const [config,setConfig]=useState({blockId:"51781",dailyLimit:20,rewardTon:0.00001});
+  const [config,setConfig]=useState({blockId:"51785",dailyLimit:20,rewardTon:0.00001});
   const [saving,setSaving]=useState(false);
-  useEffect(()=>{adminFetch("/ad-config").then(x=>setConfig(p=>({...p,blockId:x?.adsgram_block_id||x?.adsgramBlockId||"51781"}))).catch(()=>{});},[]);
+  useEffect(()=>{adminFetch("/ad-config").then(x=>setConfig(p=>({...p,blockId:x?.adsgram_block_id||x?.adsgramBlockId||"51785"}))).catch(()=>{});},[]);
   const save=async()=>{
     setSaving(true);
     try{
-      await adminFetch("/ad-config",{method:"PATCH",body:{ads_enabled:true,adsgram_block_id:"51781",ad_triggers:{start_mining:true,collect_mining:false,spin_slot:false,dice_roll:false},daily_ad_limit:20}});
+      await adminFetch("/ad-config",{method:"PATCH",body:{ads_enabled:true,adsgram_block_id:"51785",ad_triggers:{start_mining:true,collect_mining:false,spin_slot:false,dice_roll:false},daily_ad_limit:20}});
       notify("✅ Ad task configured: 20 ads/day");
     }catch(e){notify(e.message,"error");}finally{setSaving(false);}
   };
@@ -522,7 +522,7 @@ function TasksPanel({ notify }) {
         <div style={{width:52,height:52,borderRadius:14,background:S.greenDim,display:"grid",placeItems:"center",fontSize:24}}>📺</div>
         <div style={{flex:1}}>
           <div style={{fontWeight:800,fontSize:16}}>Watch Ads</div>
-          <div style={{fontSize:12,color:S.mutedLight}}>Rewarded AdsGram · Block ID 51781 · limit 20/day</div>
+          <div style={{fontSize:12,color:S.mutedLight}}>Rewarded AdsGram · Block ID 51785 · limit 20/day</div>
           <div style={{fontSize:12,color:S.gold,marginTop:5}}>Reward: 0.0013 TON per completed ad</div>
         </div>
         <Badge color={S.green}>ACTIVE</Badge>
