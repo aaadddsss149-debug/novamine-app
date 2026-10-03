@@ -185,95 +185,11 @@ export async function startBot(app: Express) {
   }
 
   // ── Notification scheduler ───────────────────────────────────────────────
-  // Disabled by default until the notification timestamp columns are present in Supabase.
-  // Enable with ENABLE_BOT_NOTIFICATIONS=true after applying the notification schema migration.
-  async function runNotifications() {
-    if (!config.isProd || process.env.ENABLE_BOT_NOTIFICATIONS !== "true") return;
-
-    try {
-      const now = new Date();
-      const eightHoursAgo = new Date(now.getTime() - 8 * 60 * 60 * 1000).toISOString();
-
-      const { data: miningSessions, error: miningError } = await supabaseAdmin
-        .from("mining_sessions")
-        .select("id,user_id,claim_ready_at,users!inner(telegram_id,first_name,notified_mining_at)")
-        .lt("claim_ready_at", eightHoursAgo)
-        .is("claimed_at", null)
-        .limit(100);
-
-      if (miningError) {
-        console.error("[bot] mining notification query failed:", miningError.message);
-      } else {
-        for (const session of miningSessions ?? []) {
-          const u = (session as any).users;
-          if (!u?.telegram_id) continue;
-
-          const last = u.notified_mining_at ? new Date(u.notified_mining_at).getTime() : 0;
-          if (last && now.getTime() - last < 8 * 60 * 60 * 1000) continue;
-
-          try {
-            await bot.api.sendMessage(
-              u.telegram_id,
-              `⛏️ *Your EarnX rewards are ready, ${u.first_name || "Miner"}!*\n\nYour mining session has rewards waiting. Open EarnX and collect them.`,
-              {
-                parse_mode: "Markdown",
-                reply_markup: new InlineKeyboard().url("⚡ Claim EARNX", miniAppLink()),
-              }
-            );
-
-            await supabaseAdmin
-              .from("users")
-              .update({ notified_mining_at: now.toISOString() })
-              .eq("id", session.user_id);
-          } catch (err: any) {
-            console.warn("[bot] mining notification skipped:", err?.message || err);
-          }
-        }
-      }
-
-      const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
-      const { data: inactiveUsers, error: inactiveError } = await supabaseAdmin
-        .from("users")
-        .select("id,telegram_id,first_name,last_seen_at,notified_inactive_at")
-        .lt("last_seen_at", oneDayAgo)
-        .not("telegram_id", "is", null)
-        .limit(100);
-
-      if (inactiveError) {
-        console.error("[bot] inactivity query failed:", inactiveError.message);
-      } else {
-        for (const u of inactiveUsers ?? []) {
-          if (!u.telegram_id) continue;
-
-          const last = u.notified_inactive_at ? new Date(u.notified_inactive_at).getTime() : 0;
-          if (last && now.getTime() - last < 24 * 60 * 60 * 1000) continue;
-
-          try {
-            await bot.api.sendMessage(
-              u.telegram_id,
-              `🌟 *EarnX misses you, ${u.first_name || "Miner"}!*\n\nYour tasks and rewards are waiting. Come back and keep building your EarnX balance.`,
-              {
-                parse_mode: "Markdown",
-                reply_markup: new InlineKeyboard().url("🚀 Open EarnX", miniAppLink()),
-              }
-            );
-
-            await supabaseAdmin
-              .from("users")
-              .update({ notified_inactive_at: now.toISOString() })
-              .eq("id", u.id);
-          } catch (err: any) {
-            console.warn("[bot] inactivity notification skipped:", err?.message || err);
-          }
-        }
-      }
-    } catch (err) {
-      console.error("[bot] notification scheduler error:", err);
-    }
-  }
-
-  setInterval(runNotifications, 5 * 60 * 1000);
-  setTimeout(runNotifications, 30 * 1000);
+  // Disabled until the production users table contains the notification
+  // timestamp columns. Running the old joined query against the deployed
+  // schema causes PostgREST "Invalid path specified in request URL" errors.
+  // Re-enable this block only after applying the notification schema migration.
+  console.log("[bot] notifications disabled until notification schema is deployed");
 
   // ── Telegram transport ───────────────────────────────────────────────────
   if (config.isProd && config.bot.publicUrl) {
