@@ -7,7 +7,6 @@ import { api } from "./lib/api.js";
 import { supabase } from "./lib/supabase.js";
 import { miningPowerFromNova, tierFromNova, MINING, SHOP } from "@earnx/shared";
 import { useTonConnectUI, useTonAddress, TonConnectButton } from "@tonconnect/ui-react";
-import { beginCell } from "@ton/core";
 
 const T = {
   bg:"#080b0f", card:"#0d1117", gold:"#55e7ff", goldDim:"#7c5cff",
@@ -664,7 +663,9 @@ export default function EarnX(){
     setBuyingTierId(tier.id);
     try {
       const nanotons = BigInt(Math.round(Number(tier.cost) * 1_000_000_000)).toString();
-      const paymentComment = `EarnX Shop|${userDbId.current}|${tier.id}|${crypto.randomUUID()}`;
+      const randomId = globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      const paymentComment = `EarnX Shop|${userDbId.current}|${tier.id}|${randomId}`;
+      const { beginCell } = await import("@ton/core");
       const payloadCell = beginCell()
         .storeUint(0, 32)
         .storeStringTail(paymentComment)
