@@ -56,17 +56,7 @@ function Icon({name,size=20}) {
   );
 }
 
-let actIdx=0;
-function genActivity(){
-  const u=ALL_USERS[actIdx%ALL_USERS.length]; actIdx++;
-  const types=[
-    {icon:"⛏️",color:T.green, text:`${u} mined`,   value:`+${(Math.random()*0.002+0.0001).toFixed(6)} TON`},
-    {icon:"💰",color:T.gold,  text:`${u} withdrew`, value:`${(Math.random()*2+0.8).toFixed(2)} TON`},
-    {icon:"⚡",color:T.blue,  text:`${u} bought`,   value:`${["100K","500K","1.25M"][Math.floor(Math.random()*3)]} EARNX`},
-    {icon:"🚀",color:"#c084fc",text:`${u} invited`,  value:`a new member`},
-  ];
-  return {...types[Math.floor(Math.random()*types.length)],time:"just now",id:Date.now()+Math.random()};
-}
+function genActivity(){ return null; }
 
 function WithdrawModal({onClose,tonBalance,qualifiedFriends,onInvite,onWithdrawComplete,minWithdrawTon}){
   const MIN=minWithdrawTon??2.0;
