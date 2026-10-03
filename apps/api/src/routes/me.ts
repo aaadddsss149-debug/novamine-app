@@ -11,13 +11,10 @@ meRouter.get("/", requireAuth, async (req, res, next) => {
   try {
     const userId = (req as any).auth!.sub;
 
-    // Run all queries in parallel — previously sequential, causing 6 round-trips
-    // to Supabase before the response could be sent. Now they all fire at once.
+    // Run the four required queries in parallel.
     const [
       { data: user, error },
       { data: session },
-      { data: lastSpin },
-      { data: todayDice },
       { count: qualifiedFriends },
       { count: totalReferred },
     ] = await Promise.all([
