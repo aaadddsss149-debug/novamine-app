@@ -7,6 +7,7 @@ import { api } from "./lib/api.js";
 import { supabase } from "./lib/supabase.js";
 import { miningPowerFromNova, tierFromNova, MINING, SHOP } from "@earnx/shared";
 import { useTonConnectUI, useTonAddress, TonConnectButton } from "@tonconnect/ui-react";
+import { beginCell } from "@ton/core";
 
 const T = {
   bg:"#080b0f", card:"#0d1117", gold:"#55e7ff", goldDim:"#7c5cff",
@@ -640,47 +641,54 @@ export default function EarnX(){
   };
 
 
-  // ── Shop: buy a tier via TonConnect wallet ───────────────────────────────
+  // ── Shop: real TON payment via TON Connect ────────────────────────────────
   async function handleBuyTier(tier){
     if(buyingTierId) return;
     setBuyError(null);
 
-    // If wallet not connected, open connect dialog
     if(!tonWalletAddress){
       try { await tonConnectUI.connectWallet(); } catch(_){}
-      return; // user will click Buy again after connecting
+      return;
+    }
+
+    const receiverWallet = shopWallet || import.meta.env.VITE_TON_WALLET_ADDRESS || "";
+    if(!receiverWallet){
+      setBuyError("TON receiving wallet is not configured.");
+      return;
+    }
+    if(!userDbId.current){
+      setBuyError("Your EarnX account is still loading. Please try again.");
+      return;
     }
 
     setBuyingTierId(tier.id);
     try {
-      // Convert TON price → nanotons (1 TON = 1_000_000_000 nanoton)
       const nanotons = BigInt(Math.round(Number(tier.cost) * 1_000_000_000)).toString();
-      // Receiving wallet comes from the shop API response (stored in shopWallet state)
-      const receiverWallet = shopWallet || import.meta.env.VITE_TON_WALLET_ADDRESS || "";
-      if(!receiverWallet){
-        setBuyError("Wallet address not configured. Please contact support.");
-        return;
-      }
+      const paymentComment = `EarnX Shop|${userDbId.current}|${tier.id}|${crypto.randomUUID()}`;
+      const payloadCell = beginCell()
+        .storeUint(0, 32)
+        .storeStringTail(paymentComment)
+        .endCell();
+      const payload = btoa(String.fromCharCode(...payloadCell.toBoc()));
 
-      const result = await tonConnectUI.sendTransaction({
-        validUntil: Math.floor(Date.now() / 1000) + 300, // 5-min window
+      await tonConnectUI.sendTransaction({
+        network: "-239",
+        validUntil: Math.floor(Date.now() / 1000) + 300,
         messages: [{
           address: receiverWallet,
           amount: nanotons,
-          // Base64 payload identifies the purchase (tier + user)
-          payload: btoa(`novamiine:${tier.id}:${userDbId.current ?? "unknown"}`),
+          payload,
         }],
       });
 
-      // Submit the boc (transaction bag-of-cells) as proof to our API
-      const txHash = result.boc;
-      const purchase = await api.buyShopTier(tier.id, txHash);
-      alert(`✅ Payment sent! Purchase ID: ${purchase.purchaseId}\nYour EARNX boost will be applied after admin confirms (~24h).`);
+      const purchase = await api.buyShopTier(tier.id, tonWalletAddress, paymentComment);
+      setNova(Number(purchase.nova ?? nova));
+      setMiningPower(Number(purchase.miningPower ?? miningPower));
+      alert(`✅ Payment confirmed! +${Number(tier.power).toLocaleString()} EARNX has been added to your account.`);
     } catch(e){
       if(e?.message?.includes("User declined") || e?.message?.includes("Cancel")){
-        // user cancelled in wallet — no error needed
       } else {
-        setBuyError(e?.message ?? "Transaction failed. Please try again.");
+        setBuyError(e?.message ?? "Payment failed or is still being confirmed. Please try again.");
       }
     } finally {
       setBuyingTierId(null);
