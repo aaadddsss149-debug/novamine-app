@@ -666,8 +666,25 @@ export default function EarnX(){
       setBuyError("TON receiving wallet is not configured.");
       return;
     }
+    // The account request can still be finishing while the user taps a shop plan.
+    // Refresh /me here instead of blocking the payment with a false "still loading" error.
     if(!userDbId.current){
-      setBuyError("Your EarnX account is still loading. Please try again.");
+      try {
+        const fresh = await api.me();
+        if(fresh?.user?.id){
+          userDbId.current = fresh.user.id;
+          setNova(Number(fresh.user.nova ?? nova));
+          setHashes(Number(fresh.user.hashes ?? hashes));
+          setTonBalance(Number(fresh.user.ton_balance ?? tonBalance));
+          setMiningPower(miningPowerFromNova(Number(fresh.user.nova ?? nova)));
+        }
+      } catch(e) {
+        console.warn("[EarnX] Account refresh before shop payment failed:", e);
+      }
+    }
+
+    if(!userDbId.current){
+      setBuyError("Your EarnX account could not be loaded. Please reopen the app and try again.");
       return;
     }
 
