@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { miningPowerFromNova, MINING, ADMIN_RATES, SWAP } from "@earnx/shared";
 
 // ─── CONFIG — no secrets here, everything goes through your Render API ────────
-const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "https://novamine-api.onrender.com";
+const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "https://novamine-api-bdi0.onrender.com";
 
 // ─── API HELPER ───────────────────────────────────────────────────────────────
 async function adminFetch(path, opts = {}, secret) {
