@@ -27,6 +27,7 @@ async function findConfirmedPayment(
   receiverAddress: string,
   expectedNano: bigint,
   expectedComment: string,
+  notBeforeUnix: number,
 ) {
   const senderRaw = rawTonAddress(senderAddress);
 
@@ -56,6 +57,8 @@ async function findConfirmedPayment(
       if (amount !== expectedNano) continue;
       if (comment !== expectedComment) continue;
       if (senderRawEvent !== senderRaw) continue;
+      if (Number(event?.timestamp ?? 0) < notBeforeUnix) continue;
+      if (!event?.event_id && !event?.id) continue;
 
       return {
         txHash: String(event?.event_id ?? event?.id ?? ""),
@@ -157,6 +160,7 @@ shopRouter.post("/buy", requireAuth, async (req, res, next) => {
     );
 
     let payment = null;
+    const paymentAttemptStartedAt = Math.floor(Date.now() / 1000) - 30;
 
     // Public TonAPI is rate-limited. Poll at ~4.2s intervals instead of
     // hammering it every 2s and getting 429 responses.
