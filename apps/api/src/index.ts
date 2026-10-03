@@ -1,4 +1,4 @@
-// NovaMine API — entry point.
+// EarnX API — entry point.
 // Hosts:
 //   1. Express HTTP API (consumed by the Vercel-hosted Mini App)
 //   2. Telegram bot (grammy) — receives updates via webhook in prod, long-poll in dev
