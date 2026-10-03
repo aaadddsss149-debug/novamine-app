@@ -504,37 +504,31 @@ function UsersPanel({ notify }) {
 
 // ─── TASK MANAGER ────────────────────────────────────────────────────────────
 function TasksPanel({ notify }) {
-  const [tasks,setTasks]=useState([]);
-  const [loading,setLoading]=useState(true);
+  const [config,setConfig]=useState({blockId:"51781",dailyLimit:20,rewardTon:0.00001});
   const [saving,setSaving]=useState(false);
-  const [form,setForm]=useState({label:"",reward:100,category:"TG TASKS",url:"",action:"Open"});
-  const load=useCallback(()=>{setLoading(true);adminFetch("/tasks").then(setTasks).catch(e=>notify(e.message,"error")).finally(()=>setLoading(false));},[]);
-  useEffect(()=>{load();},[]);
-  const add=async()=>{
-    if(!form.label.trim()) return notify("Task name is required","error");
+  useEffect(()=>{adminFetch("/ad-config").then(x=>setConfig(p=>({...p,blockId:x?.adsgram_block_id||x?.adsgramBlockId||"51781"}))).catch(()=>{});},[]);
+  const save=async()=>{
     setSaving(true);
-    try{ const id="task_"+Date.now(); await adminFetch("/tasks",{method:"POST",body:{...form,id,reward:Number(form.reward),active:true}}); notify("Task added — live in the app"); setForm({label:"",reward:100,category:"TG TASKS",url:"",action:"Open"}); load(); }
-    catch(e){notify(e.message,"error");} finally{setSaving(false);}
+    try{
+      await adminFetch("/ad-config",{method:"PATCH",body:{ads_enabled:true,adsgram_block_id:"51781",ad_triggers:{start_mining:true,collect_mining:false,spin_slot:false,dice_roll:false},daily_ad_limit:20}});
+      notify("✅ Ad task configured: 20 ads/day");
+    }catch(e){notify(e.message,"error");}finally{setSaving(false);}
   };
-  const toggle=async t=>{try{await adminFetch(`/tasks/${encodeURIComponent(t.id)}`,{method:"PATCH",body:{active:!t.active}});load();}catch(e){notify(e.message,"error");}};
-  const remove=async t=>{if(!confirm("Delete this task?"))return;try{await adminFetch(`/tasks/${encodeURIComponent(t.id)}`,{method:"DELETE"});notify("Task deleted");load();}catch(e){notify(e.message,"error");}};
   return <div className="fade-in">
-    <SectionHeader icon="📋" title="Task Manager" sub="Add Telegram links, channels, and rewarded-ad tasks. Changes are live immediately." />
-    <Card style={{marginBottom:20}}>
-      <div style={{fontWeight:800,fontSize:16,marginBottom:14}}>➕ Add New Task</div>
-      <div style={{display:"grid",gridTemplateColumns:"2fr 1fr 1fr",gap:10,marginBottom:10}}>
-        <Input value={form.label} onChange={v=>setForm(p=>({...p,label:v}))} placeholder="Task title e.g. Join EarnX Channel" />
-        <Input value={form.reward} onChange={v=>setForm(p=>({...p,reward:v}))} type="number" placeholder="Reward" />
-        <select value={form.category} onChange={e=>setForm(p=>({...p,category:e.target.value}))} style={{background:"#080c12",border:`1px solid ${S.cardBorder}`,borderRadius:6,color:S.text,padding:"7px 12px"}}><option>TG TASKS</option><option>ADS</option><option>LINK</option></select>
+    <SectionHeader icon="📺" title="Daily Ad Task" sub="The app has one fixed earning task. Users can watch up to 20 rewarded ads per day." />
+    <Card style={{marginBottom:16}}>
+      <div style={{display:"flex",alignItems:"center",gap:14}}>
+        <div style={{width:52,height:52,borderRadius:14,background:S.greenDim,display:"grid",placeItems:"center",fontSize:24}}>📺</div>
+        <div style={{flex:1}}>
+          <div style={{fontWeight:800,fontSize:16}}>Watch Ads</div>
+          <div style={{fontSize:12,color:S.mutedLight}}>Rewarded AdsGram · Block ID 51781 · limit 20/day</div>
+          <div style={{fontSize:12,color:S.gold,marginTop:5}}>Reward: 0.00001 TON per completed ad</div>
+        </div>
+        <Badge color={S.green}>ACTIVE</Badge>
       </div>
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr auto",gap:10,alignItems:"end"}}>
-        <Input value={form.url} onChange={v=>setForm(p=>({...p,url:v}))} placeholder="https://t.me/..." />
-        <Input value={form.action} onChange={v=>setForm(p=>({...p,action:v}))} placeholder="Open / Watch" />
-        <Btn onClick={add} disabled={saving}>{saving?"Adding…":"Add Task"}</Btn>
-      </div>
-      <div style={{fontSize:11,color:S.mutedLight,marginTop:10}}>ADS tasks use the configured AdsGram rewarded block. TG TASKS / LINK tasks open the URL, then the user claims the reward.</div>
     </Card>
-    {loading?<LoadingScreen/>:<div style={{display:"grid",gap:10}}>{tasks.map(t=><Card key={t.id} style={{padding:"13px 16px"}}><div style={{display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}><div style={{width:42,height:42,borderRadius:10,background:t.active?S.greenDim:S.cardBorder,display:"grid",placeItems:"center"}}>{String(t.category).toUpperCase().includes("AD")?"📺":"📣"}</div><div style={{flex:1,minWidth:180}}><div style={{fontWeight:800,fontSize:14}}>{t.label}</div><div style={{fontSize:11,color:S.mutedLight}}>{t.category} · +{Number(t.reward).toLocaleString()} EARNX{t.url?" · "+t.url:""}</div></div><Badge color={t.active?S.green:S.muted}>{t.active?"ACTIVE":"OFF"}</Badge><Btn small onClick={()=>toggle(t)}>{t.active?"Disable":"Enable"}</Btn><Btn small danger onClick={()=>remove(t)}>Delete</Btn></div></Card>)}{tasks.length===0&&<EmptyState icon="📋" msg="No tasks yet. Add your first task above."/>}</div>}
+    <Btn onClick={save} disabled={saving}>{saving?"Saving…":"Save Ads Settings"}</Btn>
+    <div style={{fontSize:11,color:S.mutedLight,marginTop:12}}>No user-created tasks are shown. This is intentionally a fixed daily task.</div>
   </div>;
 }
 // ─── SHOP (DB-backed editor — saves live to the database) ─────────────────────
