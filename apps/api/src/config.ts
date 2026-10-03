@@ -23,7 +23,7 @@ export const config = {
   isProd: process.env.NODE_ENV === "production",
   allowDevAuth: process.env.ALLOW_DEV_AUTH === "true",
 
-  corsOrigins: (process.env.CORS_ORIGINS ?? "http://localhost:5173")
+  corsOrigins: (process.env.CORS_ORIGINS ?? "http://localhost:5173,https://earnx-web-yujc.onrender.com")
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean),
