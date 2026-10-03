@@ -63,6 +63,33 @@ const css = `
   @keyframes ringPulse{0%,100%{opacity:0.6;transform:scale(1)}50%{opacity:1;transform:scale(1.02)}}
 `;
 
+function Icon({name,size=20}) {
+  const icons = {
+    zap:"⚡", swap:"↔", check:"✓", lock:"🔒", info:"ⓘ",
+    share:"↗", copy:"⧉", users:"👥", cpu:"◉", wallet:"◈",
+    home:"⌂", tasks:"☷", team:"♟", rank:"♛", power:"⚡",
+    mining:"⛏", settings:"⚙", gift:"🎁", star:"★", arrow:"→"
+  };
+  return (
+    <span
+      aria-hidden="true"
+      style={{
+        display:"inline-flex",
+        width:size,
+        height:size,
+        alignItems:"center",
+        justifyContent:"center",
+        fontSize:Math.max(11, Math.round(size*0.8)),
+        lineHeight:1,
+        fontFamily:"Arial, sans-serif",
+        flexShrink:0
+      }}
+    >
+      {icons[name] || "•"}
+    </span>
+  );
+}
+
 let actIdx=0;
 function genActivity(){
   const u=ALL_USERS[actIdx%ALL_USERS.length]; actIdx++;
