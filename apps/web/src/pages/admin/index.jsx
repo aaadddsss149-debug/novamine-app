@@ -232,8 +232,11 @@ export default function EarnXAdmin() {
       await adminFetch("/login", { method: "POST", body: { secret } }, secret);
       sessionStorage.setItem("nm_admin_secret", secret);
       setAuthed(true);
-    } catch {
-      setLoginErr("Wrong password. Try again.");
+    } catch (e) {
+      const detail = e?.message || "Login request failed";
+      const code = e?.code ? ` [${e.code}]` : "";
+      const status = e?.status ? ` (HTTP ${e.status})` : "";
+      setLoginErr(`${detail}${code}${status}`);
     } finally {
       setLoginLoading(false);
     }
