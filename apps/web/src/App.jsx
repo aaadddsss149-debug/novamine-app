@@ -38,7 +38,6 @@ const css = `
   @keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
   @keyframes scanline{0%{transform:translateY(-100%)}100%{transform:translateY(100vh)}}
   @keyframes reelSpin{0%{transform:translateY(-6px)}50%{transform:translateY(6px)}100%{transform:translateY(-6px)}}
-  @keyframes diceRoll{0%{transform:rotate(0deg) scale(1)}25%{transform:rotate(90deg) scale(1.1)}50%{transform:rotate(180deg) scale(0.9)}75%{transform:rotate(270deg) scale(1.1)}100%{transform:rotate(360deg) scale(1)}}
   @keyframes float{0%,100%{transform:translateY(0px)}50%{transform:translateY(-6px)}}
   @keyframes float{0%,100%{transform:translateY(0) rotate(-5deg)}50%{transform:translateY(-12px) rotate(5deg)}}
   @keyframes particle{0%{transform:scale(1);opacity:1}100%{transform:scale(0) translate(20px,-40px);opacity:0}}
@@ -252,12 +251,11 @@ export default function EarnX(){
   const [tonBalance,setTonBalance]=useState(0); // new users start at 0
   const [miningPower,setMiningPower]=useState(1000);
   const [adsEnabled,setAdsEnabled]=useState(false);
-  const [adTriggers,setAdTriggers]=useState({start_mining:false,collect_mining:false,spin_slot:false,dice_roll:false});
+  const [adTriggers,setAdTriggers]=useState({start_mining:false,collect_mining:false});
   const [userLoaded,setUserLoaded]=useState(false);
   const [shopTiers,setShopTiers]=useState([]);
   const [shopWallet,setShopWallet]=useState("");
   const userDbId=useRef(null);
-  const [subTab,setSubTab]=useState("slots");
   const [showWithdraw,setShowWithdraw]=useState(false);
   const [showSwap,setShowSwap]=useState(false);
   const [showAd,setShowAd]=useState(false);
@@ -347,25 +345,6 @@ export default function EarnX(){
           setMiningStartedAt(started);
           localStorage.setItem("nm_mining_started_at", String(started));
         }
-
-        // Sync dice used state from server (overrides localStorage)
-        if(data?.dice?.todayRolled){
-          const today = new Date().toISOString().slice(0,10);
-          localStorage.setItem("nm_dice_rolled_date", today);
-          setDiceUsed(true);
-          if(data.dice.todayValue != null) setDiceVal(data.dice.todayValue);
-        }
-
-        // Sync slots cooldown from server (server is authoritative)
-        if(data?.slots?.nextAvailableAt){
-          const nextAt = new Date(data.slots.nextAvailableAt).getTime();
-          const remaining = Math.max(0, Math.round((nextAt - Date.now()) / 1000));
-          localStorage.setItem("nm_slot_cooldown_until", String(nextAt));
-          if(remaining > 0){
-            setSlotsCooldown(remaining);
-            clearInterval(slotTimer.current);
-            slotTimer.current = setInterval(()=>{setSlotsCooldown(s=>{if(s<=1){clearInterval(slotTimer.current);localStorage.removeItem("nm_slot_cooldown_until");return 0;}return s-1;});},1000);
-          }
         }
 
         // ── Load shop tiers from API — no auth required, always runs ──
