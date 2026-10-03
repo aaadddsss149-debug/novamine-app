@@ -4,8 +4,8 @@
  * Runs once per day (scheduled in index.ts).
  *
  * What it does:
- *  1. For every pending/active referral this month, counts how many days
- *     the referred user has claimed their streak reward (streak_claims table).
+ * *  1. For every pending/active referral this month, counts distinct active
+ *     days from the deployed activity_feed table.
  *  2. Updates active_days_this_month on the referrals row.
  *  3. If active_days_this_month >= 10, flips status to "active".
  *  4. If a new month has started, resets active_days_this_month back to 0
@@ -35,21 +35,43 @@ export async function updateReferralStatus() {
       return;
     }
 
-    // 2. Fetch streak_claims for all referred users this month in one query
+    // 2. Count active days from activity_feed.
+    // The current production schema does not contain streak_claims, so querying
+    // that table makes the cron fail with "Invalid path specified in request URL".
+    // activity_feed is already part of the deployed schema and gives us a
+    // reliable per-day activity signal for referral qualification.
     const referredIds = referrals.map((r: any) => r.referred_id);
+    const monthStart = new Date(Date.UTC(
+      Number(monthKey.slice(0, 4)),
+      Number(monthKey.slice(5, 7)) - 1,
+      1
+    ));
+    const nextMonthStart = new Date(Date.UTC(
+      monthStart.getUTCFullYear(),
+      monthStart.getUTCMonth() + 1,
+      1
+    ));
 
-    const { data: claims, error: claimErr } = await supabaseAdmin
-      .from("streak_claims")
-      .select("user_id, day")
+    const { data: activities, error: activityErr } = await supabaseAdmin
+      .from("activity_feed")
+      .select("user_id, created_at")
       .in("user_id", referredIds)
-      .eq("month", monthKey);
+      .gte("created_at", monthStart.toISOString())
+      .lt("created_at", nextMonthStart.toISOString());
 
-    if (claimErr) throw claimErr;
+    if (activityErr) throw activityErr;
 
-    // Build a map: user_id -> count of claimed days this month
+    // Count distinct UTC calendar days per referred user.
+    const activeDaySets: Record<string, Set<string>> = {};
+    for (const activity of activities ?? []) {
+      if (!activity.user_id || !activity.created_at) continue;
+      const day = new Date(activity.created_at).toISOString().slice(0, 10);
+      (activeDaySets[activity.user_id] ??= new Set()).add(day);
+    }
+
     const claimCount: Record<string, number> = {};
-    for (const c of claims ?? []) {
-      claimCount[c.user_id] = (claimCount[c.user_id] ?? 0) + 1;
+    for (const userId of referredIds) {
+      claimCount[userId] = activeDaySets[userId]?.size ?? 0;
     }
 
     // 3. Update each referral row
