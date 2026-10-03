@@ -64,9 +64,9 @@ export function tierFromNova(nova) {
 // ── ADMIN AUTO-FILL RATES ─────────────────────────────────────────────────────
 // When admin types a TON amount, EARNX and ENERGY auto-fill using these rates.
 export const ADMIN_RATES = {
-  TON_TO_EARNX:   10_000,   // 1 TON = 10,000 EARNX
+  TON_TO_NOVA:   10_000,   // 1 TON = 10,000 EARNX
   TON_TO_HASHES: 0.08691,  // 1 TON = 0.08691 HASHES (derived from swap rate)
-  earnxFromTon:  (ton) => Math.round(Number(ton) * 10_000),
+  novaFromTon:  (ton) => Math.round(Number(ton) * 10_000),
   hashesFromTon:(ton) => +(Number(ton) * 0.08691).toFixed(8),
 };
 
