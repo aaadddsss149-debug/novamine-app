@@ -303,7 +303,8 @@ adminRouter.post("/tasks", requireAdmin, async (req: any, res: any) => {
 adminRouter.patch("/tasks/:id", requireAdmin, async (req: any, res: any) => {
   try {
     const updates: any = {};
-    for (const key of ["label","action","url","category"]) if (req.body?.[key] !== undefined) updates[key] = req.body[key] === null ? null : String(req.body[key]);\n    if (req.body?.active !== undefined) updates.active = Boolean(req.body.active);
+    for (const key of ["label","action","url","category"]) if (req.body?.[key] !== undefined) updates[key] = req.body[key] === null ? null : String(req.body[key]);
+    if (req.body?.active !== undefined) updates.active = Boolean(req.body.active);
     if (req.body?.reward !== undefined) updates.reward = Math.max(0, Math.floor(Number(req.body.reward)));
     updates.updated_at = new Date().toISOString();
     const { data, error } = await supabaseAdmin.from("tasks").update(updates).eq("id", req.params.id).select("*").single();
