@@ -191,7 +191,7 @@ function WithdrawModal({onClose,tonBalance,qualifiedFriends,onGoSwap,onInvite,on
           </div>
           <div style={{display:"flex",flexDirection:"column",gap:8}}>
             <button className="btn-gold" onClick={()=>{onClose();onGoSwap();}} style={{width:"100%",padding:14,background:`linear-gradient(135deg,${T.gold},${T.goldDim})`,border:"none",borderRadius:12,fontFamily:"'Rajdhani'",fontWeight:700,fontSize:15,cursor:"pointer",color:"#000",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
-              <Icon name="swap" size={16}/> Swap HASHES → TON
+              <Icon name="swap" size={16}/> Swap ENERGY → TON
             </button>
             <button onClick={onClose} style={{width:"100%",padding:12,background:"transparent",border:"1px solid #1e2a1e",borderRadius:12,fontFamily:"'Rajdhani'",fontWeight:600,fontSize:14,cursor:"pointer",color:T.muted}}>Keep Mining</button>
           </div>
@@ -957,11 +957,11 @@ export default function EarnX(){
 
             {/* ── ENERGY MINED card (styled like Dulce CANDY's CANDIES MINED) ── */}
             <div style={{background:T.card,border:"1px solid #1e2a1e",borderRadius:16,padding:18,marginBottom:14}}>
-              {/* ⭐ HASHES MINED ⭐ badge — mirrors CANDIES MINED badge */}
+              {/* ⭐ ENERGY MINED ⭐ badge — mirrors CANDIES MINED badge */}
               <div style={{display:"flex",alignItems:"center",justifyContent:"center",marginBottom:14}}>
                 <div style={{background:`linear-gradient(135deg,${T.gold},${T.goldDim})`,borderRadius:20,padding:"6px 20px",display:"flex",alignItems:"center",gap:8}}>
                   <span style={{color:"#000",fontSize:13}}>★</span>
-                  <span style={{fontFamily:"'Orbitron'",fontSize:11,letterSpacing:2,color:"#000",fontWeight:700}}>HASHES MINED</span>
+                  <span style={{fontFamily:"'Orbitron'",fontSize:11,letterSpacing:2,color:"#000",fontWeight:700}}>ENERGY MINED</span>
                   <span style={{color:"#000",fontSize:13}}>★</span>
                 </div>
               </div>
