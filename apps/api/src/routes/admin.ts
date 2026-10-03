@@ -70,27 +70,40 @@ adminRouter.get("/verify", requireAdmin, (_req: any, res: any) => {
 
 // ── Analytics ───────────────────────────────────────────────────────────────
 adminRouter.get("/analytics", requireAdmin, async (_req: any, res: any) => {
-  try {
-    const [users, purchases, withdrawals, sessions] = await Promise.all([
-      supabaseAdmin.from("users").select("id,nova,ton_balance,mining_power,created_at,last_seen_at"),
-      supabaseAdmin.from("shop_purchases").select("ton_paid,status,created_at"),
-      supabaseAdmin.from("withdrawals").select("amount_ton,status"),
-      supabaseAdmin.from("mining_sessions").select("id,claimed_at").not("claimed_at", "is", null),
-    ]);
-    if (users.error) throw users.error;
-    if (purchases.error) throw purchases.error;
-    if (withdrawals.error) throw withdrawals.error;
-    if (sessions.error) throw sessions.error;
+  // Analytics must remain available even if one optional table/query is missing
+  // from the production schema. Return each dataset independently and expose
+  // query errors for diagnostics instead of turning the whole dashboard into
+  // a blank/error state.
+  const result: any = {
+    users: [],
+    purchases: [],
+    withdrawals: [],
+    sessions: [],
+    errors: {},
+  };
 
-    res.json({
-      users: users.data ?? [],
-      purchases: purchases.data ?? [],
-      withdrawals: withdrawals.data ?? [],
-      sessions: sessions.data ?? [],
-    });
-  } catch (e: any) {
-    res.status(500).json({ error: e.message });
+  const queries: Array<[string, Promise<any>]> = [
+    ["users", supabaseAdmin.from("users").select("id,nova,ton_balance,mining_power,created_at,last_seen_at")],
+    ["purchases", supabaseAdmin.from("shop_purchases").select("ton_paid,status,created_at")],
+    ["withdrawals", supabaseAdmin.from("withdrawals").select("amount_ton,status")],
+    ["sessions", supabaseAdmin.from("mining_sessions").select("id,claimed_at").not("claimed_at", "is", null)],
+  ];
+
+  for (const [name, query] of queries) {
+    try {
+      const { data, error } = await query;
+      if (error) {
+        result.errors[name] = { message: error.message, code: error.code };
+      } else {
+        result[name] = Array.isArray(data) ? data : [];
+      }
+    } catch (e: any) {
+      result.errors[name] = { message: e?.message || "Unknown query error" };
+    }
   }
+
+  res.setHeader("Cache-Control", "no-store");
+  res.json(result);
 });
 
 // ── Users ───────────────────────────────────────────────────────────────────
