@@ -23,7 +23,7 @@ authRouter.post("/telegram", async (req, res, next) => {
 
     const { data: existing, error: selErr } = await supabaseAdmin
       .from("users")
-      .select("id, telegram_id, username, referrer_id")
+      .select("id, telegram_id, username, referrer_id, gift_claimed")
       .eq("telegram_id", tg.id)
       .maybeSingle();
     if (selErr) throw selErr;
@@ -109,7 +109,7 @@ authRouter.post("/telegram", async (req, res, next) => {
     // rely on the re-read which can race and return the wrong value.
     const { data: freshUser } = await supabaseAdmin
       .from("users")
-      .select("ton_balance")
+      .select("ton_balance,gift_claimed")
       .eq("id", userId)
       .single();
 
@@ -122,13 +122,7 @@ authRouter.post("/telegram", async (req, res, next) => {
       refreshToken: accessToken,
       isNewUser: !existing,
       welcomeTon: welcomeTonAmount,
-      // FIX: new users always get false (gift not yet claimed), regardless of
-      // whether the re-read raced. Existing users fall back to true (safe —
-      // suppresses the popup if the read somehow fails).
-      // The deployed users table currently does not include gift_claimed.
-      // Keep auth compatible with the live schema; registration must not fail
-      // just because the optional welcome-popup flag is absent.
-      giftClaimed: true,
+      giftClaimed: freshUser?.gift_claimed ?? true,
       user: {
         id: userId,
         telegramId: tg.id,
@@ -156,9 +150,22 @@ function parseReferral(raw: string | null | undefined): number | null {
 authRouter.post("/claim-gift", requireAuth, async (req: any, res, next) => {
   try {
     const userId = req.auth!.sub;
-    await supabaseAdmin.from("users")
+    const { data: user, error: readError } = await supabaseAdmin
+      .from("users")
+      .select("gift_claimed")
+      .eq("id", userId)
+      .single();
+
+    if (readError) throw readError;
+    if (user?.gift_claimed) return res.json({ ok: true, alreadyClaimed: true });
+
+    const { error } = await supabaseAdmin
+      .from("users")
       .update({ gift_claimed: true })
-      .eq("id", userId);
-    res.json({ ok: true });
+      .eq("id", userId)
+      .eq("gift_claimed", false);
+
+    if (error) throw error;
+    res.json({ ok: true, alreadyClaimed: false });
   } catch (err) { next(err); }
 });
