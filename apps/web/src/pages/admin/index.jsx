@@ -17,7 +17,7 @@ async function adminFetch(path, opts = {}, secret) {
   });
   const text = await res.text();
   const data = text ? JSON.parse(text) : null;
-  if (!res.ok) throw new Error(data?.error || `HTTP ${res.status}`);
+  if (!res.ok) {\n    const err = new Error(data?.error || `HTTP ${res.status}`);\n    err.status = res.status;\n    err.code = data?.code;\n    throw err;\n  }
   return data;
 }
 
