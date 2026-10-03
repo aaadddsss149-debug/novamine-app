@@ -54,12 +54,13 @@ app.get("/ad-config-public", async (_req, res) => {
   try {
     const { supabaseAdmin } = await import("./lib/supabase.js");
     const { data } = await supabaseAdmin.from("app_config")
-      .select("key,value").in("key", ["ads_enabled", "ad_triggers"]);
+      .select("key,value").in("key", ["ads_enabled", "ad_triggers", "adsgram_block_id"]);
     const cfg: Record<string, any> = {};
     (data ?? []).forEach((r: any) => { cfg[r.key] = r.value; });
     res.json({
       adsEnabled: cfg.ads_enabled ?? false,
       adTriggers: cfg.ad_triggers ?? { start_mining: false, collect_mining: false, spin_slot: false, dice_roll: false },
+      adBlockId: typeof cfg.adsgram_block_id === "string" ? cfg.adsgram_block_id : "",
     });
   } catch { res.json({ adsEnabled: false, adTriggers: {} }); }
 });
