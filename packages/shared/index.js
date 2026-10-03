@@ -8,7 +8,7 @@ export const MINING = {
   SESSION_DURATION_MS: 24 * 60 * 60 * 1000,
   // Default mining power for a brand-new user (Starter tier).
   DEFAULT_POWER: 1000,
-  // NOVA bonus earned every time a user claims a mining session.
+  // EarnX balance bonus earned every time a user claims a mining session.
   NOVA_PER_CLAIM: 1300,
   // Hashes earned per session — each tier has its own fixed rate.
   // These are tuned so each tier hits the target days-to-withdraw.
@@ -35,7 +35,7 @@ export const MINING = {
   },
 };
 
-// ── NOVA → MINING POWER TIERS ────────────────────────────────────────────────
+// ── EARNX → MINING POWER TIERS ────────────────────────────────────────────────
 export const NOVA_POWER_TIERS = [
   { minNova: 1_000_000, power: 50_000, label: "⚡ Legendary" },
   { minNova:   500_000, power: 25_000, label: "💎 Elite"     },
@@ -62,11 +62,11 @@ export function tierFromNova(nova) {
 }
 
 // ── ADMIN AUTO-FILL RATES ─────────────────────────────────────────────────────
-// When admin types a TON amount, NOVA and HASHES auto-fill using these rates.
+// When admin types a TON amount, EARNX and ENERGY auto-fill using these rates.
 export const ADMIN_RATES = {
-  TON_TO_NOVA:   10_000,   // 1 TON = 10,000 NOVA
+  TON_TO_EARNX:   10_000,   // 1 TON = 10,000 EARNX
   TON_TO_HASHES: 0.08691,  // 1 TON = 0.08691 HASHES (derived from swap rate)
-  novaFromTon:  (ton) => Math.round(Number(ton) * 10_000),
+  earnxFromTon:  (ton) => Math.round(Number(ton) * 10_000),
   hashesFromTon:(ton) => +(Number(ton) * 0.08691).toFixed(8),
 };
 
