@@ -207,7 +207,7 @@ function RewardsPanel({ notify }) {
   );
 }
 
-export default function NovaMineAdmin() {
+export default function EarnXAdmin() {
   const [authed, setAuthed] = useState(!!sessionStorage.getItem("nm_admin_secret"));
   const [secret, setSecret] = useState("");
   const [tab, setTab] = useState("analytics");
@@ -245,7 +245,7 @@ export default function NovaMineAdmin() {
       <style>{globalCSS}</style>
       <Card style={{ width: 360, textAlign: "center" }} glow>
         <div style={{ fontSize: 48, marginBottom: 16 }}>⛏️</div>
-        <div style={{ fontSize: 22, fontWeight: 800, marginBottom: 4 }}>NovaMine Admin</div>
+        <div style={{ fontSize: 22, fontWeight: 800, marginBottom: 4 }}>EarnX Admin</div>
         <div style={{ fontSize: 13, color: S.mutedLight, marginBottom: 24 }}>Enter your admin password</div>
         <Input value={secret} onChange={setSecret} placeholder="Admin password" type="password" style={{ marginBottom: 12 }} />
         {loginErr && <div style={{ color: S.red, fontSize: 12, marginBottom: 10 }}>{loginErr}</div>}
@@ -274,7 +274,7 @@ export default function NovaMineAdmin() {
         <div style={{ padding: "0 16px", display: "flex", alignItems: "center", justifyContent: "space-between", height: 56 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <div style={{ width: 32, height: 32, background: `linear-gradient(135deg, ${S.accent}, ${S.gold})`, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>⛏</div>
-            <span style={{ fontWeight: 800, fontSize: 16 }}>NovaMine</span>
+            <span style={{ fontWeight: 800, fontSize: 16 }}>EarnX</span>
             <Badge color={S.accent}>ADMIN</Badge>
           </div>
           <Btn small onClick={logout} color={S.red}>Logout</Btn>
