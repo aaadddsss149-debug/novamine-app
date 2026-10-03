@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { requireAuth } from "../middleware/auth.js";
 import { supabaseAdmin } from "../lib/supabase.js";
-import { SLOTS, DICE } from "@novamine/shared";
+import { SLOTS, DICE } from "@earnx/shared";
 
 export const gamesRouter = Router();
 
