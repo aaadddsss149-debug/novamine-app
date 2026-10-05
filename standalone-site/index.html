@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Taka Income Pro - Earn Money</title>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script async src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <script>
@@ -270,7 +269,22 @@
         };
 
         // --- MAIN APP LOGIC ---
-        const tg = window.Telegram ? window.Telegram.WebApp : null;
+        const tg = window.Telegram?.WebApp || null;
+        let telegramReadyPromise;
+        function waitForTelegramWebApp(timeout = 6000) {
+            if (window.Telegram?.WebApp) return Promise.resolve(window.Telegram.WebApp);
+            if (telegramReadyPromise) return telegramReadyPromise;
+            telegramReadyPromise = new Promise((resolve, reject) => {
+                const started = Date.now();
+                const check = () => {
+                    if (window.Telegram?.WebApp) return resolve(window.Telegram.WebApp);
+                    if (Date.now() - started >= timeout) return reject(new Error('TELEGRAM_WEBAPP_NOT_READY'));
+                    setTimeout(check, 100);
+                };
+                check();
+            });
+            return telegramReadyPromise;
+        }
         
         let state = { totalEarning: 0.0, adCount: 0, adsWatchedToday: 0, lastAdWatchedDate: null, cooldownUntil: null, weeklyActivity: [0, 0, 0, 0, 0, 0, 0], withdrawalHistory: [], lastUsedIp: null, completedBonusTasks: [], rewardedReferrals: 0, originalUserId: null };
         const supabase = null;
@@ -289,10 +303,11 @@
         };
         
         async function apiCall(action, payload = {}) {
-            if (!tg || !tg.initData) throw new Error('OPEN_IN_TELEGRAM');
+            const telegram = await waitForTelegramWebApp();
+            if (!telegram.initData) throw new Error('OPEN_IN_TELEGRAM');
             const response = await fetch(config.SUPABASE_URL + '/functions/v1/novamine-site-api-v2', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'apikey': config.SUPABASE_PUBLISHABLE_KEY, 'x-telegram-init-data': tg.initData },
+                headers: { 'Content-Type': 'application/json', 'apikey': config.SUPABASE_PUBLISHABLE_KEY, 'x-telegram-init-data': telegram.initData },
                 body: JSON.stringify({ action, ...payload })
             });
             const data = await response.json();
@@ -486,7 +501,7 @@
         function copyReferralLink() { navigator.clipboard.writeText(getReferralLink()).then(() => safeTgAlert('Referral link copied!')).catch(() => safeTgAlert('Could not copy link.')); }
         function shareReferralLink() { const link = getReferralLink(); const text = `Earn money by watching ads! Join using my link:\n${link}`; safeTgAction(tg => tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`)); }
         
-        let myChart; function updateChart() { const ctx = document.getElementById('activityChart').getContext('2d'); const isDark = document.documentElement.getAttribute('data-theme') === 'dark'; const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'; const fontColor = isDark ? '#F5F5F7' : '#1D1D1F'; if (myChart) myChart.destroy(); myChart = new Chart(ctx, { type: 'bar', data: { labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'], datasets: [{ label: 'Ads Watched', data: state.weeklyActivity, backgroundColor: 'rgba(var(--primary-color-rgb), 0.2)', borderColor: 'rgb(var(--primary-color-rgb))', borderWidth: 2, borderRadius: 8, hoverBackgroundColor: 'rgba(var(--primary-color-rgb), 0.4)' }] }, options: { scales: { y: { beginAtZero: true, ticks: { stepSize: 5, color: fontColor }, grid: { color: gridColor } }, x: { ticks: { color: fontColor }, grid: { color: gridColor } } }, plugins: { legend: { display: false } }, responsive: true, maintainAspectRatio: false } }); }
+        let myChart; function updateChart() { if (typeof Chart === 'undefined') return; const ctx = document.getElementById('activityChart').getContext('2d'); const isDark = document.documentElement.getAttribute('data-theme') === 'dark'; const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'; const fontColor = isDark ? '#F5F5F7' : '#1D1D1F'; if (myChart) myChart.destroy(); myChart = new Chart(ctx, { type: 'bar', data: { labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'], datasets: [{ label: 'Ads Watched', data: state.weeklyActivity, backgroundColor: 'rgba(var(--primary-color-rgb), 0.2)', borderColor: 'rgb(var(--primary-color-rgb))', borderWidth: 2, borderRadius: 8, hoverBackgroundColor: 'rgba(var(--primary-color-rgb), 0.4)' }] }, options: { scales: { y: { beginAtZero: true, ticks: { stepSize: 5, color: fontColor }, grid: { color: gridColor } }, x: { ticks: { color: fontColor }, grid: { color: gridColor } } }, plugins: { legend: { display: false } }, responsive: true, maintainAspectRatio: false } }); }
 
         async function handleReferral() { return; }
         async function processReferralRewards() { return; }
