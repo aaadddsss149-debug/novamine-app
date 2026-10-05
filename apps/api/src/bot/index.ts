@@ -192,34 +192,14 @@ export async function startBot(app: Express) {
   console.log("[bot] notifications disabled until notification schema is deployed");
 
   // ── Telegram transport ───────────────────────────────────────────────────
-  if (config.isProd && config.bot.publicUrl) {
-    const path = "/telegram/webhook";
-    const rawSecret = config.bot.webhookSecret || "";
-    const webhookSecret =
-      rawSecret.replace(/[^A-Za-z0-9_-]/g, "").slice(0, 256) || undefined;
-
-    app.use(
-      path,
-      webhookCallback(bot, "express", {
-        secretToken: webhookSecret,
-      })
-    );
-
-    const webhookUrl = `${config.bot.publicUrl.replace(/\/$/, "")}${path}`;
-
-    try {
-      await bot.api.setWebhook(webhookUrl, {
-        secret_token: webhookSecret,
-        allowed_updates: ["message", "callback_query"],
-        drop_pending_updates: true,
-      });
-      console.log(`[bot] webhook set to ${webhookUrl}`);
-    } catch (err) {
-      console.error("[bot] failed to set webhook:", err);
-    }
-  } else {
+  // Use long polling on the Render API service. This avoids webhook delivery
+  // issues and keeps the bot independent from the public URL/proxy layer.
+  try {
+    await bot.api.deleteWebhook({ drop_pending_updates: false });
     bot.start({
       onStart: (info) => console.log(`[bot] long-polling as @${info.username}`),
     });
+  } catch (err) {
+    console.error("[bot] failed to start long-polling:", err);
   }
 }
