@@ -24,7 +24,8 @@ async function syncTelegramUser(from: any, referrerTelegramId?: number | null) {
   if (error) throw error;
   return created.id;
 }
-\nfunction botUsername() {
+
+function botUsername() {
   return config.bot.username.replace(/^@/, "").trim();
 }
 
