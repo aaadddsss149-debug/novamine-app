@@ -269,15 +269,15 @@
         };
 
         // --- MAIN APP LOGIC ---
-        const tg = window.Telegram?.WebApp || null;
+        let tg = window.Telegram?.WebApp || null;
         let telegramReadyPromise;
         function waitForTelegramWebApp(timeout = 6000) {
-            if (window.Telegram?.WebApp) return Promise.resolve(window.Telegram.WebApp);
+            if (window.Telegram?.WebApp) { tg = window.Telegram.WebApp; return Promise.resolve(tg); }
             if (telegramReadyPromise) return telegramReadyPromise;
             telegramReadyPromise = new Promise((resolve, reject) => {
                 const started = Date.now();
                 const check = () => {
-                    if (window.Telegram?.WebApp) return resolve(window.Telegram.WebApp);
+                    if (window.Telegram?.WebApp) { tg = window.Telegram.WebApp; return resolve(tg); }
                     if (Date.now() - started >= timeout) return reject(new Error('TELEGRAM_WEBAPP_NOT_READY'));
                     setTimeout(check, 100);
                 };
