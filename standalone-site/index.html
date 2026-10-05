@@ -492,7 +492,118 @@
         body:not(:has(#homePage.active)) .app-page {
             background: transparent;
         }
-</style>
+
+        /* NovaMine black pages + polished loading */
+        html, body {
+            background: #000 !important;
+        }
+        body {
+            background: #000 !important;
+            color: #f5f5f7;
+        }
+        .app-page, .container {
+            background: transparent !important;
+        }
+        .card, .stat-item, .modal-content {
+            background: #0b0b0d !important;
+            border-color: #202024 !important;
+            box-shadow: 0 8px 24px rgba(0,0,0,.32);
+        }
+        .nav-bar {
+            background: rgba(8,8,10,.94) !important;
+            border-top-color: #202024 !important;
+            box-shadow: 0 -8px 28px rgba(0,0,0,.45);
+        }
+        .modal-content input, .modal-content select,
+        #bonus-tasks-list .bonus-item {
+            background: #050506 !important;
+            border-color: #25252a !important;
+        }
+
+        #preloader {
+            background:
+                radial-gradient(circle at 50% 28%, rgba(0,191,255,.16), transparent 27%),
+                radial-gradient(circle at 50% 75%, rgba(0,98,255,.08), transparent 32%),
+                #000 !important;
+        }
+        #preloader::before, #preloader::after {
+            border-color: rgba(0,191,255,.16);
+            box-shadow: 0 0 22px rgba(0,191,255,.10);
+        }
+        .earnx-loader {
+            width: min(86vw, 360px);
+            padding: 0 6px;
+        }
+        .earnx-orbit {
+            width: 172px;
+            height: 172px;
+            margin-bottom: 20px;
+        }
+        .earnx-orbit::before {
+            width: 166px;
+            height: 166px;
+            border-width: 1px;
+            box-shadow: 0 0 26px rgba(0,191,255,.18);
+        }
+        .earnx-orbit::after {
+            width: 138px;
+            height: 138px;
+        }
+        .earnx-logo {
+            width: 96px;
+            height: 96px;
+            font-size: 68px;
+        }
+        .earnx-logo::after {
+            width: 112px;
+            height: 31px;
+            border-width: 4px;
+        }
+        .earnx-platform {
+            width: 120px;
+            height: 16px;
+            bottom: -1px;
+        }
+        .earnx-brand {
+            font-size: clamp(38px, 11vw, 46px);
+            letter-spacing: -2px;
+        }
+        .earnx-tagline {
+            margin-top: 8px;
+            font-size: 10px;
+            letter-spacing: 4px;
+        }
+        .earnx-progress-row {
+            margin-top: 42px;
+            gap: 10px;
+        }
+        .earnx-progress {
+            height: 10px;
+            padding: 1px;
+            background: rgba(255,255,255,.04);
+            border-color: rgba(0,191,255,.38);
+        }
+        #preloader-percentage {
+            min-width: 40px;
+            font-size: 13px;
+        }
+        .earnx-loading {
+            margin-top: 22px;
+            font-size: 11px;
+            letter-spacing: 3px;
+        }
+        .earnx-spinner {
+            width: 28px;
+            height: 28px;
+            margin-bottom: 9px;
+            border-width: 2px;
+        }
+        @media (max-width: 380px) {
+            .earnx-orbit { transform: scale(.82); margin-bottom: -2px; }
+            .earnx-progress-row { margin-top: 28px; }
+        }
+
+    </style>
 </head>
 <body>
     <div id="preloader" aria-label="EarnX loading">
