@@ -504,6 +504,8 @@
         }
 
         async function initApp() {
+            if (window.__novamineStarted) return;
+            window.__novamineStarted = true;
             let appReady = false;
             let preloaderAnimationDone = false;
             
@@ -564,7 +566,9 @@
                 });
 
                 if (!sessionStorage.getItem('alreadyVisited')) { showModal('welcomeModal'); sessionStorage.setItem('alreadyVisited', 'true'); }
-            } catch (error) { console.error("Initialization failed:", error); } 
+            } catch (error) {
+                console.error("Initialization failed:", error);
+            } 
             finally {
                 appReady = true;
                 if (percentage < 100) {
@@ -577,6 +581,8 @@
         }
         
         window.addEventListener('load', initApp);
+        document.addEventListener('DOMContentLoaded', () => { setTimeout(initApp, 50); });
+        setTimeout(() => { if (!window.__novamineStarted) initApp(); }, 4000);
     </script>
 </body>
 </html>
