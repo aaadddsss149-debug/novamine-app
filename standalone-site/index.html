@@ -335,6 +335,127 @@
             box-shadow: 0 0 20px rgba(0,191,255,.20);
         }
 
+
+        /* EarnX premium icon system */
+        .profile-header { position: relative; }
+        #profile-pic {
+            position: relative;
+            flex: 0 0 52px;
+            display: grid;
+            place-items: center;
+            color: #fff;
+            font-size: 21px;
+            background: linear-gradient(145deg,#0878ff,#00d9ff);
+        }
+        #profile-pic::after {
+            content: "";
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            border: 1px solid rgba(0,207,255,.55);
+            box-shadow: 0 0 18px rgba(0,191,255,.22);
+        }
+        .profile-header::after {
+            content: "ONLINE";
+            margin-left: auto;
+            padding: 5px 9px;
+            border: 1px solid rgba(0,207,255,.20);
+            border-radius: 999px;
+            color: #00cfff;
+            background: rgba(0,191,255,.06);
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 1.2px;
+        }
+        .stats-grid { gap: 10px; }
+        .stat-item {
+            min-height: 105px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+        .stat-item .icon {
+            width: 40px;
+            height: 40px;
+            display: grid;
+            place-items: center;
+            margin-bottom: 3px;
+            border-radius: 13px;
+            color: #00d9ff;
+            background: linear-gradient(145deg,rgba(0,191,255,.14),rgba(0,109,255,.06));
+            border: 1px solid rgba(0,191,255,.20);
+            box-shadow: inset 0 0 12px rgba(0,191,255,.05), 0 0 12px rgba(0,191,255,.06);
+        }
+        .stat-item .icon i { font-size: 18px; }
+        .stat-item .bg-icon { right: -5px; bottom: -7px; opacity: .045; }
+        .stat-item .value { font-size: 18px; line-height: 1.15; }
+        .stat-item .label { font-size: 10px; letter-spacing: .2px; }
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+        }
+        .card-title i {
+            color: #00cfff;
+            width: 30px;
+            height: 30px;
+            display: grid;
+            place-items: center;
+            border-radius: 9px;
+            background: rgba(0,191,255,.09);
+            border: 1px solid rgba(0,191,255,.16);
+            font-size: 13px;
+        }
+        #watch-ad-button {
+            min-height: 58px;
+            font-size: 17px;
+            letter-spacing: .2px;
+        }
+        #watch-ad-button i { font-size: 16px; }
+        #join-channel-button { min-height: 50px; }
+        .nav-bar { padding-left: 7px; padding-right: 7px; }
+        .nav-button {
+            position: relative;
+            min-height: 52px;
+            gap: 5px;
+            border: 1px solid transparent;
+        }
+        .nav-button i {
+            width: 35px;
+            height: 28px;
+            display: grid;
+            place-items: center;
+            margin-bottom: 0;
+            border-radius: 9px;
+            font-size: 16px;
+            background: rgba(0,191,255,.055);
+            transition: .2s ease;
+        }
+        .nav-button.active i {
+            background: linear-gradient(145deg,rgba(0,191,255,.18),rgba(0,109,255,.10));
+            border: 1px solid rgba(0,191,255,.20);
+            box-shadow: 0 0 12px rgba(0,191,255,.08);
+        }
+        .nav-button.active { border-color: rgba(0,191,255,.10); }
+        .modal-content > .card-title:first-of-type { margin-top: 2px; }
+        .close-button {
+            width: 32px;
+            height: 32px;
+            display: grid;
+            place-items: center;
+            border-radius: 10px;
+            background: rgba(0,191,255,.06);
+            color: #8fa8c7;
+        }
+        @media (max-width:380px) {
+            .profile-header::after { font-size: 8px; padding: 4px 7px; }
+            .stat-item { min-height: 100px; }
+            .stat-item .icon { width: 36px; height: 36px; }
+            .nav-button i { width: 32px; }
+        }
+
     </style>
 </head>
 <body>
@@ -389,7 +510,7 @@
         </div>
     </div>
     
-    <div id="supportModal" class="modal"><div class="modal-content"><span class="close-button" onclick="closeModal('supportModal')">&times;</span><h3 class="card-title">Support</h3><p>For any help or questions, please contact the admin directly. We are here to assist you!</p><button class="action-button" id="admin-contact-button"><i class="fa-brands fa-telegram"></i><span>Contact Admin</span></button></div></div>
+    <div id="supportModal" class="modal"><div class="modal-content"><span class="close-button" onclick="closeModal('supportModal')">&times;</span><h3 class="card-title"><i class="fa-solid fa-circle-question"></i> Support</h3><p>Need help? Join our official Telegram channel for updates and support.</p><button class="action-button" id="support-channel-button"><i class="fa-brands fa-telegram"></i><span>Open Support Channel</span></button></div></div>
     <div id="historyModal" class="modal"><div class="modal-content"><span class="close-button" onclick="closeModal('historyModal')">&times;</span><h3 class="card-title">Withdrawal History</h3><div id="history-list"></div></div></div>
     <div id="inviteModal" class="modal"><div class="modal-content"><span class="close-button" onclick="closeModal('inviteModal')">&times;</span><h3 class="card-title">Invite Friends</h3><p>Share your referral link with your friends and earn together. You will get a reward for each successful referral.</p><button class="action-button" id="copy-link-button"><i class="fa-solid fa-copy"></i><span>Copy Link</span></button><button class="action-button secondary-button" id="share-link-button"><i class="fa-solid fa-share-nodes"></i><span>Share Link</span></button></div></div>
     <div id="bonusTasksModal" class="modal"><div class="modal-content"><span class="close-button" onclick="closeModal('bonusTasksModal')">&times;</span><h3 class="card-title">Bonus Tasks</h3><p style="text-align: center; margin-bottom: 20px;">Complete these one-time tasks to earn extra rewards!</p><div id="bonus-tasks-list"></div></div></div>
@@ -455,7 +576,7 @@
             container: document.querySelector('.container'), totalEarningEl: document.getElementById('total-earning'), adCountEl: document.getElementById('ad-count'), 
             adsTodayCountEl: document.getElementById('ads-today-count'), referralCountEl: document.getElementById('referral-count'), watchAdButton: document.getElementById('watch-ad-button'), 
             withdrawForm: document.getElementById('withdraw-form'), adLoaderOverlay: document.getElementById('ad-loader-overlay'), profilePicEl: document.getElementById('profile-pic'), 
-            greetingEl: document.getElementById('greeting'), joinChannelButton: document.getElementById('join-channel-button'), adminContactButton: document.getElementById('admin-contact-button'), 
+            greetingEl: document.getElementById('greeting'), joinChannelButton: document.getElementById('join-channel-button'), supportChannelButton: document.getElementById('support-channel-button'), 
             copyLinkButton: document.getElementById('copy-link-button'), shareLinkButton: document.getElementById('share-link-button'), historyListEl: document.getElementById('history-list'), 
             bonusTasksListEl: document.getElementById('bonus-tasks-list'), minWithdrawText: document.getElementById('min-withdraw-text'),
             welcomeTitle: document.getElementById('welcome-title'), welcomeMessage: document.getElementById('welcome-message')
@@ -732,7 +853,7 @@ await loadState();
                 allDOMElements.watchAdButton.addEventListener('click', watchAd);
                 allDOMElements.withdrawForm.addEventListener('submit', handleWithdrawal);
                 allDOMElements.joinChannelButton.addEventListener('click', () => safeTgAction(tg => tg.openTelegramLink(config.TELEGRAM_CHANNEL_LINK)));
-                allDOMElements.adminContactButton.addEventListener('click', () => safeTgAction(tg => tg.openLink(config.ADMIN_SUPPORT_LINK, {try_instant_view: true})));
+                allDOMElements.supportChannelButton.addEventListener('click', () => safeTgAction(tg => tg.openTelegramLink(config.ADMIN_SUPPORT_LINK)));
                 allDOMElements.copyLinkButton.addEventListener('click', copyReferralLink);
                 allDOMElements.shareLinkButton.addEventListener('click', shareReferralLink);
                 window.onclick = (event) => { if (event.target.classList.contains('modal')) closeModal(event.target.id); }
