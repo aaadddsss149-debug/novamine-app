@@ -315,6 +315,7 @@
             state.completedBonusTasks = data.completedBonusTasks || [];
             state.weeklyActivity = data.weeklyActivity || [0,0,0,0,0,0,0];
             state.originalUserId = u.telegram_id;
+            state.cooldownUntil = u.cooldown_until || null;
             const cfg = data.config || {};
             if (cfg.ad_reward !== undefined) config.AD_REWARD = Number(cfg.ad_reward);
             if (cfg.daily_ad_limit !== undefined) config.DAILY_AD_LIMIT = Number(cfg.daily_ad_limit);
@@ -383,7 +384,13 @@
                 safeTgAlert(left ? `Ad watched! You have ${left} ads left.` : `You completed today's ads. Please take a ${config.COOLDOWN_MINUTES}-minute break.`);
             } catch (e) {
                 console.error('Reward error:', e);
-                safeTgAlert(e.message === 'DAILY_LIMIT_REACHED' ? 'Daily ad limit reached.' : 'Ad reward could not be saved. Please try again.');
+                if (e.message === 'COOLDOWN_ACTIVE' || e.message === 'COOLDOWN_STARTED') {
+                    await loadState().catch(() => {});
+                    updateUI();
+                    safeTgAlert(state.cooldownUntil ? 'Break started. Please wait until the timer ends.' : 'Please wait before watching another ad.');
+                } else {
+                    safeTgAlert(e.message === 'DAILY_LIMIT_REACHED' ? 'Daily ad limit reached.' : 'Ad reward could not be saved. Please try again.');
+                }
             } finally {
                 allDOMElements.adLoaderOverlay.style.display = 'none';
             }
@@ -531,8 +538,6 @@
 
                 allDOMElements.welcomeTitle.textContent = config.welcomeNotice.title;
                 allDOMElements.welcomeMessage.textContent = config.welcomeNotice.message;
-
-                await loadState();
 
                 await loadState();
 
