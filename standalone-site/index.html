@@ -669,22 +669,30 @@
         @keyframes percentPulse { 0%,100%{opacity:.72} 50%{opacity:1;text-shadow:0 0 12px rgba(0,217,255,.65)} }
         @keyframes spinnerGlow { from{box-shadow:0 0 8px rgba(0,191,255,.2)} to{box-shadow:0 0 22px rgba(0,191,255,.65)} }
 
-        /* Clean Invite + loading */
-        .earnx-orbit, .earnx-ring-dot, .earnx-platform { display:none !important; }
-        .earnx-logo-wrap { width:150px; height:120px; margin:0 auto 18px; display:grid; place-items:center; }
-        .earnx-logo { animation:logoFloat 2.8s ease-in-out infinite, logoGlow 2s ease-in-out infinite alternate !important; }
-        #invitePage .referral-count-card { display:flex; align-items:center; justify-content:center; flex-direction:column; gap:3px; padding:18px; margin-bottom:14px; border-radius:15px; background:#050506; border:1px solid rgba(0,191,255,.16); }
-        #invitePage .referral-count-card strong { font-size:32px; color:#00cfff; line-height:1; text-shadow:0 0 16px rgba(0,191,255,.28); }
-        #invitePage .referral-count-card span { color:#8fa8c7; font-size:11px; }
+        /* Refined NovaMine loading + Invite */
+        .earnx-orbit { display:block !important; width:150px !important; height:150px !important; position:relative; margin:auto; }
+        .earnx-ring-dot { display:none !important; }
+        .earnx-platform { display:block !important; position:absolute; width:92px; height:3px; left:29px; bottom:14px; border-radius:50%; background:linear-gradient(90deg,transparent,#00cfff,transparent); box-shadow:0 0 14px rgba(0,207,255,.7); animation:none !important; }
+        .earnx-orbit::before { content:""; position:absolute; inset:7px; border:1px solid rgba(0,207,255,.20); border-radius:50%; animation:loaderOrbit 5s linear infinite; }
+        .earnx-orbit::after { content:""; position:absolute; inset:20px; border:1px solid rgba(0,207,255,.10); border-radius:50%; animation:loaderOrbit 8s linear infinite reverse; }
+        .earnx-logo { position:absolute !important; left:50%; top:50%; transform:translate(-50%,-50%); animation:logoFloat 2.8s ease-in-out infinite, logoGlow 2s ease-in-out infinite alternate !important; }
+        .earnx-logo::before { content:none !important; }
+        .earnx-logo-wrap { width:auto; height:auto; margin:0; display:block; }
+        #preloader .earnx-progress { position:relative; }
+        #preloader .earnx-progress::after { content:""; position:absolute; top:0; bottom:0; width:30%; left:-35%; background:rgba(255,255,255,.35); animation:progressShine 1.7s linear infinite; }
+        #invitePage .card { padding:20px; }
+        #invitePage .referral-count-card { display:flex; align-items:center; justify-content:center; flex-direction:column; gap:5px; padding:20px; margin:8px 0 16px; border-radius:16px; background:#050506; border:1px solid rgba(0,191,255,.16); }
+        #invitePage .referral-count-card strong { font-size:34px; color:#00cfff; line-height:1; }
+        #invitePage .referral-count-card span { color:#8fa8c7; font-size:12px; }
         #invitePage .invite-list-title { display:flex; align-items:center; gap:8px; margin:20px 0 10px; color:#eef9ff; font-size:14px; font-weight:700; }
         #invitePage .invite-list-title i { color:#00cfff; }
         #invitePage .referrals-list { display:flex; flex-direction:column; gap:8px; }
-        #invitePage .referral-user { display:flex; align-items:center; gap:11px; padding:11px 12px; border-radius:13px; background:#050506; border:1px solid #202024; }
-        #invitePage .referral-avatar { width:38px; height:38px; flex:0 0 38px; border-radius:50%; display:grid; place-items:center; background:linear-gradient(145deg,#0878ff,#00d9ff); color:#fff; font-weight:800; overflow:hidden; }
+        #invitePage .referral-user { display:flex; align-items:center; gap:11px; padding:12px; border-radius:13px; background:#050506; border:1px solid #202024; }
+        #invitePage .referral-avatar { width:40px; height:40px; flex:0 0 40px; border-radius:50%; display:grid; place-items:center; background:linear-gradient(145deg,#0878ff,#00d9ff); color:#fff; font-weight:800; overflow:hidden; }
         #invitePage .referral-avatar img { width:100%; height:100%; object-fit:cover; }
         #invitePage .referral-user-name { font-size:13px; font-weight:700; color:#eef9ff; }
-        #invitePage .referral-user-meta { margin-top:2px; font-size:10px; color:#8fa8c7; }
-        #invitePage .action-button { touch-action:manipulation; -webkit-tap-highlight-color:transparent; }
+        #invitePage .referral-user-meta { margin-top:3px; font-size:10px; color:#8fa8c7; }
+        #invitePage .action-button { touch-action:manipulation; -webkit-tap-highlight-color:transparent; margin-top:8px; }
     </style>
 </head>
 <body>
