@@ -196,6 +196,145 @@
             .nav-button { font-size: 9px; }
         }
 
+
+        /* EarnX full neon theme */
+        :root {
+            --primary-color: #00bfff;
+            --primary-color-rgb: 0, 191, 255;
+            --secondary-color: #006dff;
+            --background-color: #020711;
+            --card-background: #071323;
+            --text-color: #eef9ff;
+            --text-light: #8fa8c7;
+            --border-color: rgba(0,191,255,.18);
+            --glass-bg: rgba(3,14,29,.88);
+        }
+        [data-theme="dark"] {
+            --primary-color: #00cfff;
+            --primary-color-rgb: 0, 207, 255;
+            --secondary-color: #0878ff;
+            --background-color: #020711;
+            --card-background: #071323;
+            --text-color: #eef9ff;
+            --text-light: #8fa8c7;
+            --border-color: rgba(0,191,255,.18);
+            --glass-bg: rgba(3,14,29,.90);
+        }
+        body {
+            background:
+                radial-gradient(circle at 50% -12%, rgba(0,132,255,.20), transparent 30%),
+                radial-gradient(circle at 0% 55%, rgba(0,229,255,.055), transparent 28%),
+                radial-gradient(circle at 100% 80%, rgba(0,98,255,.07), transparent 30%),
+                #020711;
+            color: #eef9ff;
+        }
+        .profile-header { padding-top: 8px; }
+        #profile-pic {
+            background: linear-gradient(135deg,#0878ff,#00d9ff);
+            border-color: rgba(0,217,255,.55);
+            box-shadow: 0 0 18px rgba(0,191,255,.25);
+        }
+        .balance-card {
+            background:
+                radial-gradient(circle at 90% 10%, rgba(0,229,255,.22), transparent 35%),
+                linear-gradient(135deg,#063b9e,#006dff 52%,#00a9d9);
+            border: 1px solid rgba(0,217,255,.38);
+            box-shadow: 0 14px 34px rgba(0,111,255,.24), inset 0 0 30px rgba(0,229,255,.06);
+        }
+        .balance-card::before {
+            content: "";
+            position: absolute;
+            inset: -40% 20% auto -20%;
+            height: 130px;
+            background: rgba(0,229,255,.10);
+            filter: blur(30px);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .stat-item, .card {
+            background: linear-gradient(145deg, rgba(8,24,45,.96), rgba(4,14,28,.96));
+            border-color: rgba(0,191,255,.16);
+            box-shadow: 0 7px 24px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.025);
+        }
+        .stat-item .icon, .bonus-item .reward {
+            color: #00cfff;
+            text-shadow: 0 0 12px rgba(0,207,255,.28);
+        }
+        .stat-item .bg-icon { color: #00bfff; }
+        .card-title { color: #f2fbff; }
+        .action-button {
+            background: linear-gradient(90deg,#0878ff,#00bfff);
+            border: 1px solid rgba(0,229,255,.35);
+            box-shadow: 0 8px 22px rgba(0,128,255,.22), inset 0 1px 0 rgba(255,255,255,.12);
+        }
+        .action-button:hover:not(:disabled) {
+            box-shadow: 0 10px 28px rgba(0,191,255,.30), 0 0 18px rgba(0,191,255,.14);
+        }
+        .secondary-button {
+            background: rgba(0,132,255,.08);
+            color: #00cfff;
+            border-color: rgba(0,191,255,.55);
+            box-shadow: none;
+        }
+        .secondary-button:hover:not(:disabled) {
+            background: rgba(0,191,255,.13);
+        }
+        .nav-bar {
+            background: rgba(2,12,26,.92);
+            border-top-color: rgba(0,191,255,.20);
+            box-shadow: 0 -8px 28px rgba(0,0,0,.30), 0 -1px 14px rgba(0,191,255,.06);
+        }
+        .nav-button.active, .nav-button:hover {
+            color: #00cfff;
+            background: rgba(0,191,255,.10);
+            text-shadow: 0 0 10px rgba(0,207,255,.28);
+        }
+        .nav-button i { text-shadow: 0 0 8px rgba(0,191,255,.12); }
+        .modal-content {
+            background: linear-gradient(145deg,#081729,#030d1c);
+            border: 1px solid rgba(0,191,255,.18);
+            box-shadow: 0 -12px 40px rgba(0,0,0,.38);
+        }
+        .modal-content input, .modal-content select {
+            background: #030d1c;
+            border-color: rgba(0,191,255,.18);
+            color: #eef9ff;
+        }
+        .modal-content input:focus, .modal-content select:focus {
+            border-color: #00bfff;
+            box-shadow: 0 0 0 3px rgba(0,191,255,.12), 0 0 18px rgba(0,191,255,.08);
+        }
+        #bonus-tasks-list .bonus-item {
+            background: rgba(3,14,28,.82);
+            border-color: rgba(0,191,255,.14);
+        }
+        .bonus-item .claim-button {
+            background: linear-gradient(90deg,#0878ff,#00bfff);
+            box-shadow: 0 5px 15px rgba(0,128,255,.18);
+        }
+        .history-item { border-bottom-color: rgba(0,191,255,.12); }
+        .history-status.success {
+            color: #28e0a0;
+            background: rgba(40,224,160,.08);
+        }
+        .history-status.pending {
+            color: #ffb45c;
+            background: rgba(255,180,92,.08);
+        }
+        .spinner {
+            border-color: rgba(255,255,255,.16);
+            border-top-color: #00cfff;
+        }
+        #ad-loader-overlay {
+            background: rgba(0,4,12,.78);
+            backdrop-filter: blur(8px);
+        }
+        .loader {
+            border-color: rgba(255,255,255,.16);
+            border-bottom-color: #00cfff;
+            box-shadow: 0 0 20px rgba(0,191,255,.20);
+        }
+
     </style>
 </head>
 <body>
