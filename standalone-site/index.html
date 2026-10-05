@@ -474,7 +474,7 @@
         #withdrawPage .withdraw-field label i { color:var(--primary-color); margin-right:4px; }
         #withdrawPage #payment-details-wrap { padding:12px; border-radius:14px; background:rgba(0,191,255,.035); border:1px solid rgba(0,191,255,.10); }
         #withdrawPage #account-hint { font-size:10px; color:var(--text-light); line-height:1.4; }
-        #withdrawPage form select { appearance:auto; cursor:pointer; position:relative; z-index:2; }
+        #withdrawPage form select { appearance:auto; cursor:pointer; }
         @media (max-width:380px) { #withdrawPage .withdraw-stat strong { font-size:16px; } }
         #withdrawPage form select,#withdrawPage form input { width:100%; box-sizing:border-box; margin:0; min-height:50px; padding:13px 14px; border-radius:13px; border:1px solid rgba(0,191,255,.16); background:#030d1c; color:#eef9ff; font-family:inherit; font-size:15px; }
         #withdrawPage form select:focus,#withdrawPage form input:focus { outline:none; border-color:#00bfff; box-shadow:0 0 0 3px rgba(0,191,255,.10); }
@@ -495,8 +495,7 @@
     </div>
 <div id="ad-loader-overlay"><div class="loader"></div><span>Loading Ad...</span></div>
     
-    <div id="homePage" class="container app-page active">
-        <div class="profile-header"><div id="profile-pic"><i class="fa-solid fa-user"></i></div><h1 id="greeting">Welcome!</h1></div>
+    <div id="homePage" class="container app-page active">        <div class="profile-header"><div id="profile-pic"><i class="fa-solid fa-user"></i></div><h1 id="greeting">Welcome!</h1></div>
         <div class="balance-card"><h3>Your Balance</h3><div class="amount" id="total-earning">$0.000</div></div>
         <div class="stats-grid">
             <div class="stat-item"><i class="fa-solid fa-rectangle-ad bg-icon"></i><div class="icon"><i class="fa-solid fa-rectangle-ad"></i></div><div class="value" id="ad-count">0</div><div class="label">Ads Watched</div></div>
@@ -772,10 +771,7 @@
             try {
                 await apiCall('withdraw', { amount, method, accountNumber });
                 await loadState();
-                updateUI(); renderHistory();
-                withdrawForm.reset();
-                updatePaymentField();
-                showPage('historyPage', document.querySelector('.nav-button:nth-child(3)'));
+                updateUI(); renderHistory(); withdrawForm.reset(); showPage('historyPage', document.querySelector('.nav-button:nth-child(3)'));
                 safeTgAlert('Your withdrawal request has been saved and is pending admin processing.');
                 safeTgAction(tg => tg.HapticFeedback.notificationOccurred('success'));
             } catch (error) {
@@ -799,3 +795,162 @@
                 return `<div class="history-item">
                     <div class="history-details"><span class="method-number">${escapeHTML(item.method)} - ${escapeHTML(item.account_number)}</span><span class="date">${new Date(item.created_at).toLocaleString()}</span></div>
                     <div class="history-amount"><span>$${Number(item.amount_usd).toFixed(3)}</span><div class="history-status ${status}">${label}</div></div>
+                </div>`;
+            }).join('');
+        }
+
+        function renderBonusTasks() {
+            const { bonusTasksListEl } = allDOMElements;
+            bonusTasksListEl.innerHTML = '';
+            if (config.bonusTasks.length === 0) { bonusTasksListEl.innerHTML = '<p class="no-history">No bonus tasks are available right now.</p>'; return; }
+            config.bonusTasks.forEach(task => {
+                const isCompleted = state.completedBonusTasks.includes(task.id);
+                const item = document.createElement('div');
+                item.className = 'bonus-item';
+                item.innerHTML = `<div class="details"><span class="title">${escapeHTML(task.title)}</span><span class="reward"><i class="fa-solid fa-gift"></i>+ $${task.reward.toFixed(3)}</span></div><button class="claim-button" ${isCompleted ? 'disabled' : ''}>${isCompleted ? 'Completed' : 'Claim'}</button>`;
+                if (!isCompleted) { item.querySelector('.claim-button').addEventListener('click', (e) => handleBonusTask(task, e.target)); }
+                bonusTasksListEl.appendChild(item);
+            });
+        }
+
+        async function handleBonusTask(task, button) {
+            button.disabled = true; button.textContent = 'Processing...';
+            safeTgAction(tg => tg.openLink(task.link));
+            try {
+                await new Promise(resolve => setTimeout(resolve, task.duration * 1000));
+                if (state.completedBonusTasks.includes(task.id)) return;
+                const data = await apiCall('claim_bonus', { taskId: task.id, reward: task.reward });
+                state.totalEarning = Number(data.balance);
+                state.completedBonusTasks.push(task.id);
+                updateUI(); button.textContent = 'Completed';
+                safeTgAlert(`Bonus of $${task.reward.toFixed(3)} added successfully!`);
+                safeTgAction(tg => tg.HapticFeedback.notificationOccurred('success'));
+            } catch (e) {
+                console.error('Bonus error:', e);
+                button.disabled = false; button.textContent = 'Claim';
+                safeTgAlert(e.message === 'BONUS_ALREADY_CLAIMED' ? 'This bonus is already completed.' : 'Could not claim this bonus.');
+            }
+        }
+
+        function showPage(pageId, buttonEl) {
+            document.querySelectorAll('.app-page').forEach(page => {
+                page.classList.remove('active');
+                page.style.display = 'none';
+            });
+            document.querySelectorAll('.nav-button').forEach(btn => btn.classList.remove('active'));
+            const page = document.getElementById(pageId);
+            if (!page) return;
+            page.classList.add('active');
+            page.style.display = 'block';
+            if (buttonEl) buttonEl.classList.add('active');
+            if (pageId === 'historyPage') renderHistory();
+            if (pageId === 'bonusPage') renderBonusTasks();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        function getReferralLink() { const userId = tg ? tg.initDataUnsafe?.user?.id : 'testuser'; return `https://t.me/${config.BOT_USERNAME}?startapp=${userId}`; }
+        function copyReferralLink() { navigator.clipboard.writeText(getReferralLink()).then(() => safeTgAlert('Referral link copied!')).catch(() => safeTgAlert('Could not copy link.')); }
+        function shareReferralLink() { const link = getReferralLink(); const text = `Earn money by watching ads! Join using my link:\n${link}`; safeTgAction(tg => tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`)); }
+        
+        let myChart; function updateChart() { if (typeof Chart === 'undefined') return; const ctx = document.getElementById('activityChart').getContext('2d'); const isDark = document.documentElement.getAttribute('data-theme') === 'dark'; const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'; const fontColor = isDark ? '#F5F5F7' : '#1D1D1F'; if (myChart) myChart.destroy(); myChart = new Chart(ctx, { type: 'bar', data: { labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'], datasets: [{ label: 'Ads Watched', data: state.weeklyActivity, backgroundColor: 'rgba(var(--primary-color-rgb), 0.2)', borderColor: 'rgb(var(--primary-color-rgb))', borderWidth: 2, borderRadius: 8, hoverBackgroundColor: 'rgba(var(--primary-color-rgb), 0.4)' }] }, options: { scales: { y: { beginAtZero: true, ticks: { stepSize: 5, color: fontColor }, grid: { color: gridColor } }, x: { ticks: { color: fontColor }, grid: { color: gridColor } } }, plugins: { legend: { display: false } }, responsive: true, maintainAspectRatio: false } }); }
+
+        async function handleReferral() { return; }
+        async function processReferralRewards() { return; }
+        async function listenForReferralCount() { return; }
+
+        function loadMonetagSDK() {
+            const script = document.createElement('script');
+            script.src = `//libtl.com/sdk.js`;
+            script.setAttribute('data-zone', config.MONETAG_ZONE_ID);
+            script.setAttribute('data-sdk', `show_${config.MONETAG_ZONE_ID}`);
+            script.async = true;
+            document.body.appendChild(script);
+        }
+
+        async function initApp() {
+            if (window.__novamineStarted) return;
+            window.__novamineStarted = true;
+            const preloaderStartedAt = Date.now();
+            const MIN_PRELOADER_MS = 10000;
+            let appReady = false;
+            let preloaderAnimationDone = false;
+            
+            const tryFinishLoading = () => {
+                if(appReady && preloaderAnimationDone) {
+                    const elapsed = Date.now() - preloaderStartedAt;
+                    const remaining = Math.max(0, MIN_PRELOADER_MS - elapsed);
+                    setTimeout(() => {
+                        allDOMElements.preloader.style.opacity = '0';
+                        if (allDOMElements.preloaderFooter) allDOMElements.preloaderFooter.style.opacity = '0';
+                        setTimeout(() => {
+                            allDOMElements.preloader.style.display = 'none';
+                            if (allDOMElements.preloaderFooter) allDOMElements.preloaderFooter.style.display = 'none';
+                            allDOMElements.container.style.display = 'block';
+                        }, 550);
+                    }, remaining);
+                }
+            };
+
+            let percentage = 0;
+            const interval = setInterval(() => {
+                percentage += Math.floor(Math.random() * 5) + 1;
+                if (percentage > 100) percentage = 100;
+                allDOMElements.preloaderPercentage.textContent = `${percentage}%`;
+                const progressFill = document.getElementById('preloader-progress-fill');
+                if (progressFill) progressFill.style.width = `${percentage}%`;
+                if (percentage >= 100) {
+                    clearInterval(interval);
+                    preloaderAnimationDone = true;
+                    tryFinishLoading();
+                }
+            }, 60);
+
+            try {
+                loadMonetagSDK(); 
+               
+                populateWithdrawalMethods();
+
+await loadState();
+
+                const user = tg ? tg.initDataUnsafe?.user : { first_name: 'User', photo_url: null };
+                if (user?.first_name) {
+                    allDOMElements.greetingEl.textContent = `Welcome, ${escapeHTML(user.first_name)}!`;
+                    if (user.photo_url) { allDOMElements.profilePicEl.innerHTML = `<img src="${user.photo_url}" alt="P">`; }
+                    else { allDOMElements.profilePicEl.innerHTML = `<span>${escapeHTML(user.first_name.charAt(0))}</span>`; }
+                }
+                
+                updateUI();
+                
+                allDOMElements.watchAdButton.addEventListener('click', watchAd);
+                allDOMElements.withdrawForm.addEventListener('submit', handleWithdrawal);
+                allDOMElements.joinChannelButton.addEventListener('click', () => safeTgAction(tg => tg.openTelegramLink(config.TELEGRAM_CHANNEL_LINK)));
+                allDOMElements.copyLinkButton.addEventListener('click', copyReferralLink);
+                allDOMElements.shareLinkButton.addEventListener('click', shareReferralLink);
+                showPage('homePage', document.querySelector('.nav-button:nth-child(1)'));
+
+                safeTgAction(tg => {
+                    tg.ready(); tg.expand();
+                    tg.onEvent('themeChanged', () => { document.documentElement.setAttribute('data-theme', tg.colorScheme); updateChart(); });
+                });
+
+} catch (error) {
+                console.error("Initialization failed:", error);
+            } 
+            finally {
+                appReady = true;
+                if (percentage < 100) {
+                    clearInterval(interval);
+                    allDOMElements.preloaderPercentage.textContent = '100%';
+                    const progressFill = document.getElementById('preloader-progress-fill');
+                    if (progressFill) progressFill.style.width = '100%';
+                    preloaderAnimationDone = true;
+                }
+                tryFinishLoading();
+            }
+        }
+        
+        window.addEventListener('load', initApp);
+        document.addEventListener('DOMContentLoaded', () => { setTimeout(initApp, 50); });
+        setTimeout(() => { if (!window.__novamineStarted) initApp(); }, 4000);
+    </script>
+</body>
+</html>
