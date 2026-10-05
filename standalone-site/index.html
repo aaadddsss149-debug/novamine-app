@@ -31,26 +31,29 @@
         html, body { overscroll-behavior-y: contain; touch-action: manipulation; -webkit-text-size-adjust: 100%; }
         body { touch-action: manipulation; font-family: 'Noto Sans', sans-serif; margin: 0; padding: max(18px, env(safe-area-inset-top)) 14px calc(92px + env(safe-area-inset-bottom)) 14px; background-color: var(--background-color); color: var(--text-color); -webkit-font-smoothing: antialiased; transition: background-color 0.3s, color 0.3s; }
         
-        #preloader { position: fixed; inset: 0; z-index: 9999; overflow: hidden; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at 50% 18%, rgba(0,132,255,.20), transparent 30%), radial-gradient(circle at 50% 58%, rgba(0,229,255,.08), transparent 34%), #020711; color: #fff; transition: opacity .55s ease; }
-        #preloader::before, #preloader::after { display:none !important; }
-        #preloader::before { bottom: -7%; box-shadow: 0 -1px 18px rgba(0,174,255,.20); } #preloader::after { bottom: -13%; opacity: .45; transform: rotate(4deg); }
-        .earnx-loader { position: relative; z-index: 1; width: min(88vw, 390px); text-align: center; }
-        .earnx-orbit { position: relative; width: 190px; height: 190px; margin: 0 auto 24px; display: grid; place-items: center; }
-        .earnx-orbit::before, .earnx-orbit::after { display:none !important; }
-        .earnx-orbit::before { width: 182px; height: 182px; } .earnx-orbit::after { width: 154px; height: 154px; border-color: rgba(0,229,255,.18); animation-direction: reverse; animation-duration: 5s; }
-        .earnx-ring-dot { position: absolute; width: 9px; height: 9px; border-radius: 50%; background: #00d9ff; box-shadow: 0 0 15px #00bfff; top: 6px; left: 91px; animation: loaderOrbit 3s linear infinite; transform-origin: 4px 89px; }
-        .earnx-logo { position: relative; width: 105px; height: 105px; display: grid; place-items: center; font-size: 74px; font-weight: 900; letter-spacing: -13px; padding-right: 10px; color: #f5f9ff; text-shadow: 0 0 12px rgba(0,190,255,.9), 0 0 34px rgba(0,98,255,.55); filter: drop-shadow(0 0 14px rgba(0,183,255,.55)); }
-        .earnx-logo::after { content: ""; position: absolute; width: 122px; height: 34px; border: 5px solid #00d9ff; border-radius: 50%; transform: rotate(-18deg); box-shadow: 0 0 16px rgba(0,217,255,.9); }
-        .earnx-logo-x { color: #00bfff; } .earnx-platform { display:none !important; }
-        .earnx-brand { font-size: 46px; line-height: 1; font-weight: 900; letter-spacing: -2.5px; } .earnx-brand span { color: #00bfff; text-shadow: 0 0 18px rgba(0,191,255,.5); }
-        .earnx-tagline { margin-top: 10px; font-size: 12px; letter-spacing: 5px; color: #9cb6d4; }
-        .earnx-progress-row { display: flex; align-items: center; gap: 12px; margin: 54px auto 0; width: 100%; }
-        .earnx-progress { flex: 1; height: 13px; border: 1px solid #006dff; border-radius: 99px; padding: 2px; background: rgba(0,35,75,.5); box-shadow: 0 0 15px rgba(0,116,255,.2); }
-        #preloader-progress-fill { width: 0%; height: 100%; border-radius: 99px; background: linear-gradient(90deg,#0878ff,#00e5ff); box-shadow: 0 0 14px rgba(0,204,255,.8); transition: width .12s linear; }
-        #preloader-percentage { min-width: 45px; font-size: 15px; font-weight: 800; color: #e9f6ff; text-align: left; }
-        .earnx-loading { margin-top: 30px; color: #8fa8c7; font-size: 13px; letter-spacing: 4px; } .earnx-spinner { width: 34px; height: 34px; margin: 0 auto 12px; border-radius: 50%; border: 3px dotted #00bfff; animation: spin 1.2s linear infinite; box-shadow: 0 0 16px rgba(0,191,255,.35); }
-        @keyframes loaderOrbit { to { transform: rotate(360deg); } }
-        @media (max-width: 380px) { .earnx-orbit { transform: scale(.86); margin-bottom: 6px; } .earnx-brand { font-size: 40px; } .earnx-progress-row { margin-top: 35px; } }
+        #preloader {
+ position:fixed; inset:0; z-index:9999; overflow:hidden;
+ display:flex; align-items:center; justify-content:center;
+ background:#000; color:#fff; transition:opacity .55s ease;
+}
+#preloader::before,#preloader::after{display:none!important;content:none!important}
+.earnx-loader{position:relative;z-index:1;width:min(88vw,390px);text-align:center;margin:0 auto}
+.earnx-orbit{position:relative;width:120px;height:120px;margin:0 auto 18px;display:grid;place-items:center}
+.earnx-orbit::before,.earnx-orbit::after,.earnx-ring-dot,.earnx-platform{display:none!important;content:none!important}
+.earnx-logo{position:relative;width:92px;height:92px;display:grid;place-items:center;font-size:64px;font-weight:900;letter-spacing:-11px;padding-right:8px;color:#f5f9ff;text-shadow:0 0 12px rgba(0,190,255,.9),0 0 30px rgba(0,98,255,.55);filter:drop-shadow(0 0 12px rgba(0,183,255,.5));animation:logoFloat 2.6s ease-in-out infinite}
+.earnx-logo::after{content:"";position:absolute;width:106px;height:30px;border:4px solid #00d9ff;border-radius:50%;transform:rotate(-18deg);box-shadow:0 0 14px rgba(0,217,255,.8)}
+.earnx-logo-x{color:#00bfff}
+.earnx-brand{font-size:40px;line-height:1;font-weight:900;letter-spacing:-2px}
+.earnx-brand span{color:#00bfff;text-shadow:0 0 16px rgba(0,191,255,.5)}
+.earnx-tagline{margin-top:9px;font-size:10px;letter-spacing:3.5px;color:#8fa8c7}
+.earnx-progress-row{display:flex;align-items:center;gap:10px;margin:38px auto 0;width:100%}
+.earnx-progress{flex:1;height:10px;border:1px solid #006dff;border-radius:99px;padding:2px;background:#050b14;box-shadow:0 0 12px rgba(0,116,255,.18);overflow:hidden}
+#preloader-progress-fill{width:0%;height:100%;border-radius:99px;background:linear-gradient(90deg,#0878ff,#00e5ff);box-shadow:0 0 12px rgba(0,204,255,.7);transition:width .12s linear}
+#preloader-percentage{min-width:42px;font-size:14px;font-weight:800;color:#e9f6ff;text-align:left}
+.earnx-loading{margin-top:22px;color:#7189a6;font-size:11px;letter-spacing:3px}
+.earnx-spinner{width:24px;height:24px;margin:0 auto 9px;border:2px solid rgba(0,191,255,.2);border-top-color:#00cfff;border-radius:50%;animation:spin 1s linear infinite;box-shadow:0 0 12px rgba(0,191,255,.3)}
+@keyframes logoFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@media(max-width:380px){.earnx-loader{width:88vw}.earnx-orbit{width:105px;height:105px;margin-bottom:12px}.earnx-logo{width:82px;height:82px;font-size:58px}.earnx-logo::after{width:96px;height:28px}.earnx-brand{font-size:36px}.earnx-progress-row{margin-top:30px}}
 .container { max-width: 500px; margin: 0 auto; display: none; width: 100%; }
         .app-page { max-width: 500px; margin: 0 auto; width: 100%; display: none; animation: fadeIn 0.25s ease-out; }
         .app-page.active { display: block; }
