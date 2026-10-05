@@ -292,7 +292,7 @@
         
         async function apiCall(action, payload = {}) {
             if (!tg || !tg.initData) throw new Error('OPEN_IN_TELEGRAM');
-            const response = await fetch(config.SUPABASE_URL + '/functions/v1/novamine-site-api', {
+            const response = await fetch(config.SUPABASE_URL + '/functions/v1/novamine-site-api-v2', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'apikey': config.SUPABASE_PUBLISHABLE_KEY, 'x-telegram-init-data': tg.initData },
                 body: JSON.stringify({ action, ...payload })
