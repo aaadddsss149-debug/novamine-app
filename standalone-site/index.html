@@ -208,9 +208,7 @@
     </div>
     
     <!-- All Modals -->
-    <div id="welcomeModal" class="modal"><div class="modal-content"><span class="close-button" onclick="closeModal('welcomeModal')">&times;</span><h3 id="welcome-title" class="card-title" style="text-align:center;"></h3><p id="welcome-message" style="line-height: 1.6; font-size: 15px; text-align: center; white-space: pre-wrap; margin: 15px 0;"></p><button class="action-button" onclick="closeModal('welcomeModal')">I Understand</button></div></div>
-    
-    <!-- পরিবর্তিত: Withdraw Modal -->
+    <!-- Withdraw Modal -->
     <div id="withdrawModal" class="modal">
         <div class="modal-content">
             <span class="close-button" onclick="closeModal('withdrawModal')">&times;</span>
@@ -551,10 +549,7 @@
                
                 populateWithdrawalMethods();
 
-                allDOMElements.welcomeTitle.textContent = config.welcomeNotice.title;
-                allDOMElements.welcomeMessage.textContent = config.welcomeNotice.message;
-
-                await loadState();
+await loadState();
 
                 const user = tg ? tg.initDataUnsafe?.user : { first_name: 'User', photo_url: null };
                 if (user?.first_name) {
@@ -578,8 +573,7 @@
                     tg.onEvent('themeChanged', () => { document.documentElement.setAttribute('data-theme', tg.colorScheme); updateChart(); });
                 });
 
-                if (!sessionStorage.getItem('alreadyVisited')) { showModal('welcomeModal'); sessionStorage.setItem('alreadyVisited', 'true'); }
-            } catch (error) {
+} catch (error) {
                 console.error("Initialization failed:", error);
             } 
             finally {
