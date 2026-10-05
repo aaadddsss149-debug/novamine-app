@@ -482,37 +482,26 @@
         <div class="card"><h3 class="card-title">Weekly Activity</h3><div class="chart-container"><canvas id="activityChart"></canvas></div></div>
     </div>
     <div class="nav-bar">
-        <button class="nav-button" onclick="showModal('withdrawModal', this)"><i class="fa-solid fa-money-bill-transfer"></i><span>Withdraw</span></button>
-        <button class="nav-button" onclick="showModal('historyModal', this)"><i class="fa-solid fa-clock-rotate-left"></i><span>History</span></button>
-        <button class="nav-button" onclick="showModal('inviteModal', this)"><i class="fa-solid fa-user-plus"></i><span>Invite</span></button>
-        <button class="nav-button" onclick="showModal('bonusTasksModal', this)"><i class="fa-solid fa-star"></i><span>Bonus</span></button>
+        <button class="nav-button active" onclick="showPage('homePage', this)"><i class="fa-solid fa-house"></i><span>Home</span></button>
+        <button class="nav-button" onclick="showPage('withdrawPage', this)"><i class="fa-solid fa-money-bill-transfer"></i><span>Withdraw</span></button>
+        <button class="nav-button" onclick="showPage('historyPage', this)"><i class="fa-solid fa-clock-rotate-left"></i><span>History</span></button>
+        <button class="nav-button" onclick="showPage('invitePage', this)"><i class="fa-solid fa-user-plus"></i><span>Invite</span></button>
+        <button class="nav-button" onclick="showPage('bonusPage', this)"><i class="fa-solid fa-star"></i><span>Bonus</span></button>
     </div>
     
-    <!-- All Modals -->
-    <!-- Withdraw Modal -->
-    <div id="withdrawModal" class="modal">
-        <div class="modal-content">
-            <span class="close-button" onclick="closeModal('withdrawModal')">&times;</span>
-            <h3 class="card-title">Withdraw Funds</h3>
-            <p id="min-withdraw-text"></p>
-            <form id="withdraw-form">
-                <select id="method" name="method" required>
-                    <option value="" disabled selected>Select Payment Method</option>
-                </select>
+        <section id="withdrawPage" class="app-page">
+            <div class="page-header"><div class="page-icon"><i class="fa-solid fa-money-bill-transfer"></i></div><div><h2>Withdraw</h2><p>Request your earnings</p></div></div>
+            <div class="card"><h3 class="card-title">Withdraw Funds</h3><p id="min-withdraw-text"></p><form id="withdraw-form">
+                <select id="method" name="method" required><option value="" disabled selected>Select Payment Method</option></select>
                 <input type="text" id="account-number" placeholder="Enter Binance UID or Email" required>
                 <input type="number" step="0.001" id="withdraw-amount" placeholder="Amount in USD" required>
-                <button type="submit" class="action-button" id="withdraw-submit-button">
-                    <span class="button-text">Submit Request</span>
-                    <div class="spinner" style="display: none;"></div>
-                </button>
-            </form>
-        </div>
-    </div>
-    
-    <div id="historyModal" class="modal"><div class="modal-content"><span class="close-button" onclick="closeModal('historyModal')">&times;</span><h3 class="card-title">Withdrawal History</h3><div id="history-list"></div></div></div>
-    <div id="inviteModal" class="modal"><div class="modal-content"><span class="close-button" onclick="closeModal('inviteModal')">&times;</span><h3 class="card-title">Invite Friends</h3><p>Share your referral link with your friends and earn together. You will get a reward for each successful referral.</p><button class="action-button" id="copy-link-button"><i class="fa-solid fa-copy"></i><span>Copy Link</span></button><button class="action-button secondary-button" id="share-link-button"><i class="fa-solid fa-share-nodes"></i><span>Share Link</span></button></div></div>
-    <div id="bonusTasksModal" class="modal"><div class="modal-content"><span class="close-button" onclick="closeModal('bonusTasksModal')">&times;</span><h3 class="card-title">Bonus Tasks</h3><p style="text-align: center; margin-bottom: 20px;">Complete these one-time tasks to earn extra rewards!</p><div id="bonus-tasks-list"></div></div></div>
-    <div id="multiAccountModal" class="modal"><div class="modal-content"><h3 class="card-title" style="text-align:center;">⚠️ Warning</h3><p>Multiple accounts are not allowed. Only one Telegram account can be used on this device. Please use your original account to continue.</p></div></div>
+                <button type="submit" class="action-button" id="withdraw-submit-button"><span class="button-text">Submit Request</span><div class="spinner" style="display: none;"></div></button>
+            </form></div>
+        </section>
+        <section id="historyPage" class="app-page"><div class="page-header"><div class="page-icon"><i class="fa-solid fa-clock-rotate-left"></i></div><div><h2>History</h2><p>Your withdrawal activity</p></div></div><div class="card"><div id="history-list"></div></div></section>
+        <section id="invitePage" class="app-page"><div class="page-header"><div class="page-icon"><i class="fa-solid fa-user-plus"></i></div><div><h2>Invite</h2><p>Grow your rewards with friends</p></div></div><div class="card"><h3 class="card-title">Invite Friends</h3><p>Share your referral link with your friends and earn together. You will get a reward for each successful referral.</p><button class="action-button" id="copy-link-button"><i class="fa-solid fa-copy"></i><span>Copy Link</span></button><button class="action-button secondary-button" id="share-link-button"><i class="fa-solid fa-share-nodes"></i><span>Share Link</span></button></div></section>
+        <section id="bonusPage" class="app-page"><div class="page-header"><div class="page-icon"><i class="fa-solid fa-star"></i></div><div><h2>Bonus</h2><p>Complete tasks for extra rewards</p></div></div><div class="card"><h3 class="card-title">Bonus Tasks</h3><p style="text-align:center;margin-bottom:20px;">Complete these one-time tasks to earn extra rewards!</p><div id="bonus-tasks-list"></div></div></section>
+        <div id="multiAccountModal" class="modal"><div class="modal-content"><h3 class="card-title" style="text-align:center;">⚠️ Warning</h3><p>Multiple accounts are not allowed. Only one Telegram account can be used on this device. Please use your original account to continue.</p></div></div>
 
     <script>
         // --- CONFIGURATION (MERGED) ---
@@ -705,7 +694,7 @@
             try {
                 await apiCall('withdraw', { amount, method, accountNumber });
                 await loadState();
-                updateUI(); renderHistory(); closeModal('withdrawModal'); withdrawForm.reset();
+                updateUI(); renderHistory(); withdrawForm.reset(); showPage('historyPage', document.querySelector('.nav-button:nth-child(3)'));
                 safeTgAlert('Your withdrawal request has been saved and is pending admin processing.');
                 safeTgAction(tg => tg.HapticFeedback.notificationOccurred('success'));
             } catch (error) {
@@ -766,15 +755,16 @@
             }
         }
 
-        function showModal(modalId, buttonEl) {
-            document.querySelectorAll('.nav-button.active').forEach(btn => btn.classList.remove('active'));
+        function showPage(pageId, buttonEl) {
+            document.querySelectorAll('.app-page').forEach(page => page.classList.remove('active'));
+            document.querySelectorAll('.nav-button').forEach(btn => btn.classList.remove('active'));
+            const page = document.getElementById(pageId);
+            if (page) page.classList.add('active');
             if (buttonEl) buttonEl.classList.add('active');
-            if (modalId === 'historyModal') renderHistory();
-            if (modalId === 'bonusTasksModal') renderBonusTasks();
-            const modal = document.getElementById(modalId);
-            if(modal) modal.style.display = 'flex';
+            if (pageId === 'historyPage') renderHistory();
+            if (pageId === 'bonusPage') renderBonusTasks();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
-        function closeModal(modalId) { const modal = document.getElementById(modalId); if(modal) modal.style.display = 'none'; if (modalId !== 'welcomeModal') { document.querySelectorAll('.nav-button.active').forEach(btn => btn.classList.remove('active')); } }
         function getReferralLink() { const userId = tg ? tg.initDataUnsafe?.user?.id : 'testuser'; return `https://t.me/${config.BOT_USERNAME}?startapp=${userId}`; }
         function copyReferralLink() { navigator.clipboard.writeText(getReferralLink()).then(() => safeTgAlert('Referral link copied!')).catch(() => safeTgAlert('Could not copy link.')); }
         function shareReferralLink() { const link = getReferralLink(); const text = `Earn money by watching ads! Join using my link:\n${link}`; safeTgAction(tg => tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`)); }
@@ -853,7 +843,7 @@ await loadState();
                 allDOMElements.joinChannelButton.addEventListener('click', () => safeTgAction(tg => tg.openTelegramLink(config.TELEGRAM_CHANNEL_LINK)));
                 allDOMElements.copyLinkButton.addEventListener('click', copyReferralLink);
                 allDOMElements.shareLinkButton.addEventListener('click', shareReferralLink);
-                window.onclick = (event) => { if (event.target.classList.contains('modal')) closeModal(event.target.id); }
+                showPage('homePage', document.querySelector('.nav-button:nth-child(1)'));
 
                 safeTgAction(tg => {
                     tg.ready(); tg.expand();
