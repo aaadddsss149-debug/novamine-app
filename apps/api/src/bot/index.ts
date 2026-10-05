@@ -39,11 +39,11 @@ function appKeyboard(referrerTelegramId?: number | null) {
   const inviteUrl = username && referrerTelegramId
     ? `https://t.me/share/url?url=${encodeURIComponent(
         `https://t.me/${username}?startapp=ref_${referrerTelegramId}`
-      )}&text=${encodeURIComponent("🚀 Join me on NovaMine and start earning rewards!")}`
+      )}&text=${encodeURIComponent("🚀 Join me on EarnX and start earning rewards!")}`
     : null;
 
   const keyboard = new InlineKeyboard()
-    .webApp("🚀 Open NovaMine", config.bot.appUrl || config.bot.publicUrl.replace(/\/api\/?$/, ""));
+    .webApp("🚀 Open EarnX", config.bot.appUrl || config.bot.publicUrl.replace(/\/api\/?$/, ""));
 
   if (inviteUrl) {
     keyboard.row().url("👥 Invite Friends", inviteUrl);
@@ -76,9 +76,9 @@ export async function startBot(app: Express) {
 
     await ctx.reply(
       [
-        `🚀 *Welcome to NovaMine, ${firstName}!*`,
+        `🚀 *Welcome to EarnX, ${firstName}!*`,
         "",
-        "Your all-in-one Telegram rewards hub — complete missions, watch rewarded ads, invite friends and grow your NovaMine balance.",
+        "Your all-in-one Telegram rewards hub — complete missions, watch rewarded ads, invite friends and grow your EarnX balance.",
         referralLine,
         "",
         "👇 Open the Mini App and start earning.",
@@ -92,7 +92,7 @@ export async function startBot(app: Express) {
 
   // ── /app ─────────────────────────────────────────────────────────────────
   bot.command("app", async (ctx) => {
-    await ctx.reply("⚡ Your NovaMine dashboard is ready:", {
+    await ctx.reply("⚡ Your EarnX dashboard is ready:", {
       reply_markup: appKeyboard(ctx.from?.id),
     });
   });
@@ -115,20 +115,20 @@ export async function startBot(app: Express) {
 
     if (!user) {
       return ctx.reply(
-        "👋 You haven't opened NovaMine yet. Tap the button below to create your account.",
+        "👋 You haven't opened EarnX yet. Tap the button below to create your account.",
         { reply_markup: appKeyboard(ctx.from?.id) }
       );
     }
 
     await ctx.reply(
       [
-        `⚡ *NovaMine Balance — ${user.first_name || "Miner"}*`,
+        `⚡ *EarnX Balance — ${user.first_name || "Miner"}*`,
         "",
         `💎 TON: *${Number(user.ton_balance || 0).toFixed(6)}*`,
         `💎 TON: *${Number(user.ton_balance || 0).toFixed(6)}*`,
         `⚡ Power: *${Number(user.mining_power || 0).toLocaleString()}*`,
         "",
-        "Open NovaMine to earn more.",
+        "Open EarnX to earn more.",
       ].join("\n"),
       { parse_mode: "Markdown", reply_markup: appKeyboard(ctx.from?.id) }
     );
@@ -145,14 +145,14 @@ export async function startBot(app: Express) {
 
     await ctx.reply(
       [
-        "👥 *Your NovaMine referral link*",
+        "👥 *Your EarnX referral link*",
         "",
         "Share this link with friends:",
         `\`${link}\``,
         "",
         "Friends who join through your link are tracked automatically.",
       ].join("\n"),
-      { parse_mode: "Markdown", reply_markup: new InlineKeyboard().url("🚀 Open NovaMine", link) }
+      { parse_mode: "Markdown", reply_markup: new InlineKeyboard().url("🚀 Open EarnX", link) }
     );
   });
 
@@ -160,15 +160,15 @@ export async function startBot(app: Express) {
   bot.command("help", async (ctx) => {
     await ctx.reply(
       [
-        "⚡ *NovaMine Help*",
+        "⚡ *EarnX Help*",
         "",
-        "/start — welcome & open NovaMine",
+        "/start — welcome & open EarnX",
         "/app — open the Mini App",
         "/balance — view your balance",
         "/invite — get your referral link",
         "/help — show this menu",
         "",
-        "Inside NovaMine you can use Tasks, Reward Ads, Referrals and Withdraw.",
+        "Inside EarnX you can use Tasks, Reward Ads, Referrals and Withdraw.",
       ].join("\n"),
       { parse_mode: "Markdown", reply_markup: appKeyboard(ctx.from?.id) }
     );
@@ -176,7 +176,7 @@ export async function startBot(app: Express) {
 
   // Ignore commands we don't own and give plain messages a useful response.
   bot.on("message:text", async (ctx) => {
-    await ctx.reply("⚡ Use the buttons below to open NovaMine.", {
+    await ctx.reply("⚡ Use the buttons below to open EarnX.", {
       reply_markup: appKeyboard(),
     });
   });
@@ -184,11 +184,11 @@ export async function startBot(app: Express) {
   // ── Bot UX setup ─────────────────────────────────────────────────────────
   try {
     await bot.api.setMyCommands([
-      { command: "start", description: "Open NovaMine" },
+      { command: "start", description: "Open EarnX" },
       { command: "app", description: "Launch the Mini App" },
       { command: "balance", description: "Check TON & TON" },
       { command: "invite", description: "Get your referral link" },
-      { command: "help", description: "NovaMine help" },
+      { command: "help", description: "EarnX help" },
     ]);
 
     if (username) {
@@ -196,7 +196,7 @@ export async function startBot(app: Express) {
       await bot.api.setChatMenuButton({
         menu_button: {
           type: "web_app",
-          text: "🚀 Open NovaMine",
+          text: "🚀 Open EarnX",
           web_app: { url: appUrl },
         },
       });
