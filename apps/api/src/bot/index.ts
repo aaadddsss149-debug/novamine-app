@@ -3,7 +3,28 @@ import type { Express } from "express";
 import { config } from "../config.js";
 import { supabaseAdmin } from "../lib/supabase.js";
 
-function botUsername() {
+
+async function syncTelegramUser(from: any, referrerTelegramId?: number | null) {
+  if (!from?.id) return;
+  const telegramId = Number(from.id);
+  const patch = { telegram_id: telegramId, username: from.username ?? null, first_name: from.first_name ?? null, last_name: from.last_name ?? null, language_code: from.language_code ?? null, last_seen_at: new Date().toISOString() };
+  const { data: existing, error: readError } = await supabaseAdmin.from("users").select("id").eq("telegram_id", telegramId).maybeSingle();
+  if (readError) throw readError;
+  if (existing?.id) {
+    const { error } = await supabaseAdmin.from("users").update(patch).eq("id", existing.id);
+    if (error) throw error;
+    return existing.id;
+  }
+  let referrerId: string | null = null;
+  if (referrerTelegramId && referrerTelegramId !== telegramId) {
+    const { data: referrer } = await supabaseAdmin.from("users").select("id").eq("telegram_id", referrerTelegramId).maybeSingle();
+    referrerId = referrer?.id ?? null;
+  }
+  const { data: created, error } = await supabaseAdmin.from("users").insert({ ...patch, referrer_id: referrerId }).select("id").single();
+  if (error) throw error;
+  return created.id;
+}
+\nfunction botUsername() {
   return config.bot.username.replace(/^@/, "").trim();
 }
 
