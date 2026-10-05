@@ -626,7 +626,12 @@
             box-shadow:0 0 30px rgba(0,191,255,.10);
             animation: loaderWave 7s ease-in-out infinite reverse;
         }
-        .earnx-loader { filter:drop-shadow(0 10px 35px rgba(0,0,0,.55)); }
+        .earnx-loader { filter:drop-shadow(0 10px 35px rgba(0,0,0,.55)); display:flex; flex-direction:column; align-items:center; }
+        .earnx-logo-wrap { order:1; margin-bottom:8px; }
+        .earnx-brand { order:2; margin-top:0; }
+        .earnx-tagline { order:3; }
+        .earnx-progress-row { order:4; }
+        .earnx-loading { order:5; }
         .earnx-orbit::before {
             animation:loaderOrbit 7s linear infinite, loaderPulse 2.4s ease-in-out infinite;
         }
