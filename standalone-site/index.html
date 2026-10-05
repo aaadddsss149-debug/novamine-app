@@ -32,16 +32,16 @@
         body { touch-action: manipulation; font-family: 'Noto Sans', sans-serif; margin: 0; padding: max(18px, env(safe-area-inset-top)) 14px calc(92px + env(safe-area-inset-bottom)) 14px; background-color: var(--background-color); color: var(--text-color); -webkit-font-smoothing: antialiased; transition: background-color 0.3s, color 0.3s; }
         
         #preloader { position: fixed; inset: 0; z-index: 9999; overflow: hidden; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at 50% 18%, rgba(0,132,255,.20), transparent 30%), radial-gradient(circle at 50% 58%, rgba(0,229,255,.08), transparent 34%), #020711; color: #fff; transition: opacity .55s ease; }
-        #preloader::before, #preloader::after { content: ""; position: absolute; left: -15%; width: 130%; height: 22%; border: 1px solid rgba(0,153,255,.22); border-radius: 50%; transform: rotate(-5deg); pointer-events: none; }
+        #preloader::before, #preloader::after { display:none !important; }
         #preloader::before { bottom: -7%; box-shadow: 0 -1px 18px rgba(0,174,255,.20); } #preloader::after { bottom: -13%; opacity: .45; transform: rotate(4deg); }
         .earnx-loader { position: relative; z-index: 1; width: min(88vw, 390px); text-align: center; }
         .earnx-orbit { position: relative; width: 190px; height: 190px; margin: 0 auto 24px; display: grid; place-items: center; }
-        .earnx-orbit::before, .earnx-orbit::after { content: ""; position: absolute; border-radius: 50%; border: 1px solid rgba(0,153,255,.72); box-shadow: 0 0 18px rgba(0,132,255,.24); animation: loaderOrbit 7s linear infinite; }
+        .earnx-orbit::before, .earnx-orbit::after { display:none !important; }
         .earnx-orbit::before { width: 182px; height: 182px; } .earnx-orbit::after { width: 154px; height: 154px; border-color: rgba(0,229,255,.18); animation-direction: reverse; animation-duration: 5s; }
         .earnx-ring-dot { position: absolute; width: 9px; height: 9px; border-radius: 50%; background: #00d9ff; box-shadow: 0 0 15px #00bfff; top: 6px; left: 91px; animation: loaderOrbit 3s linear infinite; transform-origin: 4px 89px; }
         .earnx-logo { position: relative; width: 105px; height: 105px; display: grid; place-items: center; font-size: 74px; font-weight: 900; letter-spacing: -13px; padding-right: 10px; color: #f5f9ff; text-shadow: 0 0 12px rgba(0,190,255,.9), 0 0 34px rgba(0,98,255,.55); filter: drop-shadow(0 0 14px rgba(0,183,255,.55)); }
         .earnx-logo::after { content: ""; position: absolute; width: 122px; height: 34px; border: 5px solid #00d9ff; border-radius: 50%; transform: rotate(-18deg); box-shadow: 0 0 16px rgba(0,217,255,.9); }
-        .earnx-logo-x { color: #00bfff; } .earnx-platform { position: absolute; bottom: -4px; width: 132px; height: 18px; border-radius: 50%; border: 2px solid #00cfff; box-shadow: 0 0 22px rgba(0,179,255,.65), inset 0 0 12px rgba(0,179,255,.35); }
+        .earnx-logo-x { color: #00bfff; } .earnx-platform { display:none !important; }
         .earnx-brand { font-size: 46px; line-height: 1; font-weight: 900; letter-spacing: -2.5px; } .earnx-brand span { color: #00bfff; text-shadow: 0 0 18px rgba(0,191,255,.5); }
         .earnx-tagline { margin-top: 10px; font-size: 12px; letter-spacing: 5px; color: #9cb6d4; }
         .earnx-progress-row { display: flex; align-items: center; gap: 12px; margin: 54px auto 0; width: 100%; }
@@ -1092,27 +1092,25 @@
         async function copyReferralLink() {
             const link = getReferralLink();
             if (!link) return safeTgAlert('Open the Mini App inside Telegram first.');
+            const input = document.createElement('input');
+            input.value = link;
+            input.setAttribute('readonly','');
+            input.style.position = 'fixed';
+            input.style.top = '50%';
+            input.style.left = '50%';
+            input.style.width = '1px';
+            input.style.height = '1px';
+            input.style.opacity = '0';
+            document.body.appendChild(input);
+            input.focus();
+            input.select();
             let copied = false;
-            try {
-                if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
-                    await navigator.clipboard.writeText(link);
-                    copied = true;
-                }
-            } catch (_) {}
-            if (!copied) {
-                const area = document.createElement('textarea');
-                area.value = link;
-                area.setAttribute('readonly', '');
-                area.style.position = 'fixed';
-                area.style.left = '-10000px';
-                area.style.top = '0';
-                document.body.appendChild(area);
-                area.focus(); area.select(); area.setSelectionRange(0, area.value.length);
-                try { copied = document.execCommand('copy'); } catch (_) {}
-                area.remove();
+            try { copied = document.execCommand('copy'); } catch (_) {}
+            input.remove();
+            if (!copied && navigator.clipboard?.writeText) {
+                try { await navigator.clipboard.writeText(link); copied = true; } catch (_) {}
             }
-            if (copied) safeTgAlert('Invite link copied!');
-            else safeTgAlert('Copy is blocked by Telegram. The link is ready to share with the Share button.');
+            safeTgAlert(copied ? 'Invite link copied!' : 'Please use Share Invite Link.');
         }
         function shareReferralLink() {
             const link = getReferralLink();
