@@ -34,26 +34,49 @@
         #preloader {
  position:fixed; inset:0; z-index:9999; overflow:hidden;
  display:flex; align-items:center; justify-content:center;
- background:#000; color:#fff; transition:opacity .55s ease;
+ background:
+   radial-gradient(circle at 50% 42%, rgba(0,191,255,.12), transparent 22%),
+   radial-gradient(circle at 50% 78%, rgba(0,98,255,.10), transparent 32%),
+   linear-gradient(180deg,#000 0%,#020711 100%);
+ color:#fff; transition:opacity .55s ease;
 }
-#preloader::before,#preloader::after{display:none!important;content:none!important}
-.earnx-loader{position:relative;z-index:1;width:min(88vw,390px);text-align:center;margin:0 auto}
-.earnx-orbit{position:relative;width:120px;height:120px;margin:0 auto 18px;display:grid;place-items:center}
-.earnx-orbit::before,.earnx-orbit::after,.earnx-ring-dot,.earnx-platform{display:none!important;content:none!important}
-.earnx-logo{position:relative;width:92px;height:92px;display:grid;place-items:center;font-size:64px;font-weight:900;letter-spacing:-11px;padding-right:8px;color:#f5f9ff;text-shadow:0 0 12px rgba(0,190,255,.9),0 0 30px rgba(0,98,255,.55);filter:drop-shadow(0 0 12px rgba(0,183,255,.5));animation:logoFloat 2.6s ease-in-out infinite;transform:translateY(-9px)}
-.earnx-logo::after{display:none!important;content:none!important}
-.earnx-logo-x{color:#00bfff}
-.earnx-brand{font-size:40px;line-height:1;font-weight:900;letter-spacing:-2px}
-.earnx-brand span{color:#00bfff;text-shadow:0 0 16px rgba(0,191,255,.5)}
-.earnx-tagline{margin-top:9px;font-size:10px;letter-spacing:3.5px;color:#8fa8c7}
-.earnx-progress-row{display:flex;align-items:center;gap:10px;margin:38px auto 0;width:100%}
+#preloader::before{
+ content:"";position:absolute;inset:-20%;
+ background:
+   linear-gradient(rgba(0,191,255,.035) 1px,transparent 1px),
+   linear-gradient(90deg,rgba(0,191,255,.035) 1px,transparent 1px);
+ background-size:38px 38px;
+ transform:perspective(500px) rotateX(58deg) translateY(18%);
+ transform-origin:center bottom;
+ mask-image:linear-gradient(to top,rgba(0,0,0,.9),transparent 72%);
+ animation:gridMove 8s linear infinite;
+}
+#preloader::after{
+ content:"";position:absolute;width:280px;height:280px;border:1px solid rgba(0,191,255,.10);
+ border-radius:50%;box-shadow:0 0 70px rgba(0,191,255,.08),inset 0 0 70px rgba(0,98,255,.06);
+ animation:loaderPulse 3.5s ease-in-out infinite;
+}
+.earnx-loader{position:relative;z-index:2;width:min(88vw,390px);text-align:center;margin:0 auto;display:flex;flex-direction:column;align-items:center}
+.earnx-loader::before,.earnx-loader::after{content:"";position:absolute;border-radius:50%;pointer-events:none}
+.earnx-loader::before{width:7px;height:7px;background:#00d9ff;box-shadow:0 0 12px #00d9ff;top:18%;left:7%;animation:particleOne 4s ease-in-out infinite}
+.earnx-loader::after{width:5px;height:5px;background:#0878ff;box-shadow:0 0 12px #0878ff;top:42%;right:5%;animation:particleTwo 5s ease-in-out infinite}
+.earnx-ex{order:1;font-size:30px;line-height:1;font-weight:950;letter-spacing:4px;color:#f7fcff;text-shadow:0 0 8px rgba(0,217,255,.9),0 0 24px rgba(0,98,255,.65);margin-bottom:8px;animation:exReveal 1.2s ease-out both}
+.earnx-ex span{color:#00d9ff}
+.earnx-brand{order:2;font-size:40px;line-height:1;font-weight:900;letter-spacing:-2px;text-shadow:0 0 12px rgba(0,191,255,.22)}
+.earnx-brand span{color:#00bfff;text-shadow:0 0 16px rgba(0,191,255,.75)}
+.earnx-tagline{order:3;margin-top:10px;font-size:10px;letter-spacing:3.5px;color:#8fa8c7}
+.earnx-progress-row{order:4;display:flex;align-items:center;gap:10px;margin:38px auto 0;width:100%}
 .earnx-progress{flex:1;height:10px;border:1px solid #006dff;border-radius:99px;padding:2px;background:#050b14;box-shadow:0 0 12px rgba(0,116,255,.18);overflow:hidden}
 #preloader-progress-fill{width:0%;height:100%;border-radius:99px;background:linear-gradient(90deg,#0878ff,#00e5ff);box-shadow:0 0 12px rgba(0,204,255,.7);transition:width .12s linear}
 #preloader-percentage{min-width:42px;font-size:14px;font-weight:800;color:#e9f6ff;text-align:left}
-.earnx-loading{margin-top:22px;color:#7189a6;font-size:11px;letter-spacing:3px}
+.earnx-loading{order:5;margin-top:22px;color:#7189a6;font-size:11px;letter-spacing:3px}
 .earnx-spinner{width:24px;height:24px;margin:0 auto 9px;border:2px solid rgba(0,191,255,.2);border-top-color:#00cfff;border-radius:50%;animation:spin 1s linear infinite;box-shadow:0 0 12px rgba(0,191,255,.3)}
-@keyframes logoFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
-@media(max-width:380px){.earnx-loader{width:88vw}.earnx-orbit{width:105px;height:105px;margin-bottom:12px}.earnx-logo{width:82px;height:82px;font-size:58px;transform:translateY(-7px)}.earnx-brand{font-size:36px}.earnx-progress-row{margin-top:30px}}
+@keyframes gridMove{from{background-position:0 0,0 0}to{background-position:0 38px,38px 0}}
+@keyframes loaderPulse{0%,100%{transform:scale(.88);opacity:.45}50%{transform:scale(1.08);opacity:.9}}
+@keyframes particleOne{0%,100%{transform:translate(0,0);opacity:.25}50%{transform:translate(28px,-18px);opacity:1}}
+@keyframes particleTwo{0%,100%{transform:translate(0,0);opacity:.25}50%{transform:translate(-24px,22px);opacity:1}}
+@keyframes exReveal{from{opacity:0;transform:translateY(12px) scale(.92);filter:blur(5px)}to{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}}
+@media(max-width:380px){.earnx-loader{width:88vw}.earnx-ex{font-size:27px}.earnx-brand{font-size:36px}.earnx-progress-row{margin-top:30px}}
 .container { max-width: 500px; margin: 0 auto; display: none; width: 100%; }
         .app-page { max-width: 500px; margin: 0 auto; width: 100%; display: none; animation: fadeIn 0.25s ease-out; }
         .app-page.active { display: block; }
@@ -706,6 +729,7 @@
 <body>
     <div id="preloader" aria-label="EarnX loading">
         <div class="earnx-loader">
+            <div class="earnx-ex">E<span>X</span></div>
             <div class="earnx-brand">Earn<span>X</span></div>
             <div class="earnx-tagline">WATCH &nbsp;•&nbsp; EARN &nbsp;•&nbsp; GROW</div>
             <div class="earnx-progress-row"><div class="earnx-progress"><div id="preloader-progress-fill"></div></div><div id="preloader-percentage">0%</div></div>
