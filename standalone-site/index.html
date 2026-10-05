@@ -482,9 +482,12 @@
         #withdrawPage .withdraw-note { margin:12px 0 0; padding:11px 12px; border-radius:12px; color:var(--text-light); background:rgba(0,191,255,.045); border:1px solid rgba(0,191,255,.10); font-size:11px; line-height:1.5; }
         #homePage .chart-container { height:210px; padding:8px 2px 2px; }
     
-        /* Keep the Home page dark; use a clean non-black surface on inner pages */
-        body:not(:has(#homePage.active)) {
-            background: #071323;
+        /* NovaMine global loading-screen background */
+        body {
+            background:
+                radial-gradient(circle at 50% 18%, rgba(0,132,255,.20), transparent 30%),
+                radial-gradient(circle at 50% 58%, rgba(0,229,255,.08), transparent 34%),
+                #020711;
         }
         body:not(:has(#homePage.active)) .app-page {
             background: transparent;
@@ -518,7 +521,7 @@
         <button class="nav-button" onclick="showPage('withdrawPage', this)"><i class="fa-solid fa-money-bill-transfer"></i><span>Withdraw</span></button>
         <button class="nav-button" onclick="showPage('historyPage', this)"><i class="fa-solid fa-clock-rotate-left"></i><span>History</span></button>
         <button class="nav-button" onclick="showPage('invitePage', this)"><i class="fa-solid fa-user-plus"></i><span>Invite</span></button>
-        <button class="nav-button" onclick="showPage('bonusPage', this)"><i class="fa-solid fa-star"></i><span>Bonus</span></button>
+        <button class="nav-button" onclick="showPage('bonusPage', this)"><i class="fa-solid fa-star"></i><span>Task</span></button>
     </div>
     
         <section id="withdrawPage" class="app-page">
@@ -542,7 +545,7 @@
         </section>
         <section id="historyPage" class="app-page"><div class="page-header"><div class="page-icon"><i class="fa-solid fa-clock-rotate-left"></i></div><div><h2>History</h2><p>Your withdrawal activity</p></div></div><div class="card"><div id="history-list"></div></div></section>
         <section id="invitePage" class="app-page"><div class="page-header"><div class="page-icon"><i class="fa-solid fa-user-plus"></i></div><div><h2>Invite</h2><p>Grow your rewards with friends</p></div></div><div class="card"><h3 class="card-title">Invite Friends</h3><p>Share your referral link with your friends and earn together. You will get a reward for each successful referral.</p><button class="action-button" id="copy-link-button"><i class="fa-solid fa-copy"></i><span>Copy Link</span></button><button class="action-button secondary-button" id="share-link-button"><i class="fa-solid fa-share-nodes"></i><span>Share Link</span></button></div></section>
-        <section id="bonusPage" class="app-page"><div class="page-header"><div class="page-icon"><i class="fa-solid fa-star"></i></div><div><h2>Bonus</h2><p>Complete tasks for extra rewards</p></div></div><div class="card"><h3 class="card-title">Bonus Tasks</h3><p style="text-align:center;margin-bottom:20px;">Complete these one-time tasks to earn extra rewards!</p><div id="bonus-tasks-list"></div></div></section>
+        <section id="bonusPage" class="app-page"><div class="page-header"><div class="page-icon"><i class="fa-solid fa-star"></i></div><div><h2>Task</h2><p>Complete tasks for extra rewards</p></div></div><div class="card"><h3 class="card-title">Tasks</h3><p style="text-align:center;margin-bottom:20px;">Complete tasks to earn extra rewards!</p><div id="bonus-tasks-list"></div></div></section>
         <div id="multiAccountModal" class="modal"><div class="modal-content"><h3 class="card-title" style="text-align:center;">⚠️ Warning</h3><p>Multiple accounts are not allowed. Only one Telegram account can be used on this device. Please use your original account to continue.</p></div></div>
 
     <script>
@@ -864,8 +867,37 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
         function getReferralLink() { const userId = tg ? tg.initDataUnsafe?.user?.id : 'testuser'; return `https://t.me/${config.BOT_USERNAME}?startapp=${userId}`; }
-        function copyReferralLink() { navigator.clipboard.writeText(getReferralLink()).then(() => safeTgAlert('Referral link copied!')).catch(() => safeTgAlert('Could not copy link.')); }
-        function shareReferralLink() { const link = getReferralLink(); const text = `Earn money by watching ads! Join using my link:\n${link}`; safeTgAction(tg => tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`)); }
+        async function copyReferralLink() {
+            const link = getReferralLink();
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(link);
+                } else {
+                    const textarea = document.createElement('textarea');
+                    textarea.value = link;
+                    textarea.style.position = 'fixed';
+                    textarea.style.left = '-9999px';
+                    document.body.appendChild(textarea);
+                    textarea.focus();
+                    textarea.select();
+                    document.execCommand('copy');
+                    textarea.remove();
+                }
+                safeTgAlert('Referral link copied!');
+            } catch (error) {
+                console.error('Copy referral link error:', error);
+                safeTgAlert('Could not copy the referral link. Please use Share Link.');
+            }
+        }
+        function shareReferralLink() {
+            const link = getReferralLink();
+            const text = `Earn money by watching ads! Join using my link:\\n${link}`;
+            const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`;
+            safeTgAction(tg => {
+                try { tg.openTelegramLink(shareUrl); }
+                catch (error) { window.open(shareUrl, '_blank'); }
+            }, () => { window.open(shareUrl, '_blank'); });
+        }
         
         let myChart; function updateChart() { if (typeof Chart === 'undefined') return; const ctx = document.getElementById('activityChart').getContext('2d'); const isDark = document.documentElement.getAttribute('data-theme') === 'dark'; const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'; const fontColor = isDark ? '#F5F5F7' : '#1D1D1F'; if (myChart) myChart.destroy(); myChart = new Chart(ctx, { type: 'bar', data: { labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'], datasets: [{ label: 'Ads Watched', data: state.weeklyActivity, backgroundColor: 'rgba(var(--primary-color-rgb), 0.2)', borderColor: 'rgb(var(--primary-color-rgb))', borderWidth: 2, borderRadius: 8, hoverBackgroundColor: 'rgba(var(--primary-color-rgb), 0.4)' }] }, options: { scales: { y: { beginAtZero: true, ticks: { stepSize: 5, color: fontColor }, grid: { color: gridColor } }, x: { ticks: { color: fontColor }, grid: { color: gridColor } } }, plugins: { legend: { display: false } }, responsive: true, maintainAspectRatio: false } }); }
 
