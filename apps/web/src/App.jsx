@@ -200,6 +200,9 @@ export default function EarnX(){
   const [dailyAdCount,setDailyAdCount]=useState(0);
   const userDbId=useRef(null);
   const [showWithdraw,setShowWithdraw]=useState(false);
+  const [withdrawAddress,setWithdrawAddress]=useState("");
+  const [withdrawBusy,setWithdrawBusy]=useState(false);
+  const [withdrawError,setWithdrawError]=useState("");
     // Mining state — persisted in localStorage so it survives page reloads/quit
   const MINING_DURATION_MS = 24 * 60 * 60 * 1000; // 24 hours — matches Dulce CANDY 24h production loop
   const [miningTick,setMiningTick]=useState(0);
@@ -718,10 +721,10 @@ export default function EarnX(){
 
   const navItems=[
     {id:"home",icon:"home",label:"Home"},
-    {id:"tasks",icon:"tasks",label:"Tasks"},
-    {id:"team",icon:"users",label:"Refer"},
-    {id:"wallet",icon:"wallet",label:"Wallet"},
-    {id:"profile",icon:"user",label:"Profile"},
+    {id:"withdraw",icon:"wallet",label:"Withdraw"},
+    {id:"history",icon:"rank",label:"History"},
+    {id:"team",icon:"users",label:"Invite"},
+    {id:"bonus",icon:"gift",label:"Bonus"},
   ];
 
   const novaDisplay=tonBalance.toFixed(5)+" TON";
@@ -739,15 +742,9 @@ export default function EarnX(){
         .ex-nav button.active{color:#5d57e9}
       `}</style>
 
-      {showGift&&<div style={{position:"fixed",inset:0,zIndex:1001,background:"rgba(20,25,40,.55)",backdropFilter:"blur(8px)",display:"flex",alignItems:"center",justifyContent:"center",padding:18}}>
-        <div className="ex-card" style={{padding:28,width:"100%",maxWidth:350,textAlign:"center"}}>
-          {!giftOpened?<><div onClick={async()=>{try{await api.claimGift?.(); const fresh=await api.me(); if(fresh?.user){setTonBalance(Number(fresh.user.ton_balance ?? 0));setNova(Number(fresh.user.nova ?? 0));setHashes(Number(fresh.user.hashes ?? 0));setMiningPower(miningPowerFromNova(Number(fresh.user.nova ?? 0)));} setGiftOpened(true);}catch(e){setBuyError(e?.message||"Could not claim the welcome gift.");}}} style={{fontSize:75,cursor:"pointer"}}>🎁</div><b style={{fontSize:20}}>Welcome to EarnX</b><div style={{fontSize:12,color:"#8d96a7",marginTop:5}}>Tap the gift to reveal your bonus.</div></>:<><div style={{fontSize:50}}>🎉</div><b style={{fontSize:20}}>Reward unlocked</b><div style={{fontSize:12,color:"#8d96a7",marginTop:5}}>Welcome bonus</div><div style={{fontSize:34,fontWeight:800,color:"#5d57e9",margin:"8px 0 16px"}}>+{welcomeTon} TON</div><button className="ex-btn" onClick={async()=>{try{const fresh=await api.me();if(fresh?.user){setTonBalance(Number(fresh.user.ton_balance ?? 0));setNova(Number(fresh.user.nova ?? 0));setHashes(Number(fresh.user.hashes ?? 0));setMiningPower(miningPowerFromNova(Number(fresh.user.nova ?? 0)));}}catch(_){} setShowGift(false);setGiftUnclaimed(false);}} style={{width:"100%",padding:13,borderRadius:14,background:"linear-gradient(135deg,#5d57e9,#857fff)",color:"#fff"}}>Claim reward</button></>}
-        </div>
-      </div>}
-
       <header style={{background:"#fff",borderBottom:"1px solid #eceef4",padding:"16px 17px 12px",display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:200}}>
         <div style={{display:"flex",alignItems:"center",gap:10}}><div style={{width:40,height:40,borderRadius:13,background:"linear-gradient(135deg,#5d57e9,#8580ff)",color:"#fff",display:"grid",placeItems:"center",fontSize:18,fontWeight:800}}>E</div><div><b style={{fontSize:17}}>EarnX</b><div style={{fontSize:10,color:"#929aaa"}}>Rewards hub</div></div></div>
-        <button className="ex-btn" onClick={()=>setTab("profile")} style={{width:40,height:40,borderRadius:"50%",background:"#f0efff",color:"#5d57e9",fontSize:17}}>👤</button>
+        <button className="ex-btn" onClick={()=>setTab("bonus")} style={{width:40,height:40,borderRadius:"50%",background:"#f0efff",color:"#5d57e9",fontSize:17}}>👤</button>
       </header>
 
       <main style={{padding:"18px 16px 94px",animation:"exIn .25s ease"}}>
@@ -774,23 +771,24 @@ export default function EarnX(){
           </div>
 
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:11}}><button className="ex-card ex-btn" onClick={()=>setTab("tasks")} style={{padding:15,textAlign:"left",color:"#202637"}}><div style={{fontSize:23}}>✓</div><b>{C.earnMore}</b><div style={{fontSize:10,color:"#8d96a7",marginTop:3}}>{C.tasksRewards}</div></button><button className="ex-card ex-btn" onClick={()=>setTab("team")} style={{padding:15,textAlign:"left",color:"#202637"}}><div style={{fontSize:23}}>👥</div><b>{C.invite}</b><div style={{fontSize:10,color:"#8d96a7",marginTop:3}}>{C.buildTeam}</div></button></div>
-          {giftUnclaimed&&<button className="ex-card ex-btn" onClick={()=>{setGiftOpened(false);setShowGift(true)}} style={{width:"100%",padding:14,marginTop:11,display:"flex",alignItems:"center",gap:11,textAlign:"left",color:"#202637"}}><span style={{fontSize:30}}>🎁</span><span style={{flex:1}}><b>{C.welcomeGift}</b><div style={{fontSize:10,color:"#8d96a7"}}>{C.claimBonus} · {welcomeTon} TON</div></span><span style={{fontSize:21,color:"#5d57e9"}}>›</span></button>}
+          {giftUnclaimed&&<button className="ex-card ex-btn" onClick={()=>setTab("bonus")} style={{width:"100%",padding:14,marginTop:11,display:"flex",alignItems:"center",gap:11,textAlign:"left",color:"#202637"}}><span style={{fontSize:30}}>🎁</span><span style={{flex:1}}><b>{C.welcomeGift}</b><div style={{fontSize:10,color:"#8d96a7"}}>{C.claimBonus} · {welcomeTon} TON</div></span><span style={{fontSize:21,color:"#5d57e9"}}>›</span></button>}
         </div>}
 
-        {tab==="tasks"&&<div>
-          <div style={{marginBottom:15}}><div style={{fontSize:25,fontWeight:800}}>{TC.title}</div><div style={{fontSize:12,color:"#8d96a7"}}>{TC.sub}</div></div>
-          <div className="ex-card" style={{padding:18,marginBottom:12,background:"linear-gradient(135deg,#fff8ee,#ffffff)"}}>
-            <div style={{display:"flex",alignItems:"center",gap:12}}>
-              <div style={{width:50,height:50,borderRadius:15,background:"#fff0d8",display:"grid",placeItems:"center",fontSize:24}}>📺</div>
-              <div style={{flex:1}}><b style={{fontSize:15}}>Watch Ads</b><div style={{fontSize:11,color:"#8d96a7",marginTop:3}}>Reward Ad</div></div>
-              <b style={{color:"#18a76a",fontSize:12}}>+0.0013 TON</b>
+        {tab==="history"&&<div>
+          <div style={{marginBottom:15}}><div style={{fontSize:25,fontWeight:800}}>History</div><div style={{fontSize:12,color:"#8d96a7"}}>Your recent earning activity</div></div>
+          <div className="ex-card" style={{padding:18,marginBottom:12}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}><b>Current balance</b><b style={{color:"#18a76a"}}>{tonBalance.toFixed(5)} TON</b></div>
+            <div style={{display:"grid",gap:9}}>
+              <div style={{padding:13,borderRadius:13,background:"#f6f7fb",display:"flex",justifyContent:"space-between"}}><span>Mining rate</span><b>{miningPower.toLocaleString()}</b></div>
+              <div style={{padding:13,borderRadius:13,background:"#f6f7fb",display:"flex",justifyContent:"space-between"}}><span>Referrals</span><b>{refStats.total}</b></div>
+              <div style={{padding:13,borderRadius:13,background:"#f6f7fb",display:"flex",justifyContent:"space-between"}}><span>Active friends</span><b>{qualifiedFriends}</b></div>
             </div>
-            <div style={{marginTop:14,height:8,borderRadius:8,background:"#edf0f4",overflow:"hidden"}}><div style={{height:"100%",width:(Math.min(20,dailyAdCount)/20*100)+"%",background:"linear-gradient(90deg,#5d57e9,#18a76a)",borderRadius:8}}/></div>
-            <div style={{display:"flex",justifyContent:"space-between",marginTop:8,fontSize:11,color:"#7f8998"}}><span>{dailyAdCount}/20 {lang==="ar"?"إعلان اليوم":"ads today"}</span><span>0.0013 TON / ad</span></div>
-            <button className="ex-btn" disabled={dailyAdCount>=20||taskBusy==="daily_ads"} onClick={()=>runTask({id:"daily_ads",reward:0.0013,category:"ADS"})} style={{width:"100%",marginTop:12,padding:12,borderRadius:12,background:dailyAdCount>=20?"#eef1f5":"#5d57e9",color:dailyAdCount>=20?"#8d96a7":"#fff"}}>{dailyAdCount>=20?"✓ 20/20":taskBusy==="daily_ads"?"…":TC.watch+" · +0.0013 TON"}</button>
           </div>
-          <div className="ex-card" style={{padding:16}}><b>{TC.refMilestones}</b>{[1,3,5,10].map(n=>{const done=refStats.total>=n;return <div key={n} style={{display:"flex",alignItems:"center",gap:10,padding:"11px 0",borderTop:"1px solid #eef0f5",marginTop:7}}><span style={{width:30,height:30,borderRadius:"50%",background:done?"#eafbf4":"#f3f5f8",color:done?"#18a76a":"#8d96a7",display:"grid",placeItems:"center",fontWeight:800,fontSize:11}}>{done?"✓":n}</span><span style={{flex:1,fontSize:12}}>{n} referral{n>1?"s":""}</span><small style={{color:done?"#18a76a":"#8d96a7"}}>{done?TC.completedLabel:TC.locked}</small></div>})}</div>
-        </div>}
+          <div className="ex-card" style={{padding:18}}>
+            <b>Activity</b>
+            <div style={{padding:"28px 8px 12px",textAlign:"center",color:"#8d96a7",fontSize:12}}>Your real mining and withdrawal records will appear here as the account creates them.</div>
+          </div>
+        </div>
 
         {tab==="team"&&<div>
           <div style={{marginBottom:15}}><div style={{fontSize:25,fontWeight:800}}>Refer & earn</div><div style={{fontSize:12,color:"#8d96a7"}}>Invite friends and grow together</div></div>
@@ -799,24 +797,30 @@ export default function EarnX(){
           {refStats.list?.length>0?<div className="ex-card" style={{padding:16}}><b>👥 {L.team}</b>{refStats.list.slice(0,8).map((rr,i)=><div key={rr.id||i} style={{display:"flex",alignItems:"center",gap:9,padding:"10px 0",borderTop:"1px solid #eef0f5",marginTop:7}}><div style={{width:37,height:37,borderRadius:"50%",background:"#f0efff",display:"grid",placeItems:"center"}}>{rr.referred?.photo_url?<img src={rr.referred.photo_url} style={{width:37,height:37,borderRadius:"50%"}}/>:"👤"}</div><div style={{flex:1}}><b style={{fontSize:12}}>{rr.referred?.username?"@"+rr.referred.username:rr.referred?.first_name||"Member"}</b><div style={{fontSize:9,color:rr.status==="active"?"#18a76a":"#8d96a7"}}>{rr.status==="active"?L.active:L.pending}</div></div><small style={{color:"#8d96a7"}}>{rr.active_days_this_month??0}d</small></div>)}</div>:<div className="ex-card" style={{padding:25,textAlign:"center",color:"#8d96a7"}}>👥<div style={{marginTop:5}}>{L.noRefs}</div></div>}
         </div>}
 
-        {tab==="wallet"&&<div>
-          <div style={{marginBottom:15}}><div style={{fontSize:25,fontWeight:800}}>Wallet</div><div style={{fontSize:12,color:"#8d96a7"}}>Manage your EarnX and TON</div></div>
-          <div className="ex-card" style={{padding:18,marginBottom:11}}><small style={{color:"#8d96a7"}}>{L.availableTon}</small><div style={{fontSize:31,fontWeight:800,margin:"2px 0 14px"}}>{tonBalance.toFixed(5)} TON</div><div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:9}}><button className="ex-btn" onClick={()=>setShowSwap(true)} style={{padding:12,borderRadius:13,background:"#f0efff",color:"#5d57e9"}}>↔ {L.convert}</button><button className="ex-btn" onClick={()=>setShowWithdraw(true)} style={{padding:12,borderRadius:13,background:"#5d57e9",color:"#fff"}}>{L.withdraw}</button></div></div>
-          <div className="ex-card" style={{padding:18,marginBottom:11}}><small style={{color:"#8d96a7"}}>{L.earnCredits}</small><div style={{fontSize:28,fontWeight:800}}>{novaDisplay} EARNX</div><div style={{fontSize:11,color:"#8d96a7",marginTop:4}}>Mining power: <b style={{color:"#5d57e9"}}>{miningPower.toLocaleString()}</b></div></div>
-          <div className="ex-card" style={{padding:16}}>{buyError&&<div style={{background:"#fff1f1",border:"1px solid #ffd0d0",borderRadius:10,padding:"10px 12px",marginBottom:10,fontSize:11,color:"#c62828"}}>{buyError}</div>}<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:5}}><div><b>🛍️ {L.shop}</b><div style={{fontSize:10,color:"#8d96a7"}}>{L.boost}</div></div><TonConnectButton style={{height:30}}/></div>{displayTiers.slice(0,4).map(item=><div key={item.id} style={{display:"flex",alignItems:"center",gap:12,borderTop:"1px solid #eef0f5",padding:"14px 0",minHeight:70}}><span style={{width:46,height:46,borderRadius:14,background:"#f0efff",display:"grid",placeItems:"center",fontSize:20,flexShrink:0}}>⚡</span><span style={{flex:1,minWidth:0}}><b style={{fontSize:15,fontWeight:800,display:"block",lineHeight:1.25}}>{item.power} EARNX</b><small style={{display:"block",color:"#8d96a7",fontSize:12,marginTop:3}}>⚡ {L.dailyMining}: {item.daily} TON/day</small><small style={{display:"block",color:"#8d96a7",fontSize:10,marginTop:2}}>📅 {L.monthlyMining}: {item.month} TON</small></span><button className="ex-btn" onClick={()=>handleBuyTier(item)} style={{padding:"11px 13px",borderRadius:11,background:"#202637",color:"#fff",fontSize:12,fontWeight:800,whiteSpace:"nowrap",minWidth:70}}>{L.buy} · {item.cost} TON</button></div>)}{displayTiers.length===0&&<div style={{padding:15,textAlign:"center",color:"#8d96a7"}}>Shop is loading…</div>}</div>
-        </div>}
+        {tab==="withdraw"&&<div>
+          <div style={{marginBottom:15}}><div style={{fontSize:25,fontWeight:800}}>Withdraw</div><div style={{fontSize:12,color:"#8d96a7"}}>Withdraw your available TON</div></div>
+          <div className="ex-card" style={{padding:18,marginBottom:12}}>
+            <small style={{color:"#8d96a7"}}>Available balance</small><div style={{fontSize:34,fontWeight:800,margin:"4px 0 16px"}}>{tonBalance.toFixed(5)} TON</div>
+            <div style={{padding:14,borderRadius:13,background:"#f6f7fb",marginBottom:12}}><div style={{fontSize:10,color:"#8d96a7",marginBottom:6}}>TON WALLET ADDRESS</div><input value={withdrawAddress} onChange={e=>{setWithdrawAddress(e.target.value);setWithdrawError("");}} placeholder="UQ... or EQ..." style={{width:"100%",border:0,outline:0,background:"transparent",fontFamily:"inherit",fontSize:14}}/></div>
+            {withdrawError&&<div style={{padding:11,borderRadius:11,background:"#fff1f1",color:"#c62828",fontSize:11,marginBottom:10}}>{withdrawError}</div>}
+            <button className="ex-btn" disabled={withdrawBusy||!withdrawAddress.trim()||tonBalance<=0} onClick={async()=>{setWithdrawBusy(true);setWithdrawError("");try{await api.requestWithdraw(tonBalance,withdrawAddress.trim());setTonBalance(0);setWithdrawAddress("");}catch(e){setWithdrawError(e?.message||"Withdrawal request failed.");}finally{setWithdrawBusy(false);}}} style={{width:"100%",padding:14,borderRadius:14,background:"#5d57e9",color:"#fff",opacity:(withdrawBusy||!withdrawAddress.trim()||tonBalance<=0)?.55:1}}>{withdrawBusy?"Submitting…":"Withdraw TON"}</button>
+          </div>
+          <div className="ex-card" style={{padding:16,fontSize:11,color:"#8d96a7"}}>Minimum withdrawal: {minWithdrawTon} TON · Referral requirement: 5 active friends.</div>
+        </div>
 
-        {tab==="profile"&&<div>
-          <div style={{textAlign:"center",padding:"6px 0 17px"}}><div style={{width:76,height:76,borderRadius:"50%",margin:"0 auto 9px",background:"linear-gradient(135deg,#5d57e9,#8580ff)",display:"grid",placeItems:"center",color:"#fff",fontSize:29,fontWeight:800}}>{(tgUser?.first_name||"E").charAt(0).toUpperCase()}</div><div style={{fontSize:21,fontWeight:800}}>{tgUser?.first_name||"EarnX member"}</div><div style={{fontSize:11,color:"#8d96a7"}}>{tgUser?.username?"@"+tgUser.username:"Telegram member"}</div></div>
-          <div className="ex-card" style={{padding:7,marginBottom:11}}>{[["🛍️",L.shop,()=>setTab("wallet")],["↗",L.refer,()=>setTab("team")],["🌐",L.language,()=>setShowLanguage(true)]].map(([ic,label,fn])=><button key={label} className="ex-btn" onClick={fn} style={{width:"100%",display:"flex",alignItems:"center",gap:11,padding:13,border:0,borderBottom:"1px solid #eef0f5",background:"#fff",textAlign:"left",color:"#202637"}}><span style={{width:34,height:34,borderRadius:10,background:"#f2f3ff",display:"grid",placeItems:"center"}}>{ic}</span><span style={{flex:1}}>{label}</span><span style={{color:"#a0a7b4"}}>›</span></button>)}</div>
-          <div className="ex-card" style={{padding:16}}><b>⚙️ {L.account}</b><div style={{display:"flex",justifyContent:"space-between",padding:"10px 0",borderBottom:"1px solid #eef0f5",fontSize:11}}><span style={{color:"#8d96a7"}}>{L.telegramId}</span><span>{tgUser?.id||"—"}</span></div><div style={{display:"flex",justifyContent:"space-between",padding:"10px 0",borderBottom:"1px solid #eef0f5",fontSize:11}}><span style={{color:"#8d96a7"}}>Mining power</span><span>{miningPower.toLocaleString()}</span></div><div style={{display:"flex",justifyContent:"space-between",padding:"10px 0",fontSize:11}}><span style={{color:"#8d96a7"}}>{L.status}</span><span style={{color:"#18a76a",fontWeight:800}}>Active</span></div></div>
-        </div>}
+        {tab==="bonus"&&<div>
+          <div style={{marginBottom:15}}><div style={{fontSize:25,fontWeight:800}}>Bonus</div><div style={{fontSize:12,color:"#8d96a7"}}>Claim your available welcome reward</div></div>
+          <div className="ex-card" style={{padding:22,textAlign:"center",background:"linear-gradient(135deg,#f0efff,#ffffff)"}}>
+            <div style={{fontSize:58,marginBottom:8}}>🎁</div><div style={{fontSize:20,fontWeight:800}}>Welcome Bonus</div><div style={{fontSize:12,color:"#8d96a7",margin:"6px 0 18px"}}>Your account bonus</div><div style={{fontSize:36,fontWeight:800,color:"#5d57e9",marginBottom:18}}>+{welcomeTon} TON</div>
+            {giftUnclaimed?<button className="ex-btn" onClick={async()=>{try{await api.claimGift?.();const fresh=await api.me();if(fresh?.user){setTonBalance(Number(fresh.user.ton_balance??0));setNova(Number(fresh.user.nova??0));setHashes(Number(fresh.user.hashes??0));setMiningPower(miningPowerFromNova(Number(fresh.user.nova??0)));}setGiftUnclaimed(false);}catch(e){setBuyError(e?.message||"Could not claim the bonus.");}}} style={{width:"100%",padding:14,borderRadius:14,background:"#5d57e9",color:"#fff"}}>Claim Bonus</button>:<div style={{padding:12,borderRadius:12,background:"#effbf6",color:"#18a76a",fontWeight:700}}>✓ Bonus already claimed</div>}
+          </div>
+        </div>
       </main>
 
       {showLanguage&&<div onClick={()=>setShowLanguage(false)} style={{position:"fixed",inset:0,zIndex:1200,background:"rgba(20,25,40,.5)",backdropFilter:"blur(8px)",display:"flex",alignItems:"flex-end",justifyContent:"center"}}><div onClick={e=>e.stopPropagation()} className="ex-card" style={{width:"100%",maxWidth:430,maxHeight:"78vh",overflowY:"auto",padding:18,borderRadius:"24px 24px 0 0"}}><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}><b style={{fontSize:20}}>🌐 {L.chooseLanguage}</b><button onClick={()=>setShowLanguage(false)} className="ex-btn" style={{border:0,background:"#f1f2f6",borderRadius:10,width:34,height:34}}>×</button></div><div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>{Object.entries(LANGUAGES).map(([id,v])=><button key={id} onClick={()=>setLanguage(id)} className="ex-btn" style={{padding:"12px 10px",borderRadius:13,border:lang===id?"2px solid #5d57e9":"1px solid #e5e8ef",background:lang===id?"#f0efff":"#fff",textAlign:"left",color:"#202637"}}><span style={{fontSize:18,marginRight:7}}>{v.flag}</span>{v.name}</button>)}</div></div></div>}
-      <nav className="ex-nav"><div style={{display:"flex",maxWidth:430,margin:"0 auto"}}>{navItems.map(item=>{const icon=item.id==="home"?"⌂":item.id==="tasks"?"☷":item.id==="team"?"👥":item.id==="wallet"?"▣":"●";return <button key={item.id} className={tab===item.id?"active":""} onClick={()=>setTab(item.id)}><span style={{fontSize:21,lineHeight:1}}>{icon}</span><span>{item.label}</span></button>})}</div></nav>
+      <nav className="ex-nav"><div style={{display:"flex",maxWidth:430,margin:"0 auto"}}>{navItems.map(item=>{const icon=item.id==="home"?"⌂":item.id==="withdraw"?"⇩":item.id==="history"?"◷":item.id==="team"?"👥":"🎁";return <button key={item.id} className={tab===item.id?"active":""} onClick={()=>setTab(item.id)}><span style={{fontSize:21,lineHeight:1}}>{icon}</span><span>{item.label}</span></button>})}</div></nav>
 
-      {showWithdraw&&<WithdrawModal onClose={()=>setShowWithdraw(false)} tonBalance={tonBalance} qualifiedFriends={qualifiedFriends} onInvite={handleShareReferral} onWithdrawComplete={()=>{setTonBalance(0);setShowWithdraw(false);}} minWithdrawTon={minWithdrawTon}/>}
+
     </div>
   );
 }
