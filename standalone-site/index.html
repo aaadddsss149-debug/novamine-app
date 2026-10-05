@@ -397,14 +397,6 @@
             const spinner = submitButton.querySelector('.spinner');
             const amount = parseFloat(withdrawForm.elements['withdraw-amount'].value);
             const method = withdrawForm.elements.method.value;
-            const accountNumber = withdrawForm.eleme        async function handleWithdrawal(event) {
-            event.preventDefault();
-            const { withdrawForm } = allDOMElements;
-            const submitButton = document.getElementById('withdraw-submit-button');
-            const buttonText = submitButton.querySelector('.button-text');
-            const spinner = submitButton.querySelector('.spinner');
-            const amount = parseFloat(withdrawForm.elements['withdraw-amount'].value);
-            const method = withdrawForm.elements.method.value;
             const accountNumber = withdrawForm.elements['account-number'].value.trim();
 
             if (!Number.isFinite(amount) || amount <= 0) return safeTgAlert('Enter a valid amount.');
