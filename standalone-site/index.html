@@ -539,18 +539,24 @@
         async function initApp() {
             if (window.__novamineStarted) return;
             window.__novamineStarted = true;
+            const preloaderStartedAt = Date.now();
+            const MIN_PRELOADER_MS = 10000;
             let appReady = false;
             let preloaderAnimationDone = false;
             
             const tryFinishLoading = () => {
                 if(appReady && preloaderAnimationDone) {
-                    allDOMElements.preloader.style.opacity = '0';
-                    if (allDOMElements.preloaderFooter) allDOMElements.preloaderFooter.style.opacity = '0';
+                    const elapsed = Date.now() - preloaderStartedAt;
+                    const remaining = Math.max(0, MIN_PRELOADER_MS - elapsed);
                     setTimeout(() => {
-                        allDOMElements.preloader.style.display = 'none';
-                        if (allDOMElements.preloaderFooter) allDOMElements.preloaderFooter.style.display = 'none';
-                        allDOMElements.container.style.display = 'block';
-                    }, 500);
+                        allDOMElements.preloader.style.opacity = '0';
+                        if (allDOMElements.preloaderFooter) allDOMElements.preloaderFooter.style.opacity = '0';
+                        setTimeout(() => {
+                            allDOMElements.preloader.style.display = 'none';
+                            if (allDOMElements.preloaderFooter) allDOMElements.preloaderFooter.style.display = 'none';
+                            allDOMElements.container.style.display = 'block';
+                        }, 550);
+                    }, remaining);
                 }
             };
 
