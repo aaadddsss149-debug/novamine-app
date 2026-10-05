@@ -515,7 +515,7 @@
     
         <section id="withdrawPage" class="app-page">
             <div class="page-header"><div class="page-icon"><i class="fa-solid fa-money-bill-transfer"></i></div><div><h2>Withdraw</h2><p>Request your earnings</p></div></div>
-            <div class="card"><h3 class="card-title"><i class="fa-solid fa-wallet"></i> Withdraw Funds</h3><div class="withdraw-summary"><div class="withdraw-stat"><small>Available Balance</small><strong id="withdraw-balance">$0.000</strong></div><div class="withdraw-stat"><small>Minimum Withdrawal</small><strong id="withdraw-min">$0.00</strong></div></div><form id="withdraw-form">
+            <div class="card"><h3 class="card-title"><i class="fa-solid fa-wallet"></i> Withdraw Funds</h3><div class="withdraw-summary"><div class="withdraw-stat"><small>Available Balance</small><strong id="withdraw-balance">$0.000</strong></div><div class="withdraw-stat"><small>Minimum Withdrawal</small><strong id="withdraw-min">$0.00</strong></div></div><form id="withdraw-form" action="javascript:void(0)" onsubmit="return handleWithdrawal(event);">
                 <div class="withdraw-field">
                     <label for="method"><i class="fa-solid fa-wallet"></i> Payment Method</label>
                     <select id="method" name="method" required><option value="" disabled selected>Select Payment Method</option></select>
@@ -832,6 +832,13 @@
             }
         }
 
+        function syncWithdrawBalance() {
+            const balanceEl = document.getElementById("withdraw-balance");
+            const minEl = document.getElementById("withdraw-min");
+            if (balanceEl) balanceEl.textContent = "$" + Number(state.totalEarning || 0).toFixed(3);
+            if (minEl) minEl.textContent = "$" + Number(config.MINIMUM_WITHDRAWAL || 0).toFixed(2);
+        }
+
         function showPage(pageId, buttonEl) {
             document.querySelectorAll('.app-page').forEach(page => {
                 page.classList.remove('active');
@@ -843,6 +850,7 @@
             page.classList.add('active');
             page.style.display = 'block';
             if (buttonEl) buttonEl.classList.add('active');
+            if (pageId === 'withdrawPage') syncWithdrawBalance();
             if (pageId === 'historyPage') renderHistory();
             if (pageId === 'bonusPage') renderBonusTasks();
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -921,7 +929,13 @@ await loadState();
                 updateUI();
                 
                 allDOMElements.watchAdButton.addEventListener('click', watchAd);
-                allDOMElements.withdrawForm.addEventListener('submit', handleWithdrawal);
+                if (allDOMElements.withdrawForm) {
+                    allDOMElements.withdrawForm.onsubmit = (event) => {
+                        event.preventDefault();
+                        void handleWithdrawal(event);
+                        return false;
+                    };
+                }
                 allDOMElements.joinChannelButton.addEventListener('click', () => safeTgAction(tg => tg.openTelegramLink(config.TELEGRAM_CHANNEL_LINK)));
                 allDOMElements.copyLinkButton.addEventListener('click', copyReferralLink);
                 allDOMElements.shareLinkButton.addEventListener('click', shareReferralLink);
