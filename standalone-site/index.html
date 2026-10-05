@@ -40,9 +40,8 @@
 .earnx-loader{position:relative;z-index:1;width:min(88vw,390px);text-align:center;margin:0 auto}
 .earnx-orbit{position:relative;width:120px;height:120px;margin:0 auto 18px;display:grid;place-items:center}
 .earnx-orbit::before,.earnx-orbit::after,.earnx-ring-dot,.earnx-platform{display:none!important;content:none!important}
-.earnx-logo{position:relative;width:92px;height:92px;display:flex;align-items:center;justify-content:center;gap:0;font-size:64px;font-weight:900;letter-spacing:-9px;padding:0 7px 0 0;color:#f5f9ff;text-shadow:0 0 12px rgba(0,190,255,.9),0 0 30px rgba(0,98,255,.55);filter:drop-shadow(0 0 12px rgba(0,183,255,.5));animation:logoFloat 2.6s ease-in-out infinite}
+.earnx-logo{position:relative;width:92px;height:92px;display:grid;place-items:center;font-size:64px;font-weight:900;letter-spacing:-11px;padding-right:8px;color:#f5f9ff;text-shadow:0 0 12px rgba(0,190,255,.9),0 0 30px rgba(0,98,255,.55);filter:drop-shadow(0 0 12px rgba(0,183,255,.5));animation:logoFloat 2.6s ease-in-out infinite;transform:translateY(-9px)}
 .earnx-logo::after{display:none!important;content:none!important}
-.earnx-logo span{display:block;line-height:1;transform:none}
 .earnx-logo-x{color:#00bfff}
 .earnx-brand{font-size:40px;line-height:1;font-weight:900;letter-spacing:-2px}
 .earnx-brand span{color:#00bfff;text-shadow:0 0 16px rgba(0,191,255,.5)}
@@ -54,7 +53,7 @@
 .earnx-loading{margin-top:22px;color:#7189a6;font-size:11px;letter-spacing:3px}
 .earnx-spinner{width:24px;height:24px;margin:0 auto 9px;border:2px solid rgba(0,191,255,.2);border-top-color:#00cfff;border-radius:50%;animation:spin 1s linear infinite;box-shadow:0 0 12px rgba(0,191,255,.3)}
 @keyframes logoFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
-@media(max-width:380px){.earnx-loader{width:88vw}.earnx-orbit{width:105px;height:105px;margin-bottom:12px}.earnx-logo{width:82px;height:82px;font-size:58px}.earnx-brand{font-size:36px}.earnx-progress-row{margin-top:30px}}
+@media(max-width:380px){.earnx-loader{width:88vw}.earnx-orbit{width:105px;height:105px;margin-bottom:12px}.earnx-logo{width:82px;height:82px;font-size:58px;transform:translateY(-7px)}.earnx-brand{font-size:36px}.earnx-progress-row{margin-top:30px}}
 .container { max-width: 500px; margin: 0 auto; display: none; width: 100%; }
         .app-page { max-width: 500px; margin: 0 auto; width: 100%; display: none; animation: fadeIn 0.25s ease-out; }
         .app-page.active { display: block; }
