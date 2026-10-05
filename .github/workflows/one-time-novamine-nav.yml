@@ -11,8 +11,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Rewrite App
-        shell: python
+        shell: bash
         run: |
+          python3 - <<'PY'
           from pathlib import Path
           p=Path("apps/web/src/App.jsx"); s=p.read_text()
           s=s.replace('const [showWithdraw,setShowWithdraw]=useState(false);','const [showWithdraw,setShowWithdraw]=useState(false);\\n  const [withdrawAddress,setWithdrawAddress]=useState("");\\n  const [withdrawBusy,setWithdrawBusy]=useState(false);\\n  const [withdrawError,setWithdrawError]=useState("");')
@@ -33,13 +34,13 @@ jobs:
   ];'''
           if old not in s: raise SystemExit("nav block not found")
           s=s.replace(old,new)
-          a=s.index('        {tab==="tasks"&&<div>'); b=s.index('\\n\\n        {tab==="team"&&<div>',a)
+          a=s.index('        {tab==="tasks"&&<div>'); b=s.index('\n\n        {tab==="team"&&<div>',a)
           s=s[:a]+'''        {tab==="history"&&<div>
           <div style={{marginBottom:15}}><div style={{fontSize:25,fontWeight:800}}>History</div><div style={{fontSize:12,color:"#8d96a7"}}>Your recent earning activity</div></div>
           <div className="ex-card" style={{padding:18,marginBottom:12}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:14}}><b>Current balance</b><b style={{color:"#18a76a"}}>{tonBalance.toFixed(5)} TON</b></div><div style={{display:"grid",gap:9}}><div style={{padding:13,borderRadius:13,background:"#f6f7fb",display:"flex",justifyContent:"space-between"}}><span>Mining rate</span><b>{miningPower.toLocaleString()}</b></div><div style={{padding:13,borderRadius:13,background:"#f6f7fb",display:"flex",justifyContent:"space-between"}}><span>Referrals</span><b>{refStats.total}</b></div><div style={{padding:13,borderRadius:13,background:"#f6f7fb",display:"flex",justifyContent:"space-between"}}><span>Active friends</span><b>{qualifiedFriends}</b></div></div></div>
           <div className="ex-card" style={{padding:18}}><b>Activity</b><div style={{padding:"28px 8px 12px",textAlign:"center",color:"#8d96a7",fontSize:12}}>Your real mining and withdrawal records will appear here as the account creates them.</div></div>
         </div>}''' + s[b:]
-          a=s.index('        {tab==="wallet"&&<div>'); b=s.index('\\n\\n        {tab==="profile"&&<div>',a)
+          a=s.index('        {tab==="wallet"&&<div>'); b=s.index('\n\n        {tab==="profile"&&<div>',a)
           s=s[:a]+'''        {tab==="withdraw"&&<div>
           <div style={{marginBottom:15}}><div style={{fontSize:25,fontWeight:800}}>Withdraw</div><div style={{fontSize:12,color:"#8d96a7"}}>Withdraw your available TON</div></div>
           <div className="ex-card" style={{padding:18,marginBottom:12}}><small style={{color:"#8d96a7"}}>Available balance</small><div style={{fontSize:34,fontWeight:800,margin:"4px 0 16px"}}>{tonBalance.toFixed(5)} TON</div>
@@ -48,7 +49,7 @@ jobs:
             <button className="ex-btn" disabled={withdrawBusy||!withdrawAddress.trim()||tonBalance<=0} onClick={async()=>{setWithdrawBusy(true);setWithdrawError("");try{await api.requestWithdraw(tonBalance,withdrawAddress.trim());setTonBalance(0);setWithdrawAddress("");alert("Withdrawal request submitted.");}catch(e){setWithdrawError(e?.message||"Withdrawal request failed.");}finally{setWithdrawBusy(false);}}} style={{width:"100%",padding:14,borderRadius:14,background:"#5d57e9",color:"#fff",opacity:(withdrawBusy||!withdrawAddress.trim()||tonBalance<=0)?.55:1}}>{withdrawBusy?"Submitting…":"Withdraw TON"}</button>
           </div><div className="ex-card" style={{padding:16,fontSize:11,color:"#8d96a7"}}>Minimum withdrawal: {minWithdrawTon} TON · Referral requirement: 5 active friends.</div>
         </div>}''' + s[b:]
-          a=s.index('        {tab==="profile"&&<div>'); b=s.index('\\n      </main>',a)
+          a=s.index('        {tab==="profile"&&<div>'); b=s.index('\n      </main>',a)
           s=s[:a]+'''        {tab==="bonus"&&<div>
           <div style={{marginBottom:15}}><div style={{fontSize:25,fontWeight:800}}>Bonus</div><div style={{fontSize:12,color:"#8d96a7"}}>Claim your available welcome reward</div></div>
           <div className="ex-card" style={{padding:22,textAlign:"center",background:"linear-gradient(135deg,#f0efff,#ffffff)"}}><div style={{fontSize:58,marginBottom:8}}>🎁</div><div style={{fontSize:20,fontWeight:800}}>Welcome Bonus</div><div style={{fontSize:12,color:"#8d96a7",margin:"6px 0 18px"}}>Your account bonus</div><div style={{fontSize:36,fontWeight:800,color:"#5d57e9",marginBottom:18}}>+{welcomeTon} TON</div>
@@ -63,11 +64,12 @@ jobs:
           s=s.replace('onClick={()=>{setGiftOpened(false);setShowGift(true)}}','onClick={()=>setTab("bonus")}')
           w=s.find('      {showWithdraw&&<WithdrawModal')
           if w!=-1:
-            e=s.find('\\n    </div>\\n  );',w)
+            e=s.find('\n    </div>\n  );',w)
             if e==-1: raise SystemExit("withdraw modal end not found")
             s=s[:w]+s[e:]
           s=s.replace('item.id==="tasks"?"☷":item.id==="team"?"👥":item.id==="wallet"?"▣":"●"','item.id==="withdraw"?"⇩":item.id==="history"?"◷":item.id==="team"?"👥":"🎁"')
           p.write_text(s)
+          PY
       - name: Build
         run: npm install && npm run build:web
       - name: Commit
