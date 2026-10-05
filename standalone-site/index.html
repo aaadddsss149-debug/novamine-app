@@ -538,10 +538,10 @@
             const tryFinishLoading = () => {
                 if(appReady && preloaderAnimationDone) {
                     allDOMElements.preloader.style.opacity = '0';
-                    allDOMElements.preloaderFooter.style.opacity = '0';
+                    if (allDOMElements.preloaderFooter) allDOMElements.preloaderFooter.style.opacity = '0';
                     setTimeout(() => {
                         allDOMElements.preloader.style.display = 'none';
-                        allDOMElements.preloaderFooter.style.display = 'none';
+                        if (allDOMElements.preloaderFooter) allDOMElements.preloaderFooter.style.display = 'none';
                         allDOMElements.container.style.display = 'block';
                     }, 500);
                 }
