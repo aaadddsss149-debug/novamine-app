@@ -481,7 +481,15 @@
         #withdraw-submit-button { min-height:52px; margin-top:2px; }
         #withdrawPage .withdraw-note { margin:12px 0 0; padding:11px 12px; border-radius:12px; color:var(--text-light); background:rgba(0,191,255,.045); border:1px solid rgba(0,191,255,.10); font-size:11px; line-height:1.5; }
         #homePage .chart-container { height:210px; padding:8px 2px 2px; }
-    </style>
+    
+        /* Keep the Home page dark; use a clean non-black surface on inner pages */
+        body:not(:has(#homePage.active)) {
+            background: #071323;
+        }
+        body:not(:has(#homePage.active)) .app-page {
+            background: transparent;
+        }
+</style>
 </head>
 <body>
     <div id="preloader" aria-label="EarnX loading">
