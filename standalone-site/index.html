@@ -669,45 +669,28 @@
         @keyframes percentPulse { 0%,100%{opacity:.72} 50%{opacity:1;text-shadow:0 0 12px rgba(0,217,255,.65)} }
         @keyframes spinnerGlow { from{box-shadow:0 0 8px rgba(0,191,255,.2)} to{box-shadow:0 0 22px rgba(0,191,255,.65)} }
 
-        #invitePage .referral-box {
-            margin:16px 0;
-            padding:14px;
-            border-radius:16px;
-            background:#050506;
-            border:1px solid rgba(0,191,255,.16);
-        }
-        #invitePage .referral-label {
-            display:block;
-            margin-bottom:8px;
-            color:#8fa8c7;
-            font-size:11px;
-            font-weight:700;
-        }
-        #invitePage .referral-input {
-            width:100%;
-            min-height:48px;
-            padding:12px 13px;
-            border-radius:12px;
-            border:1px solid #25252a;
-            background:#000;
-            color:#eef9ff;
-            font:500 12px/1.4 inherit;
-            outline:none;
-        }
-        #invitePage .referral-input:focus { border-color:#00bfff; box-shadow:0 0 0 3px rgba(0,191,255,.10); }
+        /* Clean Invite + loading */
+        .earnx-orbit, .earnx-ring-dot, .earnx-platform { display:none !important; }
+        .earnx-logo-wrap { width:150px; height:120px; margin:0 auto 18px; display:grid; place-items:center; }
+        .earnx-logo { animation:logoFloat 2.8s ease-in-out infinite, logoGlow 2s ease-in-out infinite alternate !important; }
+        #invitePage .referral-count-card { display:flex; align-items:center; justify-content:center; flex-direction:column; gap:3px; padding:18px; margin-bottom:14px; border-radius:15px; background:#050506; border:1px solid rgba(0,191,255,.16); }
+        #invitePage .referral-count-card strong { font-size:32px; color:#00cfff; line-height:1; text-shadow:0 0 16px rgba(0,191,255,.28); }
+        #invitePage .referral-count-card span { color:#8fa8c7; font-size:11px; }
+        #invitePage .invite-list-title { display:flex; align-items:center; gap:8px; margin:20px 0 10px; color:#eef9ff; font-size:14px; font-weight:700; }
+        #invitePage .invite-list-title i { color:#00cfff; }
+        #invitePage .referrals-list { display:flex; flex-direction:column; gap:8px; }
+        #invitePage .referral-user { display:flex; align-items:center; gap:11px; padding:11px 12px; border-radius:13px; background:#050506; border:1px solid #202024; }
+        #invitePage .referral-avatar { width:38px; height:38px; flex:0 0 38px; border-radius:50%; display:grid; place-items:center; background:linear-gradient(145deg,#0878ff,#00d9ff); color:#fff; font-weight:800; overflow:hidden; }
+        #invitePage .referral-avatar img { width:100%; height:100%; object-fit:cover; }
+        #invitePage .referral-user-name { font-size:13px; font-weight:700; color:#eef9ff; }
+        #invitePage .referral-user-meta { margin-top:2px; font-size:10px; color:#8fa8c7; }
         #invitePage .action-button { touch-action:manipulation; -webkit-tap-highlight-color:transparent; }
-        #invitePage .invite-note {
-            display:flex; gap:9px; align-items:flex-start;
-            margin-top:14px; color:#8fa8c7; font-size:11px; line-height:1.5;
-        }
-        #invitePage .invite-note i { color:#00cfff; margin-top:2px; }
-
     </style>
 </head>
 <body>
     <div id="preloader" aria-label="EarnX loading">
         <div class="earnx-loader">
-            <div class="earnx-orbit"><span class="earnx-ring-dot"></span><div class="earnx-logo"><span>E</span><span class="earnx-logo-x">X</span></div><div class="earnx-platform"></div></div>
+            <div class="earnx-logo-wrap"><div class="earnx-logo"><span>E</span><span class="earnx-logo-x">X</span></div></div>
             <div class="earnx-brand">Earn<span>X</span></div>
             <div class="earnx-tagline">WATCH &nbsp;•&nbsp; EARN &nbsp;•&nbsp; GROW</div>
             <div class="earnx-progress-row"><div class="earnx-progress"><div id="preloader-progress-fill"></div></div><div id="preloader-percentage">0%</div></div>
@@ -754,7 +737,7 @@
             </form></div>
         </section>
         <section id="historyPage" class="app-page"><div class="page-header"><div class="page-icon"><i class="fa-solid fa-clock-rotate-left"></i></div><div><h2>History</h2><p>Your withdrawal activity</p></div></div><div class="card"><div id="history-list"></div></div></section>
-        <section id="invitePage" class="app-page"><div class="page-header"><div class="page-icon"><i class="fa-solid fa-user-plus"></i></div><div><h2>Invite</h2><p>Grow your rewards with friends</p></div></div><div class="card"><h3 class="card-title"><i class="fa-solid fa-user-group"></i> Invite Friends</h3><p>Share your personal referral link. When a new user opens the Mini App through your link, the referral is recorded automatically.</p><div class="referral-box"><span class="referral-label">YOUR REFERRAL LINK</span><input id="referral-link-input" class="referral-input" type="text" readonly value="Loading referral link..."></div><button type="button" class="action-button" id="copy-link-button"><i class="fa-solid fa-copy"></i><span>Copy Link</span></button><button type="button" class="action-button secondary-button" id="share-link-button"><i class="fa-solid fa-share-nodes"></i><span>Share Link</span></button><div class="invite-note"><i class="fa-solid fa-circle-info"></i><span>Use Share Link to send the invitation directly in Telegram.</span></div></div></section>
+        <section id="invitePage" class="app-page"><div class="page-header"><div class="page-icon"><i class="fa-solid fa-user-plus"></i></div><div><h2>Invite</h2><p>Invite friends and earn rewards</p></div></div><div class="card"><h3 class="card-title"><i class="fa-solid fa-user-group"></i> Your Referrals</h3><div class="referral-count-card"><strong id="invite-referral-count">0</strong><span>Friends Invited</span></div><button type="button" class="action-button" id="copy-link-button"><i class="fa-solid fa-copy"></i><span>Copy Invite Link</span></button><button type="button" class="action-button secondary-button" id="share-link-button"><i class="fa-solid fa-share-nodes"></i><span>Share Invite Link</span></button><div class="invite-list-title"><i class="fa-solid fa-users"></i><span>People You Invited</span></div><div id="referrals-list" class="referrals-list"><p class="no-history">No invited users yet.</p></div></div></section>
         <section id="bonusPage" class="app-page"><div class="page-header"><div class="page-icon"><i class="fa-solid fa-star"></i></div><div><h2>Task</h2><p>Complete tasks for extra rewards</p></div></div><div class="card"><h3 class="card-title">Tasks</h3><p style="text-align:center;margin-bottom:20px;">Complete tasks to earn extra rewards!</p><div id="bonus-tasks-list"></div></div></section>
         <div id="multiAccountModal" class="modal"><div class="modal-content"><h3 class="card-title" style="text-align:center;">⚠️ Warning</h3><p>Multiple accounts are not allowed. Only one Telegram account can be used on this device. Please use your original account to continue.</p></div></div>
 
@@ -808,7 +791,7 @@
             return telegramReadyPromise;
         }
         
-        let state = { totalEarning: 0.0, adCount: 0, adsWatchedToday: 0, lastAdWatchedDate: null, cooldownUntil: null, weeklyActivity: [0, 0, 0, 0, 0, 0, 0], withdrawalHistory: [], lastUsedIp: null, completedBonusTasks: [], rewardedReferrals: 0, originalUserId: null };
+        let state = { totalEarning: 0.0, adCount: 0, adsWatchedToday: 0, lastAdWatchedDate: null, cooldownUntil: null, weeklyActivity: [0, 0, 0, 0, 0, 0, 0], withdrawalHistory: [], lastUsedIp: null, completedBonusTasks: [], rewardedReferrals: 0, referredUsers: [], originalUserId: null };
         const supabase = null;
         let siteUserId = null;
         let currentIpAddress = null;
@@ -848,6 +831,7 @@
             state.adsWatchedToday = Number(u.ads_watched_today || 0);
             state.withdrawalHistory = data.history || [];
             state.completedBonusTasks = data.completedBonusTasks || [];
+            state.referredUsers = data.referredUsers || [];
             state.weeklyActivity = data.weeklyActivity || [0,0,0,0,0,0,0];
             state.originalUserId = u.telegram_id;
             state.cooldownUntil = u.cooldown_until || null;
@@ -925,6 +909,7 @@
             allDOMElements.totalEarningEl.textContent = `$${state.totalEarning.toFixed(3)}`;
             allDOMElements.adCountEl.textContent = state.adCount;
             allDOMElements.adsTodayCountEl.textContent = `${state.adsWatchedToday} / ${config.DAILY_AD_LIMIT}`;
+            if (allDOMElements.referralCountEl) allDOMElements.referralCountEl.textContent = state.referredUsers.length;
             allDOMElements.minWithdrawText.textContent = `Minimum withdrawal is ${config.MINIMUM_WITHDRAWAL.toFixed(2)}.`;
             const wb = document.getElementById("withdraw-balance"); if (wb) wb.textContent = "$" + state.totalEarning.toFixed(3);
             const wm = document.getElementById("withdraw-min"); if (wm) wm.textContent = "$" + config.MINIMUM_WITHDRAWAL.toFixed(2);
@@ -1078,54 +1063,59 @@
         }
         function getReferralLink() {
             const userId = tg?.initDataUnsafe?.user?.id;
-            if (!userId) return '';
             const botUsername = String(config.BOT_USERNAME || '').replace(/^@/, '').trim();
-            return `https://t.me/${botUsername}?startapp=${encodeURIComponent(userId)}`;
+            if (!userId || !botUsername) return '';
+            return 'https://t.me/' + botUsername + '?startapp=' + encodeURIComponent(String(userId));
         }
-        function refreshReferralLink() {
-            const input = document.getElementById('referral-link-input');
-            const link = getReferralLink();
-            if (input) input.value = link || 'Open this Mini App from Telegram to generate your link.';
+        function renderReferrals() {
+            const list = document.getElementById('referrals-list');
+            const count = document.getElementById('invite-referral-count');
+            const users = Array.isArray(state.referredUsers) ? state.referredUsers : [];
+            if (count) count.textContent = users.length;
+            if (!list) return;
+            if (!users.length) { list.innerHTML = '<p class="no-history">No invited users yet.</p>'; return; }
+            list.innerHTML = users.map(user => {
+                const name = [user.first_name, user.last_name].filter(Boolean).join(' ').trim() || (user.username ? '@' + user.username : 'Telegram User');
+                const username = user.username ? '@' + user.username : 'Telegram user';
+                const avatar = user.photo_url ? '<img src="' + escapeHTML(user.photo_url) + '" alt="">' : escapeHTML(name.charAt(0).toUpperCase());
+                return '<div class="referral-user"><div class="referral-avatar">' + avatar + '</div><div><div class="referral-user-name">' + escapeHTML(name) + '</div><div class="referral-user-meta">' + escapeHTML(username) + '</div></div></div>';
+            }).join('');
         }
         async function copyReferralLink() {
             const link = getReferralLink();
             if (!link) return safeTgAlert('Open the Mini App inside Telegram first.');
-            const input = document.getElementById('referral-link-input');
+            let copied = false;
             try {
                 if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
                     await navigator.clipboard.writeText(link);
-                } else {
-                    input?.focus();
-                    input?.select();
-                    const ok = document.execCommand('copy');
-                    if (!ok) throw new Error('COPY_FAILED');
+                    copied = true;
                 }
-                safeTgAlert('Referral link copied!');
-            } catch (error) {
-                console.error('Copy referral link error:', error);
-                try {
-                    input?.focus();
-                    input?.select();
-                    safeTgAlert('Link selected. Tap Copy to copy it.');
-                } catch (_) {
-                    safeTgAlert('Copy failed. Please use Share Link.');
-                }
+            } catch (_) {}
+            if (!copied) {
+                const area = document.createElement('textarea');
+                area.value = link;
+                area.setAttribute('readonly', '');
+                area.style.position = 'fixed';
+                area.style.left = '-10000px';
+                area.style.top = '0';
+                document.body.appendChild(area);
+                area.focus(); area.select(); area.setSelectionRange(0, area.value.length);
+                try { copied = document.execCommand('copy'); } catch (_) {}
+                area.remove();
             }
+            if (copied) safeTgAlert('Invite link copied!');
+            else safeTgAlert('Copy is blocked by Telegram. The link is ready to share with the Share button.');
         }
         function shareReferralLink() {
             const link = getReferralLink();
             if (!link) return safeTgAlert('Open the Mini App inside Telegram first.');
-            const text = `Earn money by watching ads! Join using my link:\n${link}`;
-            const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`;
+            const shareUrl = 'https://t.me/share/url?url=' + encodeURIComponent(link);
             safeTgAction(tg => {
                 try {
                     if (typeof tg.openTelegramLink === 'function') tg.openTelegramLink(shareUrl);
                     else if (typeof tg.openLink === 'function') tg.openLink(shareUrl);
                     else window.location.href = shareUrl;
-                } catch (error) {
-                    console.error('Share referral link error:', error);
-                    window.location.href = shareUrl;
-                }
+                } catch (_) { window.location.href = shareUrl; }
             }, () => { window.location.href = shareUrl; });
         }
         
@@ -1209,7 +1199,7 @@ await loadState();
                 allDOMElements.joinChannelButton.addEventListener('click', () => safeTgAction(tg => tg.openTelegramLink(config.TELEGRAM_CHANNEL_LINK)));
                 allDOMElements.copyLinkButton.addEventListener('click', (event) => { event.preventDefault(); void copyReferralLink(); });
                 allDOMElements.shareLinkButton.addEventListener('click', (event) => { event.preventDefault(); shareReferralLink(); });
-                refreshReferralLink();
+                renderReferrals();
                 showPage('homePage', document.querySelector('.nav-button:nth-child(1)'));
 
                 safeTgAction(tg => {
