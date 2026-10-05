@@ -214,14 +214,31 @@ export async function startBot(app: Express) {
   console.log("[bot] notifications disabled until notification schema is deployed");
 
   // ── Telegram transport ───────────────────────────────────────────────────
-  // Use long polling on the Render API service. This avoids webhook delivery
-  // issues and keeps the bot independent from the public URL/proxy layer.
+  // Use Telegram webhooks in production to avoid 409 getUpdates conflicts.
   try {
-    await bot.api.deleteWebhook({ drop_pending_updates: false });
-    bot.start({
-      onStart: (info) => console.log(`[bot] long-polling as @${info.username}`),
+    if (!config.bot.publicUrl) throw new Error("PUBLIC_API_URL is not configured");
+    const webhookUrl = config.bot.publicUrl.replace(/\/$/, "") + "/webhook";
+
+    app.post("/webhook", async (req, res) => {
+      try {
+        if (config.bot.webhookSecret) {
+          const received = String(req.header("x-telegram-bot-api-secret-token") || "");
+          if (received !== config.bot.webhookSecret) return res.sendStatus(403);
+        }
+        const handler = webhookCallback(bot, "express");
+        await handler(req, res);
+      } catch (err) {
+        console.error("[bot] webhook handler failed:", err);
+        if (!res.headersSent) res.sendStatus(500);
+      }
     });
+
+    await bot.api.setWebhook(webhookUrl, {
+      drop_pending_updates: false,
+      ...(config.bot.webhookSecret ? { secret_token: config.bot.webhookSecret } : {}),
+    });
+    console.log("[bot] webhook set: " + webhookUrl);
   } catch (err) {
-    console.error("[bot] failed to start long-polling:", err);
+    console.error("[bot] failed to configure webhook:", err);
   }
 }
