@@ -9,9 +9,7 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
         // --- INSTANT THEME APPLY SCRIPT ---
@@ -260,17 +258,8 @@
                 'USDT TRX-20',
                 'TON'
             ],
-             firebase: {
-            apiKey: "AIza" + "SyB4scFy1ssMLxcdWYKAWymv_XnHQumGSNs",
-            authDomain: "earnx-e36de.firebaseapp.com",
-            databaseURL: "https://earnx-e36de-default-rtdb.firebaseio.com",
-            projectId: "earnx-e36de",
-            storageBucket: "earnx-e36de.firebasestorage.app",
-            messagingSenderId: "603646850706",
-            appId: "1:603646850706:web:0d46f41dcdc9e8762b984b",
-            measurementId: "G-75V8ZSWQB2"
-
-             },
+            SUPABASE_URL: 'https://ziutwampfoqreozyvcnm.supabase.co',
+            SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_Ym_0bRbsiEKCvvFdN0rxow_-JHh94ra',
             REFERRAL_REWARD: 0.01,
             bonusTasks: [
                 { id: 'bonus_01', title: 'আমাদের চ্যানেল ভিজিট করুন', link: 'https://t.me/earnx0official', reward: 0.01, duration: 10 },
@@ -286,9 +275,9 @@
         const tg = window.Telegram ? window.Telegram.WebApp : null;
         
         let state = { totalEarning: 0.0, adCount: 0, adsWatchedToday: 0, lastAdWatchedDate: null, cooldownUntil: null, weeklyActivity: [0, 0, 0, 0, 0, 0, 0], withdrawalHistory: [], lastUsedIp: null, completedBonusTasks: [], rewardedReferrals: 0, originalUserId: null };
-        const dbName = 'AdBotAppDB'; let db;
+        const supabase = window.supabase.createClient(config.SUPABASE_URL, config.SUPABASE_PUBLISHABLE_KEY);
+        let siteUserId = null;
         let currentIpAddress = null;
-        let firebaseApp, firebaseDb;
 
         const allDOMElements = { 
             preloader: document.getElementById('preloader'), preloaderPercentage: document.getElementById('preloader-percentage'), preloaderFooter: document.getElementById('preloader-footer'),
@@ -301,12 +290,41 @@
             welcomeTitle: document.getElementById('welcome-title'), welcomeMessage: document.getElementById('welcome-message')
         };
         
-        function initDB() { return new Promise((resolve) => { try { const request = indexedDB.open(dbName, 3); request.onerror = (e) => { console.error("DB Error:", e); resolve(); }; request.onsuccess = event => { db = event.target.result; resolve(); }; request.onupgradeneeded = event => { let db = event.target.result; if (!db.objectStoreNames.contains('userState')) db.createObjectStore('userState', { keyPath: 'id' }); if (!db.objectStoreNames.contains('appUsage')) db.createObjectStore('appUsage', { keyPath: 'ip' }); }; } catch (e) { resolve(); } }); }
-        function saveState() { if (!db) return; const transaction = db.transaction(['userState'], 'readwrite'); transaction.objectStore('userState').put({ id: 'currentUser', ...state }); }
-        function loadState() { return new Promise(resolve => { if (!db) { resolve(); return; } const request = db.transaction(['userState'], 'readonly').objectStore('userState').get('currentUser'); request.onsuccess = () => { if (request.result) { state = { ...state, ...request.result }; if (!state.completedBonusTasks) state.completedBonusTasks = []; if (!state.rewardedReferrals) state.rewardedReferrals = 0; if(!state.originalUserId) state.originalUserId = null; } const today = new Date().toLocaleDateString(); if (state.lastAdWatchedDate !== today) { state.adsWatchedToday = 0; state.lastAdWatchedDate = today; } resolve(); }; request.onerror = () => resolve(); }); }
-        function checkIpInDB(ip) { return new Promise(resolve => { if(!db || !ip) return resolve(false); const request = db.transaction(['appUsage'], 'readonly').objectStore('appUsage').get(ip); request.onsuccess = () => resolve(!!request.result); request.onerror = () => resolve(false); }); }
-        function saveIpToDB(ip) { if(!db || !ip) return; const transaction = db.transaction(['appUsage'], 'readwrite'); transaction.objectStore('appUsage').put({ ip: ip, timestamp: new Date().toISOString() }); }
+        async function apiCall(action, payload = {}) {
+            if (!tg || !tg.initData) throw new Error('OPEN_IN_TELEGRAM');
+            const response = await fetch(config.SUPABASE_URL + '/functions/v1/novamine-site-api', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'apikey': config.SUPABASE_PUBLISHABLE_KEY, 'x-telegram-init-data': tg.initData },
+                body: JSON.stringify({ action, ...payload })
+            });
+            const data = await response.json();
+            if (!response.ok || data.ok === false) throw new Error(data.error || 'REQUEST_FAILED');
+            return data;
+        }
 
+        async function saveState() { return true; }
+
+        async function loadState() {
+            const data = await apiCall('bootstrap');
+            const u = data.user || {};
+            siteUserId = u.id;
+            state.totalEarning = Number(u.balance_usd || 0);
+            state.adCount = Number(u.ads_watched || 0);
+            state.adsWatchedToday = Number(u.ads_watched_today || 0);
+            state.withdrawalHistory = data.history || [];
+            state.completedBonusTasks = data.completedBonusTasks || [];
+            state.weeklyActivity = data.weeklyActivity || [0,0,0,0,0,0,0];
+            state.originalUserId = u.telegram_id;
+            const cfg = data.config || {};
+            if (cfg.ad_reward !== undefined) config.AD_REWARD = Number(cfg.ad_reward);
+            if (cfg.daily_ad_limit !== undefined) config.DAILY_AD_LIMIT = Number(cfg.daily_ad_limit);
+            if (cfg.minimum_withdrawal !== undefined) config.MINIMUM_WITHDRAWAL = Number(cfg.minimum_withdrawal);
+            if (cfg.cooldown_minutes !== undefined) config.COOLDOWN_MINUTES = Number(cfg.cooldown_minutes);
+            if (cfg.referral_reward !== undefined) config.REFERRAL_REWARD = Number(cfg.referral_reward);
+        }
+
+        function checkIpInDB() { return Promise.resolve(false); }
+        function saveIpToDB() {}
         async function getIpAddress() { try { const response = await fetch('https://api.ipify.org?format=json'); const data = await response.json(); return data.ip; } catch (error) { console.error("Could not fetch IP address.", error); return null; } }
         function safeTgAction(action, fallback = () => {}) { if (tg && tg.initData) { action(tg); } else { fallback(); console.log("Telegram WebApp is not available or not ready."); } }
         function safeTgAlert(message) { safeTgAction(tg => tg.showAlert(message), () => alert(message)); }
@@ -351,29 +369,26 @@
         }
         
         async function watchAd() {
-            if (state.lastUsedIp && !state.cooldownUntil) {
-                 const newIp = await getIpAddress();
-                 if (newIp === state.lastUsedIp) { safeTgAlert('Please change your IP address to start the next round. Turn airplane mode on and off.'); return; } 
-                 else { state.lastUsedIp = null; saveState(); }
-            }
             allDOMElements.adLoaderOverlay.style.display = 'flex';
-            const adFunction = window[`show_${config.MONETAG_ZONE_ID}`];
-            if (typeof adFunction !== 'function') { safeTgAlert('Ad failed to load. Please try again.'); allDOMElements.adLoaderOverlay.style.display = 'none'; return; }
-            adFunction().then(() => {
-                state.totalEarning += config.AD_REWARD; state.adCount++; state.adsWatchedToday++; state.weeklyActivity[new Date().getDay()]++;
-                let alertMessage = `Ad watched! You have ${config.DAILY_AD_LIMIT - state.adsWatchedToday} ads left.`;
-                if (state.adsWatchedToday >= config.DAILY_AD_LIMIT) {
-                    const cdDate = new Date(); cdDate.setMinutes(cdDate.getMinutes() + config.COOLDOWN_MINUTES);
-                    state.cooldownUntil = cdDate.toISOString(); state.lastUsedIp = currentIpAddress;
-                    alertMessage = `You have completed your tasks! Please take a ${config.COOLDOWN_MINUTES}-minute break.`;
-                }
-                saveState(); updateUI();
+            try {
+                const data = await apiCall('reward_ad');
+                const u = data.user || {};
+                state.totalEarning = Number(u.balance_usd ?? state.totalEarning + Number(data.reward || 0));
+                state.adCount = Number(u.ads_watched ?? state.adCount + 1);
+                state.adsWatchedToday = Number(u.ads_today ?? state.adsWatchedToday + 1);
+                state.weeklyActivity[new Date().getDay()]++;
+                updateUI();
                 safeTgAction(tg => tg.HapticFeedback.notificationOccurred('success'));
-                safeTgAlert(alertMessage);
-            }).catch(e => { console.error("Monetag Ad Error:", e); safeTgAlert('Ad could not be completed. Please try again.'); })
-            .finally(() => { allDOMElements.adLoaderOverlay.style.display = 'none'; });
+                const left = Math.max(0, config.DAILY_AD_LIMIT - state.adsWatchedToday);
+                safeTgAlert(left ? `Ad watched! You have ${left} ads left.` : `You completed today's ads. Please take a ${config.COOLDOWN_MINUTES}-minute break.`);
+            } catch (e) {
+                console.error('Reward error:', e);
+                safeTgAlert(e.message === 'DAILY_LIMIT_REACHED' ? 'Daily ad limit reached.' : 'Ad reward could not be saved. Please try again.');
+            } finally {
+                allDOMElements.adLoaderOverlay.style.display = 'none';
+            }
         }
-        
+
         async function handleWithdrawal(event) {
             event.preventDefault();
             const { withdrawForm } = allDOMElements;
@@ -382,55 +397,50 @@
             const spinner = submitButton.querySelector('.spinner');
             const amount = parseFloat(withdrawForm.elements['withdraw-amount'].value);
             const method = withdrawForm.elements.method.value;
-            const accountNumber = withdrawForm.elements['account-number'].value;
-            
+            const accountNumber = withdrawForm.eleme        async function handleWithdrawal(event) {
+            event.preventDefault();
+            const { withdrawForm } = allDOMElements;
+            const submitButton = document.getElementById('withdraw-submit-button');
+            const buttonText = submitButton.querySelector('.button-text');
+            const spinner = submitButton.querySelector('.spinner');
+            const amount = parseFloat(withdrawForm.elements['withdraw-amount'].value);
+            const method = withdrawForm.elements.method.value;
+            const accountNumber = withdrawForm.elements['account-number'].value.trim();
+
+            if (!Number.isFinite(amount) || amount <= 0) return safeTgAlert('Enter a valid amount.');
             if (amount > state.totalEarning) return safeTgAlert('You do not have enough balance.');
-            if (isNaN(amount) || amount < config.MINIMUM_WITHDRAWAL) return safeTgAlert(`Minimum withdrawal amount is $${config.MINIMUM_WITHDRAWAL}.`);
+            if (amount < config.MINIMUM_WITHDRAWAL) return safeTgAlert(`Minimum withdrawal amount is $${config.MINIMUM_WITHDRAWAL}.`);
 
             buttonText.style.display = 'none'; spinner.style.display = 'block'; submitButton.disabled = true;
-            const user = tg ? tg.initDataUnsafe?.user : { first_name: 'Test', last_name: 'User', username: 'testuser', id: '12345' };
-            const message = `<b>💰 New Withdrawal Request 💰</b>\n\n👤 <b>User:</b> ${escapeHTML(user?.first_name)} ${escapeHTML(user?.last_name)} (@${escapeHTML(user?.username) || 'N/A'})\n🆔 <b>User ID:</b> <code>${user?.id}</code>\n---------------------------------------\n💳 <b>Method:</b> ${escapeHTML(method)}\n🔢 <b>Account:</b> <code>${escapeHTML(accountNumber)}</code>\n💵 <b>Amount:</b> $${amount.toFixed(3)}`;
             try {
-                const url = `https://api.telegram.org/bot${config.BOT_TOKEN}/sendMessage`;
-                const promises = config.ADMIN_IDS.map(chat_id => fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chat_id, text: message, parse_mode: 'HTML' }) }).then(res => res.json()));
-                const results = await Promise.all(promises);
-                if (results.some(r => r.ok)) {
-                    state.totalEarning -= amount;
-                    const pendingUntil = new Date().getTime() + (2 * 60 * 60 * 1000); // 2 hours from now
-                    state.withdrawalHistory.unshift({ method, number: accountNumber, amount, date: new Date().toISOString(), status: 'Pending', pendingUntil });
-                    saveState(); updateUI(); closeModal('withdrawModal'); withdrawForm.reset();
-                    safeTgAlert('Your withdrawal request has been sent and is now pending. It will be processed within 2 hours.');
-                    safeTgAction(tg => tg.HapticFeedback.notificationOccurred('success'));
-                } else { throw new Error(JSON.stringify(results)); }
-            } catch (error) { console.error("Withdrawal Error:", error); safeTgAlert('Failed to send your request. Please try again later.'); } 
-            finally { buttonText.style.display = 'inline'; spinner.style.display = 'none'; submitButton.disabled = false; }
-        }
-        
-        function checkPendingWithdrawals() {
-            let changed = false;
-            state.withdrawalHistory.forEach(item => {
-                if (item.status === 'Pending' && new Date().getTime() > item.pendingUntil) {
-                    item.status = 'Success';
-                    changed = true;
-                }
-            });
-            if (changed) {
-                saveState();
-                if (document.getElementById('historyModal').style.display === 'flex') {
-                    renderHistory();
-                }
+                await apiCall('withdraw', { amount, method, accountNumber });
+                await loadState();
+                updateUI(); renderHistory(); closeModal('withdrawModal'); withdrawForm.reset();
+                safeTgAlert('Your withdrawal request has been saved and is pending admin processing.');
+                safeTgAction(tg => tg.HapticFeedback.notificationOccurred('success'));
+            } catch (error) {
+                console.error('Withdrawal Error:', error);
+                safeTgAlert(error.message === 'INSUFFICIENT_BALANCE' ? 'You do not have enough balance.' : error.message === 'MINIMUM_WITHDRAWAL' ? `Minimum withdrawal amount is $${config.MINIMUM_WITHDRAWAL}.` : 'Failed to create withdrawal request.');
+            } finally {
+                buttonText.style.display = 'inline'; spinner.style.display = 'none'; submitButton.disabled = false;
             }
         }
-        
+
+        function checkPendingWithdrawals() { return; }
         function renderHistory() {
-            checkPendingWithdrawals();
             const { historyListEl } = allDOMElements;
-            if (!state.withdrawalHistory || state.withdrawalHistory.length === 0) { historyListEl.innerHTML = '<p class="no-history">No withdrawal history found.</p>'; return; }
-            historyListEl.innerHTML = state.withdrawalHistory.map(item => `
-                <div class="history-item">
-                    <div class="history-details"><span class="method-number">${escapeHTML(item.method)} - ${escapeHTML(item.number)}</span><span class="date">${new Date(item.date).toLocaleString()}</span></div>
-                    <div class="history-amount"><span>$${item.amount.toFixed(3)}</span><div class="history-status ${item.status.toLowerCase()}">${item.status}</div></div>
-                </div>`).join('');
+            if (!state.withdrawalHistory || state.withdrawalHistory.length === 0) {
+                historyListEl.innerHTML = '<p class="no-history">No withdrawal history found.</p>';
+                return;
+            }
+            historyListEl.innerHTML = state.withdrawalHistory.map(item => {
+                const status = String(item.status || 'pending').toLowerCase();
+                const label = status.charAt(0).toUpperCase() + status.slice(1);
+                return `<div class="history-item">
+                    <div class="history-details"><span class="method-number">${escapeHTML(item.method)} - ${escapeHTML(item.account_number)}</span><span class="date">${new Date(item.created_at).toLocaleString()}</span></div>
+                    <div class="history-amount"><span>$${Number(item.amount_usd).toFixed(3)}</span><div class="history-status ${status}">${label}</div></div>
+                </div>`;
+            }).join('');
         }
 
         function renderBonusTasks() {
@@ -447,17 +457,23 @@
             });
         }
 
-        function handleBonusTask(task, button) {
+        async function handleBonusTask(task, button) {
             button.disabled = true; button.textContent = 'Processing...';
             safeTgAction(tg => tg.openLink(task.link));
-            setTimeout(() => {
+            try {
+                await new Promise(resolve => setTimeout(resolve, task.duration * 1000));
                 if (state.completedBonusTasks.includes(task.id)) return;
-                state.totalEarning += task.reward;
+                const data = await apiCall('claim_bonus', { taskId: task.id, reward: task.reward });
+                state.totalEarning = Number(data.balance);
                 state.completedBonusTasks.push(task.id);
-                saveState(); updateUI(); button.textContent = 'Completed';
+                updateUI(); button.textContent = 'Completed';
                 safeTgAlert(`Bonus of $${task.reward.toFixed(3)} added successfully!`);
                 safeTgAction(tg => tg.HapticFeedback.notificationOccurred('success'));
-            }, task.duration * 1000);
+            } catch (e) {
+                console.error('Bonus error:', e);
+                button.disabled = false; button.textContent = 'Claim';
+                safeTgAlert(e.message === 'BONUS_ALREADY_CLAIMED' ? 'This bonus is already completed.' : 'Could not claim this bonus.');
+            }
         }
 
         function showModal(modalId, buttonEl) {
@@ -475,52 +491,9 @@
         
         let myChart; function updateChart() { const ctx = document.getElementById('activityChart').getContext('2d'); const isDark = document.documentElement.getAttribute('data-theme') === 'dark'; const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'; const fontColor = isDark ? '#F5F5F7' : '#1D1D1F'; if (myChart) myChart.destroy(); myChart = new Chart(ctx, { type: 'bar', data: { labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'], datasets: [{ label: 'Ads Watched', data: state.weeklyActivity, backgroundColor: 'rgba(var(--primary-color-rgb), 0.2)', borderColor: 'rgb(var(--primary-color-rgb))', borderWidth: 2, borderRadius: 8, hoverBackgroundColor: 'rgba(var(--primary-color-rgb), 0.4)' }] }, options: { scales: { y: { beginAtZero: true, ticks: { stepSize: 5, color: fontColor }, grid: { color: gridColor } }, x: { ticks: { color: fontColor }, grid: { color: gridColor } } }, plugins: { legend: { display: false } }, responsive: true, maintainAspectRatio: false } }); }
 
-        function initFirebase() { try { firebase.initializeApp(config.firebase); firebaseDb = firebase.database(); } catch (e) { console.error("Firebase initialization failed:", e); } }
-
-        async function handleReferral() {
-            if (!firebaseDb || !tg || !tg.initDataUnsafe) return;
-            const startParam = tg.initDataUnsafe.start_param;
-            const currentUser = tg.initDataUnsafe.user;
-            if (!startParam || isNaN(parseInt(startParam)) || parseInt(startParam) === currentUser.id) return;
-            
-            const referrerId = parseInt(startParam);
-            const referredUserRef = firebaseDb.ref(`users/${currentUser.id}/referred_by`);
-            const snapshot = await referredUserRef.once('value');
-            if (snapshot.exists()) return;
-
-            await referredUserRef.set(referrerId);
-            const referrerRef = firebaseDb.ref(`users/${referrerId}/referrals`);
-            await referrerRef.transaction((currentCount) => (currentCount || 0) + 1);
-
-            const message = `🎉 Congratulations! User ${currentUser.first_name} (@${currentUser.username}) joined using your link. You will receive your bonus next time you open the app.`;
-            await fetch(`https://api.telegram.org/bot${config.BOT_TOKEN}/sendMessage`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chat_id: referrerId, text: message }) });
-        }
-
-        async function processReferralRewards() {
-            if (!firebaseDb || !tg || !tg.initDataUnsafe) return;
-            const userId = tg.initDataUnsafe.user.id;
-            const referralsRef = firebaseDb.ref(`users/${userId}/referrals`);
-            const snapshot = await referralsRef.once('value');
-            const totalReferrals = snapshot.val() || 0;
-
-            const rewardedReferrals = state.rewardedReferrals || 0;
-            const newReferrals = totalReferrals - rewardedReferrals;
-
-            if (newReferrals > 0) {
-                const bonus = newReferrals * config.REFERRAL_REWARD;
-                state.totalEarning += bonus;
-                state.rewardedReferrals = totalReferrals;
-                saveState();
-                safeTgAlert(`You received a bonus of $${bonus.toFixed(3)} for ${newReferrals} new referral(s)!`);
-            }
-        }
-
-        async function listenForReferralCount() {
-            if (!firebaseDb || !tg || !tg.initDataUnsafe) return;
-            const userId = tg.initDataUnsafe.user.id;
-            const referralsRef = firebaseDb.ref(`users/${userId}/referrals`);
-            referralsRef.on('value', (snapshot) => { allDOMElements.referralCountEl.textContent = snapshot.val() || 0; });
-        }
+        async function handleReferral() { return; }
+        async function processReferralRewards() { return; }
+        async function listenForReferralCount() { return; }
 
         function loadMonetagSDK() {
             const script = document.createElement('script');
@@ -561,39 +534,15 @@
 
             try {
                 loadMonetagSDK(); 
-                initFirebase();
                
                 populateWithdrawalMethods();
 
                 allDOMElements.welcomeTitle.textContent = config.welcomeNotice.title;
                 allDOMElements.welcomeMessage.textContent = config.welcomeNotice.message;
 
-                await initDB(); 
                 await loadState();
 
-                const currentUserId = tg ? tg.initDataUnsafe?.user?.id : null;
-                if (currentUserId) {
-                    if (!state.originalUserId) {
-                        state.originalUserId = currentUserId;
-                        await saveState();
-                    } else if (state.originalUserId !== currentUserId) {
-                        document.getElementById('multiAccountModal').style.display = 'flex';
-                        return;
-                    }
-                }
-
-                currentIpAddress = await getIpAddress();
-                const isMultiAccountIP = await checkIpInDB(currentIpAddress);
-                const isNewUser = !(localStorage.getItem('userIdentified'));
-
-                if (isMultiAccountIP && isNewUser) { document.getElementById('multiAccountModal').style.display = 'flex'; return; }
-                if (!isMultiAccountIP) { saveIpToDB(currentIpAddress); localStorage.setItem('userIdentified', 'true'); }
-                
-                await handleReferral();
-                await processReferralRewards();
-                await listenForReferralCount();
-                
-                setInterval(checkPendingWithdrawals, 60 * 1000);
+                await loadState();
 
                 const user = tg ? tg.initDataUnsafe?.user : { first_name: 'User', photo_url: null };
                 if (user?.first_name) {
