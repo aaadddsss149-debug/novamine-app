@@ -474,7 +474,9 @@
         #withdrawPage .withdraw-field label i { color:var(--primary-color); margin-right:4px; }
         #withdrawPage #payment-details-wrap { padding:12px; border-radius:14px; background:rgba(0,191,255,.035); border:1px solid rgba(0,191,255,.10); }
         #withdrawPage #account-hint { font-size:10px; color:var(--text-light); line-height:1.4; }
-        #withdrawPage form select { appearance:auto; }
+        #withdrawPage form select { appearance:auto; cursor:pointer; position:relative; z-index:2; }
+        #withdrawPage .withdraw-field { position:relative; z-index:1; }
+        #withdrawPage .withdraw-field:first-child { z-index:5; }
         @media (max-width:380px) { #withdrawPage .withdraw-stat strong { font-size:16px; } }
         #withdrawPage form select,#withdrawPage form input { width:100%; box-sizing:border-box; margin:0; min-height:50px; padding:13px 14px; border-radius:13px; border:1px solid rgba(0,191,255,.16); background:#030d1c; color:#eef9ff; font-family:inherit; font-size:15px; }
         #withdrawPage form select:focus,#withdrawPage form input:focus { outline:none; border-color:#00bfff; box-shadow:0 0 0 3px rgba(0,191,255,.10); }
@@ -658,6 +660,7 @@
                 methodSelect.appendChild(option);
             });
             methodSelect.addEventListener('change', updatePaymentField);
+            updatePaymentField();
         }
 
         function updatePaymentField() {
@@ -696,7 +699,6 @@
             input.placeholder = d.placeholder;
             hint.textContent = d.hint;
             input.required = true;
-            input.focus();
         }
 
         let cooldownInterval;
