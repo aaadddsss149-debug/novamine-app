@@ -603,6 +603,105 @@
             .earnx-progress-row { margin-top: 28px; }
         }
 
+            /* Premium NovaMine loading + Invite repair */
+        #preloader {
+            isolation:isolate;
+            background:
+              radial-gradient(circle at 50% 35%, rgba(0,191,255,.20), transparent 24%),
+              radial-gradient(circle at 50% 70%, rgba(0,109,255,.12), transparent 34%),
+              #000 !important;
+        }
+        #preloader::before {
+            width:180%; height:180%; left:-40%; bottom:-92%;
+            border:1px solid rgba(0,191,255,.10);
+            box-shadow:0 0 55px rgba(0,191,255,.08);
+            animation: loaderWave 5s ease-in-out infinite;
+        }
+        #preloader::after {
+            width:150%; height:34%; left:-25%; bottom:-15%;
+            border:1px solid rgba(0,217,255,.13);
+            box-shadow:0 0 30px rgba(0,191,255,.10);
+            animation: loaderWave 7s ease-in-out infinite reverse;
+        }
+        .earnx-loader { filter:drop-shadow(0 10px 35px rgba(0,0,0,.55)); }
+        .earnx-orbit::before {
+            animation:loaderOrbit 7s linear infinite, loaderPulse 2.4s ease-in-out infinite;
+        }
+        .earnx-orbit::after {
+            animation:loaderOrbit 5s linear infinite reverse, loaderPulse 2.8s ease-in-out infinite reverse;
+        }
+        .earnx-logo {
+            animation:logoFloat 2.8s ease-in-out infinite, logoGlow 2s ease-in-out infinite alternate;
+        }
+        .earnx-logo::before {
+            content:"";
+            position:absolute;
+            width:135px; height:2px;
+            left:50%; top:50%;
+            transform:translate(-50%,-50%) rotate(-18deg);
+            background:linear-gradient(90deg,transparent,#00e5ff,transparent);
+            box-shadow:0 0 14px #00bfff;
+            animation:logoScan 2.2s ease-in-out infinite;
+            pointer-events:none;
+        }
+        .earnx-platform { animation:platformPulse 2s ease-in-out infinite; }
+        .earnx-brand { animation:brandIn .9s ease-out both; }
+        .earnx-tagline { animation:brandIn 1.2s ease-out .15s both; }
+        .earnx-progress { position:relative; overflow:hidden; }
+        .earnx-progress::after {
+            content:"";
+            position:absolute; top:0; bottom:0; width:35%;
+            left:-40%;
+            background:linear-gradient(90deg,transparent,rgba(255,255,255,.45),transparent);
+            animation:progressShine 1.5s linear infinite;
+        }
+        #preloader-progress-fill { position:relative; }
+        #preloader-percentage { animation:percentPulse 1.4s ease-in-out infinite; }
+        .earnx-spinner { animation:spin 1s linear infinite, spinnerGlow 1.5s ease-in-out infinite alternate; }
+        @keyframes loaderWave { 0%,100%{transform:rotate(-5deg) scale(.96)} 50%{transform:rotate(5deg) scale(1.03)} }
+        @keyframes loaderPulse { 0%,100%{opacity:.55;filter:brightness(.9)} 50%{opacity:1;filter:brightness(1.35)} }
+        @keyframes logoFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+        @keyframes logoGlow { from{filter:drop-shadow(0 0 8px rgba(0,183,255,.35))} to{filter:drop-shadow(0 0 24px rgba(0,217,255,.8))} }
+        @keyframes logoScan { 0%,100%{opacity:0;transform:translate(-50%,-50%) rotate(-18deg) scaleX(.45)} 50%{opacity:1;transform:translate(-50%,-50%) rotate(-18deg) scaleX(1)} }
+        @keyframes platformPulse { 0%,100%{transform:scaleX(.94);opacity:.65} 50%{transform:scaleX(1.06);opacity:1} }
+        @keyframes brandIn { from{opacity:0;transform:translateY(12px);letter-spacing:4px} to{opacity:1;transform:translateY(0)} }
+        @keyframes progressShine { to{left:110%} }
+        @keyframes percentPulse { 0%,100%{opacity:.72} 50%{opacity:1;text-shadow:0 0 12px rgba(0,217,255,.65)} }
+        @keyframes spinnerGlow { from{box-shadow:0 0 8px rgba(0,191,255,.2)} to{box-shadow:0 0 22px rgba(0,191,255,.65)} }
+
+        #invitePage .referral-box {
+            margin:16px 0;
+            padding:14px;
+            border-radius:16px;
+            background:#050506;
+            border:1px solid rgba(0,191,255,.16);
+        }
+        #invitePage .referral-label {
+            display:block;
+            margin-bottom:8px;
+            color:#8fa8c7;
+            font-size:11px;
+            font-weight:700;
+        }
+        #invitePage .referral-input {
+            width:100%;
+            min-height:48px;
+            padding:12px 13px;
+            border-radius:12px;
+            border:1px solid #25252a;
+            background:#000;
+            color:#eef9ff;
+            font:500 12px/1.4 inherit;
+            outline:none;
+        }
+        #invitePage .referral-input:focus { border-color:#00bfff; box-shadow:0 0 0 3px rgba(0,191,255,.10); }
+        #invitePage .action-button { touch-action:manipulation; -webkit-tap-highlight-color:transparent; }
+        #invitePage .invite-note {
+            display:flex; gap:9px; align-items:flex-start;
+            margin-top:14px; color:#8fa8c7; font-size:11px; line-height:1.5;
+        }
+        #invitePage .invite-note i { color:#00cfff; margin-top:2px; }
+
     </style>
 </head>
 <body>
@@ -655,7 +754,7 @@
             </form></div>
         </section>
         <section id="historyPage" class="app-page"><div class="page-header"><div class="page-icon"><i class="fa-solid fa-clock-rotate-left"></i></div><div><h2>History</h2><p>Your withdrawal activity</p></div></div><div class="card"><div id="history-list"></div></div></section>
-        <section id="invitePage" class="app-page"><div class="page-header"><div class="page-icon"><i class="fa-solid fa-user-plus"></i></div><div><h2>Invite</h2><p>Grow your rewards with friends</p></div></div><div class="card"><h3 class="card-title">Invite Friends</h3><p>Share your referral link with your friends and earn together. You will get a reward for each successful referral.</p><button class="action-button" id="copy-link-button"><i class="fa-solid fa-copy"></i><span>Copy Link</span></button><button class="action-button secondary-button" id="share-link-button"><i class="fa-solid fa-share-nodes"></i><span>Share Link</span></button></div></section>
+        <section id="invitePage" class="app-page"><div class="page-header"><div class="page-icon"><i class="fa-solid fa-user-plus"></i></div><div><h2>Invite</h2><p>Grow your rewards with friends</p></div></div><div class="card"><h3 class="card-title"><i class="fa-solid fa-user-group"></i> Invite Friends</h3><p>Share your personal referral link. When a new user opens the Mini App through your link, the referral is recorded automatically.</p><div class="referral-box"><span class="referral-label">YOUR REFERRAL LINK</span><input id="referral-link-input" class="referral-input" type="text" readonly value="Loading referral link..."></div><button type="button" class="action-button" id="copy-link-button"><i class="fa-solid fa-copy"></i><span>Copy Link</span></button><button type="button" class="action-button secondary-button" id="share-link-button"><i class="fa-solid fa-share-nodes"></i><span>Share Link</span></button><div class="invite-note"><i class="fa-solid fa-circle-info"></i><span>Use Share Link to send the invitation directly in Telegram.</span></div></div></section>
         <section id="bonusPage" class="app-page"><div class="page-header"><div class="page-icon"><i class="fa-solid fa-star"></i></div><div><h2>Task</h2><p>Complete tasks for extra rewards</p></div></div><div class="card"><h3 class="card-title">Tasks</h3><p style="text-align:center;margin-bottom:20px;">Complete tasks to earn extra rewards!</p><div id="bonus-tasks-list"></div></div></section>
         <div id="multiAccountModal" class="modal"><div class="modal-content"><h3 class="card-title" style="text-align:center;">⚠️ Warning</h3><p>Multiple accounts are not allowed. Only one Telegram account can be used on this device. Please use your original account to continue.</p></div></div>
 
@@ -977,37 +1076,57 @@
             if (pageId === 'bonusPage') renderBonusTasks();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
-        function getReferralLink() { const userId = tg ? tg.initDataUnsafe?.user?.id : 'testuser'; return `https://t.me/${config.BOT_USERNAME}?startapp=${userId}`; }
+        function getReferralLink() {
+            const userId = tg?.initDataUnsafe?.user?.id;
+            if (!userId) return '';
+            const botUsername = String(config.BOT_USERNAME || '').replace(/^@/, '').trim();
+            return `https://t.me/${botUsername}?startapp=${encodeURIComponent(userId)}`;
+        }
+        function refreshReferralLink() {
+            const input = document.getElementById('referral-link-input');
+            const link = getReferralLink();
+            if (input) input.value = link || 'Open this Mini App from Telegram to generate your link.';
+        }
         async function copyReferralLink() {
             const link = getReferralLink();
+            if (!link) return safeTgAlert('Open the Mini App inside Telegram first.');
+            const input = document.getElementById('referral-link-input');
             try {
-                if (navigator.clipboard && window.isSecureContext) {
+                if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
                     await navigator.clipboard.writeText(link);
                 } else {
-                    const textarea = document.createElement('textarea');
-                    textarea.value = link;
-                    textarea.style.position = 'fixed';
-                    textarea.style.left = '-9999px';
-                    document.body.appendChild(textarea);
-                    textarea.focus();
-                    textarea.select();
-                    document.execCommand('copy');
-                    textarea.remove();
+                    input?.focus();
+                    input?.select();
+                    const ok = document.execCommand('copy');
+                    if (!ok) throw new Error('COPY_FAILED');
                 }
                 safeTgAlert('Referral link copied!');
             } catch (error) {
                 console.error('Copy referral link error:', error);
-                safeTgAlert('Could not copy the referral link. Please use Share Link.');
+                try {
+                    input?.focus();
+                    input?.select();
+                    safeTgAlert('Link selected. Tap Copy to copy it.');
+                } catch (_) {
+                    safeTgAlert('Copy failed. Please use Share Link.');
+                }
             }
         }
         function shareReferralLink() {
             const link = getReferralLink();
-            const text = `Earn money by watching ads! Join using my link:\\n${link}`;
+            if (!link) return safeTgAlert('Open the Mini App inside Telegram first.');
+            const text = `Earn money by watching ads! Join using my link:\n${link}`;
             const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`;
             safeTgAction(tg => {
-                try { tg.openTelegramLink(shareUrl); }
-                catch (error) { window.open(shareUrl, '_blank'); }
-            }, () => { window.open(shareUrl, '_blank'); });
+                try {
+                    if (typeof tg.openTelegramLink === 'function') tg.openTelegramLink(shareUrl);
+                    else if (typeof tg.openLink === 'function') tg.openLink(shareUrl);
+                    else window.location.href = shareUrl;
+                } catch (error) {
+                    console.error('Share referral link error:', error);
+                    window.location.href = shareUrl;
+                }
+            }, () => { window.location.href = shareUrl; });
         }
         
         let myChart; function updateChart() { if (typeof Chart === 'undefined') return; const ctx = document.getElementById('activityChart').getContext('2d'); const isDark = document.documentElement.getAttribute('data-theme') === 'dark'; const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'; const fontColor = isDark ? '#F5F5F7' : '#1D1D1F'; if (myChart) myChart.destroy(); myChart = new Chart(ctx, { type: 'bar', data: { labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'], datasets: [{ label: 'Ads Watched', data: state.weeklyActivity, backgroundColor: 'rgba(var(--primary-color-rgb), 0.2)', borderColor: 'rgb(var(--primary-color-rgb))', borderWidth: 2, borderRadius: 8, hoverBackgroundColor: 'rgba(var(--primary-color-rgb), 0.4)' }] }, options: { scales: { y: { beginAtZero: true, ticks: { stepSize: 5, color: fontColor }, grid: { color: gridColor } }, x: { ticks: { color: fontColor }, grid: { color: gridColor } } }, plugins: { legend: { display: false } }, responsive: true, maintainAspectRatio: false } }); }
@@ -1088,8 +1207,9 @@ await loadState();
                     };
                 }
                 allDOMElements.joinChannelButton.addEventListener('click', () => safeTgAction(tg => tg.openTelegramLink(config.TELEGRAM_CHANNEL_LINK)));
-                allDOMElements.copyLinkButton.addEventListener('click', copyReferralLink);
-                allDOMElements.shareLinkButton.addEventListener('click', shareReferralLink);
+                allDOMElements.copyLinkButton.addEventListener('click', (event) => { event.preventDefault(); void copyReferralLink(); });
+                allDOMElements.shareLinkButton.addEventListener('click', (event) => { event.preventDefault(); shareReferralLink(); });
+                refreshReferralLink();
                 showPage('homePage', document.querySelector('.nav-button:nth-child(1)'));
 
                 safeTgAction(tg => {
