@@ -487,13 +487,14 @@
             .nav-button i { width: 32px; }
         }
 
-        .weekly-activity { display:flex; align-items:flex-end; justify-content:space-between; gap:8px; height:180px; padding:18px 8px 4px; }
-        .activity-day { flex:1; min-width:0; height:100%; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; gap:8px; }
-        .activity-bar-wrap { position:relative; width:100%; max-width:30px; height:130px; display:flex; align-items:flex-end; justify-content:center; }
-        .activity-bar { width:100%; min-height:8px; border-radius:8px 8px 4px 4px; background:linear-gradient(180deg,#00d9ff,#0878ff); box-shadow:0 0 14px rgba(0,207,255,.3); transition:height .35s ease; }
-        .activity-value { position:absolute; top:-18px; font-size:9px; color:#8fa8c7; font-weight:700; }
-        .activity-label { font-size:10px; color:#8fa8c7; }
-        .activity-day.active .activity-label { color:#00d9ff; font-weight:800; }
+        .weekly-activity-card { min-height:240px !important; }
+        .weekly-activity { display:flex !important; align-items:flex-end !important; justify-content:space-between !important; gap:7px !important; width:100% !important; height:185px !important; box-sizing:border-box !important; padding:24px 6px 8px !important; overflow:visible !important; }
+        .activity-day { flex:1 1 0 !important; min-width:0 !important; height:100% !important; display:flex !important; flex-direction:column !important; justify-content:flex-end !important; align-items:center !important; gap:9px !important; }
+        .activity-bar-wrap { position:relative !important; width:24px !important; height:135px !important; display:flex !important; align-items:flex-end !important; justify-content:center !important; }
+        .activity-bar { display:block !important; width:24px !important; min-height:8px !important; max-height:135px !important; box-sizing:border-box !important; border-radius:8px 8px 4px 4px !important; background:linear-gradient(180deg,#00e5ff,#0878ff) !important; box-shadow:0 0 14px rgba(0,207,255,.35) !important; transition:height .35s ease !important; }
+        .activity-value { position:absolute !important; top:-20px !important; left:50% !important; transform:translateX(-50%) !important; font-size:10px !important; color:#d9f7ff !important; font-weight:800 !important; white-space:nowrap !important; }
+        .activity-label { font-size:10px !important; color:#8fa8c7 !important; font-weight:600 !important; }
+        .activity-day.active .activity-label { color:#00d9ff !important; font-weight:800 !important; }
         /* Withdrawal + weekly activity polish */
         #withdrawPage .card { padding:18px; }
         #withdrawPage .withdraw-summary { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px; }
@@ -752,7 +753,7 @@
             <div class="stat-item"><i class="fa-solid fa-users bg-icon"></i><div class="icon"><i class="fa-solid fa-users"></i></div><div class="value" id="referral-count">0</div><div class="label">Referrals</div></div>
         </div>
         <div class="card"><h3 class="card-title">Today's Task</h3><button class="action-button" id="watch-ad-button"><i class="fa-solid fa-play"></i><span>Watch Ad</span></button></div>
-        <div class="card"><h3 class="card-title"><i class="fa-solid fa-chart-column"></i> Weekly Activity</h3><div id="weekly-activity" class="weekly-activity" aria-label="Weekly activity"></div></div>
+        <div class="card weekly-activity-card"><h3 class="card-title"><i class="fa-solid fa-chart-column"></i> Weekly Activity</h3><div id="weekly-activity" class="weekly-activity" aria-label="Weekly activity"><div class="activity-day"><div class="activity-bar-wrap"><div class="activity-bar" style="height:8%"></div><span class="activity-value">0</span></div><span class="activity-label">Sun</span></div><div class="activity-day"><div class="activity-bar-wrap"><div class="activity-bar" style="height:8%"></div><span class="activity-value">0</span></div><span class="activity-label">Mon</span></div><div class="activity-day"><div class="activity-bar-wrap"><div class="activity-bar" style="height:8%"></div><span class="activity-value">0</span></div><span class="activity-label">Tue</span></div><div class="activity-day"><div class="activity-bar-wrap"><div class="activity-bar" style="height:8%"></div><span class="activity-value">0</span></div><span class="activity-label">Wed</span></div><div class="activity-day"><div class="activity-bar-wrap"><div class="activity-bar" style="height:8%"></div><span class="activity-value">0</span></div><span class="activity-label">Thu</span></div><div class="activity-day"><div class="activity-bar-wrap"><div class="activity-bar" style="height:8%"></div><span class="activity-value">0</span></div><span class="activity-label">Fri</span></div><div class="activity-day"><div class="activity-bar-wrap"><div class="activity-bar" style="height:8%"></div><span class="activity-value">0</span></div><span class="activity-label">Sat</span></div></div></div>
     </div>
     <div class="nav-bar">
         <button class="nav-button active" onclick="showPage('homePage', this)"><i class="fa-solid fa-house"></i><span>Home</span></button>
@@ -1185,11 +1186,18 @@
             const labels = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
             const max = Math.max(1, ...values);
             const today = new Date().getDay();
-            el.innerHTML = labels.map((label, i) => {
-                const height = Math.max(8, Math.round((values[i] / max) * 100));
-                const active = i === today ? ' active' : '';
-                return '<div class="activity-day' + active + '"><div class="activity-bar-wrap"><div class="activity-bar" style="height:' + height + '%"></div><span class="activity-value">' + values[i] + '</span></div><span class="activity-label">' + label + '</span></div>';
-            }).join('');
+            const days = el.querySelectorAll('.activity-day');
+            values.forEach((value, i) => {
+                const day = days[i];
+                if (!day) return;
+                const bar = day.querySelector('.activity-bar');
+                const valueEl = day.querySelector('.activity-value');
+                const label = day.querySelector('.activity-label');
+                if (bar) bar.style.height = Math.max(8, Math.round((value / max) * 100)) + '%';
+                if (valueEl) valueEl.textContent = String(value);
+                if (label) label.textContent = labels[i];
+                day.classList.toggle('active', i === today);
+            });
         }
 
         async function handleReferral() { return; }
