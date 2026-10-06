@@ -1018,9 +1018,11 @@
 
             if (!Number.isFinite(amount) || amount <= 0) return safeTgAlert('Enter a valid amount.');
             if (amount > state.totalEarning) return safeTgAlert('You do not have enough balance.');
-            if (amount < config.MINIMUM_WITHDRAWAL) return safeTgAlert(`Minimum withdrawal amount is $${config.MINIMUM_WITHDRAWAL}.`);
+            if (amount < config.MINIMUM_WITHDRAWAL) return safeTgAlert('Minimum withdrawal amount is $' + config.MINIMUM_WITHDRAWAL + '.');
 
-            buttonText.style.display = 'none'; spinner.style.display = 'block'; submitButton.disabled = true;
+            buttonText.style.display = 'none';
+            spinner.style.display = 'block';
+            submitButton.disabled = true;
             try {
                 const result = await apiCall('withdraw', { amount, method, accountNumber });
                 const created = result.withdrawal;
@@ -1035,14 +1037,24 @@
                 showPage('historyPage', document.querySelector('.nav-button:nth-child(3)'));
                 safeTgAlert('Your withdrawal request has been saved and is pending admin processing.');
                 safeTgAction(tg => tg.HapticFeedback.notificationOccurred('success'));
-                loadState().then(() => { updateUI(); renderHistory(); renderReferrals(); }).catch(refreshError => console.warn('Background refresh after withdrawal failed:', refreshError));
+                loadState().then(() => {
+                    updateUI();
+                    renderHistory();
+                    renderReferrals();
+                }).catch(refreshError => console.warn('Background refresh after withdrawal failed:', refreshError));
             } catch (error) {
                 console.error('Withdrawal Error:', error);
-                const msg = String(error?.message || '');
-                safeTgAlert(
-                    msg === 'INSUFFICIENT_BALANCE' ? 'You do not have enough balance.' :
-                    msg === 'MINIMUM_WITHDRAWAL' ? ('Minimum withdrawal amount is 
-                buttonText.style.display = 'inline'; spinner.style.display = 'none'; submitButton.disabled = false;
+                const msg = String(error && error.message ? error.message : '');
+                let message = 'Withdrawal failed: ' + (msg || 'Unknown error');
+                if (msg === 'INSUFFICIENT_BALANCE') message = 'You do not have enough balance.';
+                else if (msg === 'MINIMUM_WITHDRAWAL') message = 'Minimum withdrawal amount is $' + config.MINIMUM_WITHDRAWAL + '.';
+                else if (msg === 'INVALID_WITHDRAWAL') message = 'Please choose a withdrawal method and enter your account.';
+                else if (msg === 'PENDING_WITHDRAWAL') message = 'You already have a pending withdrawal.';
+                safeTgAlert(message);
+            } finally {
+                buttonText.style.display = 'inline';
+                spinner.style.display = 'none';
+                submitButton.disabled = false;
             }
         }
 
