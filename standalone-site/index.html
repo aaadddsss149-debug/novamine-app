@@ -1049,9 +1049,9 @@
 
                 // Update every visible balance/counter immediately from the server result.
                 updateUI();
-                renderDashboard?.();
-                renderHistory?.();
-                updateStats?.();
+                if (typeof renderDashboard === 'function') renderDashboard();
+                if (typeof renderHistory === 'function') renderHistory();
+                if (typeof updateStats === 'function') updateStats();
                 if (typeof saveLocalState === 'function') saveLocalState();
                 safeTgAction(tg => tg.HapticFeedback.notificationOccurred('success'));
                 safeTgAlert('🎉 Ad completed! +$' + reward.toFixed(3));
