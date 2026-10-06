@@ -446,7 +446,6 @@
             letter-spacing: .2px;
         }
         #watch-ad-button i { font-size: 16px; }
-        #join-channel-button { min-height: 50px; }
         .nav-bar { padding-left: 7px; padding-right: 7px; }
         .nav-button {
             position: relative;
@@ -745,7 +744,7 @@
             <div class="stat-item"><i class="fa-solid fa-calendar-day bg-icon"></i><div class="icon"><i class="fa-solid fa-calendar-day"></i></div><div class="value" id="ads-today-count">0 / 15</div><div class="label">Today's Ads</div></div>
             <div class="stat-item"><i class="fa-solid fa-users bg-icon"></i><div class="icon"><i class="fa-solid fa-users"></i></div><div class="value" id="referral-count">0</div><div class="label">Referrals</div></div>
         </div>
-        <div class="card"><h3 class="card-title">Today's Task</h3><button class="action-button" id="watch-ad-button"><i class="fa-solid fa-play"></i><span>Watch Ad</span></button><button class="action-button secondary-button" id="join-channel-button"><i class="fa-brands fa-telegram"></i><span>Join Channel</span></button></div>
+        <div class="card"><h3 class="card-title">Today's Task</h3><button class="action-button" id="watch-ad-button"><i class="fa-solid fa-play"></i><span>Watch Ad</span></button></div>
         <div class="card"><h3 class="card-title">Weekly Activity</h3><div class="chart-container"><canvas id="activityChart"></canvas></div></div>
     </div>
     <div class="nav-bar">
@@ -840,7 +839,7 @@
             container: document.querySelector('.container'), totalEarningEl: document.getElementById('total-earning'), adCountEl: document.getElementById('ad-count'), 
             adsTodayCountEl: document.getElementById('ads-today-count'), referralCountEl: document.getElementById('referral-count'), watchAdButton: document.getElementById('watch-ad-button'), 
             withdrawForm: document.getElementById('withdraw-form'), adLoaderOverlay: document.getElementById('ad-loader-overlay'), profilePicEl: document.getElementById('profile-pic'), 
-            greetingEl: document.getElementById('greeting'), joinChannelButton: document.getElementById('join-channel-button'), 
+            greetingEl: document.getElementById('greeting'), 
             copyLinkButton: document.getElementById('copy-link-button'), shareLinkButton: document.getElementById('share-link-button'), historyListEl: document.getElementById('history-list'), 
             bonusTasksListEl: document.getElementById('bonus-tasks-list'), minWithdrawText: document.getElementById('min-withdraw-text'),
             welcomeTitle: document.getElementById('welcome-title'), welcomeMessage: document.getElementById('welcome-message')
@@ -1247,8 +1246,7 @@ await loadState();
                         return false;
                     };
                 }
-                allDOMElements.joinChannelButton.addEventListener('click', () => safeTgAction(tg => tg.openTelegramLink(config.TELEGRAM_CHANNEL_LINK)));
-                allDOMElements.copyLinkButton.addEventListener('click', (event) => { event.preventDefault(); void copyReferralLink(); });
+                    allDOMElements.copyLinkButton.addEventListener('click', (event) => { event.preventDefault(); void copyReferralLink(); });
                 allDOMElements.shareLinkButton.addEventListener('click', (event) => { event.preventDefault(); shareReferralLink(); });
                 renderReferrals();
                 showPage('homePage', document.querySelector('.nav-button:nth-child(1)'));
