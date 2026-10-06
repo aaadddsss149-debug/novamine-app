@@ -1120,40 +1120,59 @@
                 return '<div class="referral-user"><div class="referral-avatar">' + avatar + '</div><div><div class="referral-user-name">' + escapeHTML(name) + '</div><div class="referral-user-meta">' + escapeHTML(username) + '</div></div></div>';
             }).join('');
         }
+        function getReferralLink() {
+            const userId = tg?.initDataUnsafe?.user?.id;
+            const botUsername = String(config.BOT_USERNAME || '').replace(/^@/, '').trim();
+            if (!userId || !botUsername) return '';
+            return 'https://t.me/' + botUsername + '?startapp=' + encodeURIComponent(String(userId));
+        }
         async function copyReferralLink() {
             const link = getReferralLink();
             if (!link) return safeTgAlert('Open the Mini App inside Telegram first.');
-            const input = document.createElement('input');
-            input.value = link;
-            input.setAttribute('readonly','');
-            input.style.position = 'fixed';
-            input.style.top = '50%';
-            input.style.left = '50%';
-            input.style.width = '1px';
-            input.style.height = '1px';
-            input.style.opacity = '0';
-            document.body.appendChild(input);
-            input.focus();
-            input.select();
             let copied = false;
-            try { copied = document.execCommand('copy'); } catch (_) {}
-            input.remove();
-            if (!copied && navigator.clipboard?.writeText) {
-                try { await navigator.clipboard.writeText(link); copied = true; } catch (_) {}
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(link);
+                    copied = true;
+                }
+            } catch (_) {}
+            if (!copied) {
+                const area = document.createElement('textarea');
+                area.value = link;
+                area.setAttribute('readonly', '');
+                area.style.position = 'fixed';
+                area.style.left = '-9999px';
+                area.style.top = '0';
+                area.style.opacity = '0';
+                document.body.appendChild(area);
+                area.focus();
+                area.select();
+                area.setSelectionRange(0, area.value.length);
+                try { copied = document.execCommand('copy'); } catch (_) {}
+                area.remove();
             }
-            safeTgAlert(copied ? 'Invite link copied!' : 'Please use Share Invite Link.');
+            safeTgAlert(copied ? 'Invite link copied!' : 'Copy was blocked. Tap Share Invite Link instead.');
         }
-        function shareReferralLink() {
+        async function shareReferralLink() {
             const link = getReferralLink();
             if (!link) return safeTgAlert('Open the Mini App inside Telegram first.');
-            const shareUrl = 'https://t.me/share/url?url=' + encodeURIComponent(link);
+            const shareText = 'Join EarnX and start earning!';
+            const shareUrl = 'https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + encodeURIComponent(shareText);
+            if (navigator.share) {
+                try {
+                    await navigator.share({ title: 'EarnX Invite', text: shareText, url: link });
+                    return;
+                } catch (error) {
+                    if (error?.name === 'AbortError') return;
+                }
+            }
             safeTgAction(tg => {
                 try {
                     if (typeof tg.openTelegramLink === 'function') tg.openTelegramLink(shareUrl);
                     else if (typeof tg.openLink === 'function') tg.openLink(shareUrl);
-                    else window.location.href = shareUrl;
-                } catch (_) { window.location.href = shareUrl; }
-            }, () => { window.location.href = shareUrl; });
+                    else window.open(shareUrl, '_blank');
+                } catch (_) { window.open(shareUrl, '_blank'); }
+            }, () => window.open(shareUrl, '_blank'));
         }
         
         let myChart; function updateChart() { if (typeof Chart === 'undefined') return; const ctx = document.getElementById('activityChart').getContext('2d'); const isDark = document.documentElement.getAttribute('data-theme') === 'dark'; const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'; const fontColor = isDark ? '#F5F5F7' : '#1D1D1F'; if (myChart) myChart.destroy(); myChart = new Chart(ctx, { type: 'bar', data: { labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'], datasets: [{ label: 'Ads Watched', data: state.weeklyActivity, backgroundColor: 'rgba(var(--primary-color-rgb), 0.2)', borderColor: 'rgb(var(--primary-color-rgb))', borderWidth: 2, borderRadius: 8, hoverBackgroundColor: 'rgba(var(--primary-color-rgb), 0.4)' }] }, options: { scales: { y: { beginAtZero: true, ticks: { stepSize: 5, color: fontColor }, grid: { color: gridColor } }, x: { ticks: { color: fontColor }, grid: { color: gridColor } } }, plugins: { legend: { display: false } }, responsive: true, maintainAspectRatio: false } }); }
