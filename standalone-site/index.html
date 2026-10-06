@@ -879,6 +879,21 @@
             state.completedBonusTasks = data.completedBonusTasks || [];
             state.referredUsers = data.referredUsers || [];
             state.weeklyActivity = data.weeklyActivity || [0,0,0,0,0,0,0];
+
+            // Load live tasks created from the Admin dashboard.
+            // The API returns active tasks from the Supabase tasks table.
+            if (Array.isArray(data.tasks)) {
+                config.bonusTasks = data.tasks.map(task => ({
+                    id: String(task.id || ''),
+                    title: String(task.label || task.id || 'Task'),
+                    link: String(task.url || ''),
+                    reward: Number(task.reward || 0),
+                    duration: 10,
+                    action: String(task.action || ''),
+                    category: String(task.category || '')
+                })).filter(task => task.id && task.reward > 0);
+            }
+
             if (typeof renderReferrals === 'function') renderReferrals();
             state.originalUserId = u.telegram_id;
             state.cooldownUntil = u.cooldown_until || null;
