@@ -957,7 +957,7 @@
             allDOMElements.adCountEl.textContent = state.adCount;
             allDOMElements.adsTodayCountEl.textContent = `${state.adsWatchedToday} / ${config.DAILY_AD_LIMIT}`;
             if (allDOMElements.referralCountEl) allDOMElements.referralCountEl.textContent = state.referredUsers.length;
-            allDOMElements.minWithdrawText.textContent = `Minimum withdrawal is ${config.MINIMUM_WITHDRAWAL.toFixed(2)}.`;
+            if (allDOMElements.minWithdrawText) allDOMElements.minWithdrawText.textContent = `Minimum withdrawal is ${config.MINIMUM_WITHDRAWAL.toFixed(2)}.`;
             const wb = document.getElementById("withdraw-balance"); if (wb) wb.textContent = "$" + state.totalEarning.toFixed(3);
             const wm = document.getElementById("withdraw-min"); if (wm) wm.textContent = "$" + config.MINIMUM_WITHDRAWAL.toFixed(2);
             
