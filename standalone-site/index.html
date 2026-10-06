@@ -1056,12 +1056,22 @@
                     ? serverAdsToday
                     : Number(state.adsWatchedToday || 0) + 1;
 
+                // Update today's weekly activity immediately after a successful ad.
+                // The API bootstrap value is the source of truth, but the reward response
+                // may not include the weekly array, so increment today's local bucket.
+                if (!Array.isArray(state.weeklyActivity) || state.weeklyActivity.length !== 7) {
+                    state.weeklyActivity = [0, 0, 0, 0, 0, 0, 0];
+                }
+                const todayIndex = new Date().getDay();
+                state.weeklyActivity[todayIndex] = Number(state.weeklyActivity[todayIndex] || 0) + 1;
+
                 // UI rendering must never turn a successful reward into an ad error.
                 try {
                     updateUI();
                     if (typeof renderDashboard === 'function') renderDashboard();
                     if (typeof renderHistory === 'function') renderHistory();
                     if (typeof updateStats === 'function') updateStats();
+                    if (typeof updateChart === 'function') updateChart();
                     if (typeof saveLocalState === 'function') saveLocalState();
                 } catch (uiError) {
                     console.error('Post-ad UI update error:', uiError);
