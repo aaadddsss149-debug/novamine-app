@@ -1022,41 +1022,11 @@
                 adexiumAds.on('adClosed', () => {
                     if (!adexiumRewardInFlight) allDOMElements.adLoaderOverlay.style.display = 'none';
                 });
-                adexiumAds.on('adPlaybackCompleted', async () => {
-                    if (adexiumRewardInFlight) return;
-                    adexiumRewardInFlight = true;
-                    try {
-                        if (!adexiumTaskId) throw new Error('AD_TASK_MISSING');
-                        const data = await apiCall('reward_ad', { adTaskId: adexiumTaskId });
-                        const u = data.user || {};
-                        state.totalEarning = Number(u.balance_usd ?? state.totalEarning + Number(data.reward || 0));
-                        state.adCount = Number(u.ads_watched ?? state.adCount + 1);
-                        state.adsWatchedToday = Number(u.ads_today ?? state.adsWatchedToday + 1);
-                        state.weeklyActivity[new Date().getDay()]++;
-                        updateUI();
-                        safeTgAction(tg => tg.HapticFeedback.notificationOccurred('success'));
-                        const left = Math.max(0, config.DAILY_AD_LIMIT - state.adsWatchedToday);
-                        safeTgAlert(left ? 'Ad completed! +$0.010 added.' : 'Ad completed! +$0.010 added. Daily limit reached.');
-                    } catch (e) {
-                        console.error('Ad reward error:', e);
-                        if (e.message === 'COOLDOWN_ACTIVE' || e.message === 'COOLDOWN_STARTED') {
-                            await loadState().catch(() => {});
-                            updateUI();
-                            safeTgAlert('Please wait before watching another ad.');
-                        } else if (e.message === 'DAILY_LIMIT_REACHED') {
-                            await loadState().catch(() => {});
-                            updateUI();
-                            safeTgAlert('Daily ad limit reached.');
-                        } else if (e.message === 'AD_NOT_VERIFIED') {
-                            safeTgAlert('The ad could not be verified. No reward was added.');
-                        } else {
-                            safeTgAlert('Ad completed, but the reward could not be saved. Please try again.');
-                        }
-                    } finally {
-                        adexiumTaskId = null;
-                        adexiumRewardInFlight = false;
-                        allDOMElements.adLoaderOverlay.style.display = 'none';
-                    }
+                adexiumAds.on('adPlaybackCompleted', () => {
+                    adexiumTaskId = null;
+                    adexiumRewardInFlight = false;
+                    allDOMElements.adLoaderOverlay.style.display = 'none';
+                    safeTgAlert('Test ad completed successfully. No reward was added.');
                 });
                 return true;
             } catch (e) {
@@ -1075,7 +1045,7 @@
             try {
                 adexiumTaskId = null;
                 adexiumRewardInFlight = false;
-                adexiumAds.requestRewardedAd('interstitial');
+                adexiumAds.requestAd('interstitial');
             } catch (e) {
                 console.error('Ad request error:', e);
                 allDOMElements.adLoaderOverlay.style.display = 'none';
