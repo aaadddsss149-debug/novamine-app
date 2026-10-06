@@ -6,7 +6,7 @@
     <title>Taka Income Pro - Earn Money</title>
 
     <script async src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script async src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
+    <script async src="https://sdk.adsbitvex.com/functions/v1/ad-script?appid=000490"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <script>
@@ -797,7 +797,7 @@
             TELEGRAM_CHANNEL_LINK: 'https://t.me/earnx0official',
             ADMIN_SUPPORT_LINK: 'https://t.me/earnx0official',
             MONETAG_ZONE_ID: '#',
-    ADEXIUM_WIDGET_ID: 'b0688ff9-8c10-425b-9f62-e08694c16d24',
+    ADSBITVEX_APP_ID: '000490',
             AD_REWARD: 0.001,
             DAILY_AD_LIMIT: 15,
             MINIMUM_WITHDRAWAL: 2,
@@ -996,60 +996,49 @@
             updateChart();
         }
         
-        let adexiumAds = null;
-        let adexiumTaskId = null;
-        let adexiumRewardInFlight = false;
+        let adRewardInFlight = false;
 
-        function initAdexium() {
-            if (!window.AdexiumWidget || !config.ADEXIUM_WIDGET_ID) return false;
-            try {
-                adexiumAds = new window.AdexiumWidget({
-                    wid: config.ADEXIUM_WIDGET_ID,
-                    adFormat: 'interstitial',
-                    debug: false,
-                    isFullScreen: true
-                });
-                adexiumAds.on('adReceived', (ad) => {
-                    adexiumTaskId = ad && ad.id ? String(ad.id) : null;
-                    if (ad) adexiumAds.displayAd(ad);
-                });
-                adexiumAds.on('noAdFound', () => {
-                    adexiumTaskId = null;
-                    adexiumRewardInFlight = false;
-                    allDOMElements.adLoaderOverlay.style.display = 'none';
-                    safeTgAlert('No ad is available right now. Please try again later.');
-                });
-                adexiumAds.on('adClosed', () => {
-                    if (!adexiumRewardInFlight) allDOMElements.adLoaderOverlay.style.display = 'none';
-                });
-                adexiumAds.on('adPlaybackCompleted', () => {
-                    adexiumTaskId = null;
-                    adexiumRewardInFlight = false;
-                    allDOMElements.adLoaderOverlay.style.display = 'none';
-                    safeTgAlert('Test ad completed successfully. No reward was added.');
-                });
-                return true;
-            } catch (e) {
-                console.error('Adexium init failed:', e);
-                adexiumAds = null;
-                return false;
-            }
+        function initAdsBitvex() {
+            return typeof window.showadsbitvex === 'function';
         }
 
         async function watchAd() {
-            if (!adexiumAds && !initAdexium()) {
-                safeTgAlert('Ad service is not ready. Please try again.');
+            if (adRewardInFlight) return;
+            if (state.adsWatchedToday >= config.DAILY_AD_LIMIT) {
+                safeTgAlert('You have reached today\'s ad limit. Please try again later.');
                 return;
             }
+            if (!initAdsBitvex()) {
+                safeTgAlert('Ad service is not ready. Please wait a moment and try again.');
+                return;
+            }
+
+            adRewardInFlight = true;
             allDOMElements.adLoaderOverlay.style.display = 'flex';
             try {
-                adexiumTaskId = null;
-                adexiumRewardInFlight = false;
-                adexiumAds.requestAd('interstitial');
+                await window.showadsbitvex();
+
+                const result = await apiCall('reward_ad', {
+                    provider: 'adsbitvex',
+                    appId: config.ADSBITVEX_APP_ID
+                });
+
+                const reward = Number(result.reward || config.AD_REWARD || 0.001);
+                if (result.user) {
+                    state.totalEarning = Number(result.user.total_earning ?? result.user.balance ?? state.totalEarning);
+                } else {
+                    state.totalEarning = Number(state.totalEarning || 0) + reward;
+                }
+                state.adsWatchedToday = Number(state.adsWatchedToday || 0) + 1;
+                updateUI();
+                safeTgAction(tg => tg.HapticFeedback.notificationOccurred('success'));
+                safeTgAlert('🎉 Ad completed! +$' + reward.toFixed(3));
             } catch (e) {
-                console.error('Ad request error:', e);
+                console.error('AdsBitvex error:', e);
+                safeTgAlert('No ad is available right now. Please try again later.');
+            } finally {
+                adRewardInFlight = false;
                 allDOMElements.adLoaderOverlay.style.display = 'none';
-                safeTgAlert('Could not load the ad. Please try again.');
             }
         }
 
@@ -1317,7 +1306,7 @@
 
             try {
                 loadMonetagSDK();
-                initAdexium(); 
+                initAdsBitvex(); 
                
                 populateWithdrawalMethods();
 
