@@ -776,7 +776,7 @@
             </form></div>
         </section>
         <section id="historyPage" class="app-page"><div class="page-header"><div class="page-icon"><i class="fa-solid fa-clock-rotate-left"></i></div><div><h2>History</h2><p>Your withdrawal activity</p></div></div><div class="card"><div id="history-list"></div></div></section>
-        <section id="invitePage" class="app-page"><div class="page-header"><div class="page-icon"><i class="fa-solid fa-user-plus"></i></div><div><h2>Invite</h2><p>Invite friends and earn rewards</p></div></div><div class="card"><h3 class="card-title"><i class="fa-solid fa-user-group"></i> Your Referrals</h3><div class="referral-count-card"><strong id="invite-referral-count">0</strong><span>Friends Invited</span></div><button type="button" class="action-button" id="copy-link-button"><i class="fa-solid fa-copy"></i><span>Copy Invite Link</span></button><button type="button" class="action-button secondary-button" id="share-link-button"><i class="fa-solid fa-share-nodes"></i><span>Share Invite Link</span></button><div class="invite-list-title"><i class="fa-solid fa-users"></i><span>People You Invited</span></div><div id="referrals-list" class="referrals-list"><p class="no-history">No invited users yet.</p></div></div></section>
+        <section id="invitePage" class="app-page"><div class="page-header"><div class="page-icon"><i class="fa-solid fa-user-plus"></i></div><div><h2>Invite</h2><p>Invite friends and earn rewards</p></div></div><div class="card"><h3 class="card-title"><i class="fa-solid fa-user-group"></i> Your Referrals</h3><div class="referral-count-card"><strong id="invite-referral-count">0</strong><span>Friends Invited</span></div><button type="button" class="action-button" id="copy-link-button" onclick="void copyReferralLink()"><i class="fa-solid fa-copy"></i><span>Copy Invite Link</span></button><button type="button" class="action-button secondary-button" id="share-link-button" onclick="void shareReferralLink()"><i class="fa-solid fa-share-nodes"></i><span>Share Invite Link</span></button><div class="invite-list-title"><i class="fa-solid fa-users"></i><span>People You Invited</span></div><div id="referrals-list" class="referrals-list"><p class="no-history">No invited users yet.</p></div></div></section>
         <section id="bonusPage" class="app-page"><div class="page-header"><div class="page-icon"><i class="fa-solid fa-star"></i></div><div><h2>Task</h2><p>Complete tasks for extra rewards</p></div></div><div class="card"><h3 class="card-title">Tasks</h3><p style="text-align:center;margin-bottom:20px;">Complete tasks to earn extra rewards!</p><div id="bonus-tasks-list"></div></div></section>
         <div id="multiAccountModal" class="modal"><div class="modal-content"><h3 class="card-title" style="text-align:center;">⚠️ Warning</h3><p>Multiple accounts are not allowed. Only one Telegram account can be used on this device. Please use your original account to continue.</p></div></div>
 
@@ -1101,7 +1101,8 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
         function getReferralLink() {
-            const userId = tg?.initDataUnsafe?.user?.id;
+            const webApp = window.Telegram?.WebApp || tg;
+            const userId = webApp?.initDataUnsafe?.user?.id;
             const botUsername = String(config.BOT_USERNAME || '').replace(/^@/, '').trim();
             if (!userId || !botUsername) return '';
             return 'https://t.me/' + botUsername + '?startapp=' + encodeURIComponent(String(userId));
@@ -1128,7 +1129,7 @@
         }
         async function copyReferralLink() {
             const link = getReferralLink();
-            if (!link) return safeTgAlert('Open the Mini App inside Telegram first.');
+            if (!link) return safeTgAlert('Please open NovaMine from the Telegram bot first.');
             let copied = false;
             try {
                 if (navigator.clipboard && window.isSecureContext) {
