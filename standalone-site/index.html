@@ -1038,10 +1038,19 @@
                     returnedUser.ads_today ??
                     returnedUser.ads_watched_today
                 );
+                const serverAdsTotal = Number(
+                    returnedUser.ads_watched ??
+                    returnedUser.total_ads
+                );
 
                 state.totalEarning = Number.isFinite(serverBalance)
                     ? serverBalance
                     : Number(state.totalEarning || 0) + reward;
+
+                // Keep both counters in sync: total "Ads Watched" and today's ads.
+                state.adCount = Number.isFinite(serverAdsTotal)
+                    ? serverAdsTotal
+                    : Number(state.adCount || 0) + 1;
 
                 state.adsWatchedToday = Number.isFinite(serverAdsToday)
                     ? serverAdsToday
