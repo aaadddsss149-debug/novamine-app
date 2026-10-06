@@ -487,6 +487,13 @@
             .nav-button i { width: 32px; }
         }
 
+        .weekly-activity { display:flex; align-items:flex-end; justify-content:space-between; gap:8px; height:180px; padding:18px 8px 4px; }
+        .activity-day { flex:1; min-width:0; height:100%; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; gap:8px; }
+        .activity-bar-wrap { position:relative; width:100%; max-width:30px; height:130px; display:flex; align-items:flex-end; justify-content:center; }
+        .activity-bar { width:100%; min-height:8px; border-radius:8px 8px 4px 4px; background:linear-gradient(180deg,#00d9ff,#0878ff); box-shadow:0 0 14px rgba(0,207,255,.3); transition:height .35s ease; }
+        .activity-value { position:absolute; top:-18px; font-size:9px; color:#8fa8c7; font-weight:700; }
+        .activity-label { font-size:10px; color:#8fa8c7; }
+        .activity-day.active .activity-label { color:#00d9ff; font-weight:800; }
         /* Withdrawal + weekly activity polish */
         #withdrawPage .card { padding:18px; }
         #withdrawPage .withdraw-summary { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px; }
@@ -745,7 +752,7 @@
             <div class="stat-item"><i class="fa-solid fa-users bg-icon"></i><div class="icon"><i class="fa-solid fa-users"></i></div><div class="value" id="referral-count">0</div><div class="label">Referrals</div></div>
         </div>
         <div class="card"><h3 class="card-title">Today's Task</h3><button class="action-button" id="watch-ad-button"><i class="fa-solid fa-play"></i><span>Watch Ad</span></button></div>
-        <div class="card"><h3 class="card-title">Weekly Activity</h3><div class="chart-container"><canvas id="activityChart"></canvas></div></div>
+        <div class="card"><h3 class="card-title"><i class="fa-solid fa-chart-column"></i> Weekly Activity</h3><div id="weekly-activity" class="weekly-activity" aria-label="Weekly activity"></div></div>
     </div>
     <div class="nav-bar">
         <button class="nav-button active" onclick="showPage('homePage', this)"><i class="fa-solid fa-house"></i><span>Home</span></button>
@@ -1169,7 +1176,21 @@
             }, () => window.open(shareUrl, '_blank'));
         }
         
-        let myChart; function updateChart() { if (typeof Chart === 'undefined') return; const ctx = document.getElementById('activityChart').getContext('2d'); const isDark = document.documentElement.getAttribute('data-theme') === 'dark'; const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'; const fontColor = isDark ? '#F5F5F7' : '#1D1D1F'; if (myChart) myChart.destroy(); myChart = new Chart(ctx, { type: 'bar', data: { labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'], datasets: [{ label: 'Ads Watched', data: state.weeklyActivity, backgroundColor: 'rgba(var(--primary-color-rgb), 0.2)', borderColor: 'rgb(var(--primary-color-rgb))', borderWidth: 2, borderRadius: 8, hoverBackgroundColor: 'rgba(var(--primary-color-rgb), 0.4)' }] }, options: { scales: { y: { beginAtZero: true, ticks: { stepSize: 5, color: fontColor }, grid: { color: gridColor } }, x: { ticks: { color: fontColor }, grid: { color: gridColor } } }, plugins: { legend: { display: false } }, responsive: true, maintainAspectRatio: false } }); }
+        function updateChart() {
+            const el = document.getElementById('weekly-activity');
+            if (!el) return;
+            const values = Array.isArray(state.weeklyActivity) && state.weeklyActivity.length === 7
+                ? state.weeklyActivity.map(v => Math.max(0, Number(v) || 0))
+                : [0,0,0,0,0,0,0];
+            const labels = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+            const max = Math.max(1, ...values);
+            const today = new Date().getDay();
+            el.innerHTML = labels.map((label, i) => {
+                const height = Math.max(8, Math.round((values[i] / max) * 100));
+                const active = i === today ? ' active' : '';
+                return '<div class="activity-day' + active + '"><div class="activity-bar-wrap"><div class="activity-bar" style="height:' + height + '%"></div><span class="activity-value">' + values[i] + '</span></div><span class="activity-label">' + label + '</span></div>';
+            }).join('');
+        }
 
         async function handleReferral() { return; }
         async function processReferralRewards() { return; }
