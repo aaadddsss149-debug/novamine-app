@@ -1024,13 +1024,35 @@
                 });
 
                 const reward = Number(result.reward || config.AD_REWARD || 0.001);
-                if (result.user) {
-                    state.totalEarning = Number(result.user.total_earning ?? result.user.balance ?? state.totalEarning);
+                const returnedUser = result.user || {};
+                const serverBalance = Number(
+                    returnedUser.balance_usd ??
+                    returnedUser.balance ??
+                    returnedUser.total_earning
+                );
+                const serverAdsToday = Number(
+                    returnedUser.ads_today ??
+                    returnedUser.ads_watched_today
+                );
+
+                if (Number.isFinite(serverBalance)) {
+                    state.totalEarning = serverBalance;
                 } else {
                     state.totalEarning = Number(state.totalEarning || 0) + reward;
                 }
-                state.adsWatchedToday = Number(state.adsWatchedToday || 0) + 1;
+
+                if (Number.isFinite(serverAdsToday)) {
+                    state.adsWatchedToday = serverAdsToday;
+                } else {
+                    state.adsWatchedToday = Number(state.adsWatchedToday || 0) + 1;
+                }
+
+                // Update every visible balance/counter immediately from the server result.
                 updateUI();
+                renderDashboard?.();
+                renderHistory?.();
+                updateStats?.();
+                if (typeof saveLocalState === 'function') saveLocalState();
                 safeTgAction(tg => tg.HapticFeedback.notificationOccurred('success'));
                 safeTgAlert('🎉 Ad completed! +$' + reward.toFixed(3));
             } catch (e) {
