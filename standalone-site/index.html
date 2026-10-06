@@ -1121,12 +1121,6 @@
                 return '<div class="referral-user"><div class="referral-avatar">' + avatar + '</div><div><div class="referral-user-name">' + escapeHTML(name) + '</div><div class="referral-user-meta">' + escapeHTML(username) + '</div></div></div>';
             }).join('');
         }
-        function getReferralLink() {
-            const userId = tg?.initDataUnsafe?.user?.id;
-            const botUsername = String(config.BOT_USERNAME || '').replace(/^@/, '').trim();
-            if (!userId || !botUsername) return '';
-            return 'https://t.me/' + botUsername + '?startapp=' + encodeURIComponent(String(userId));
-        }
         async function copyReferralLink() {
             const link = getReferralLink();
             if (!link) return safeTgAlert('Please open NovaMine from the Telegram bot first.');
@@ -1156,7 +1150,7 @@
         }
         async function shareReferralLink() {
             const link = getReferralLink();
-            if (!link) return safeTgAlert('Open the Mini App inside Telegram first.');
+            if (!link) return safeTgAlert('Please open NovaMine from the Telegram bot first.');
             const shareText = 'Join EarnX and start earning!';
             const shareUrl = 'https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + encodeURIComponent(shareText);
             if (navigator.share) {
