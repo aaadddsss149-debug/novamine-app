@@ -69,20 +69,19 @@ export async function startBot(app: Express) {
   // ── /start ───────────────────────────────────────────────────────────────
   bot.command("start", async (ctx) => {
     const startParam = ctx.match?.toString().trim() || null;
-    const firstName = ctx.from?.first_name || "Miner";
 
-    const referralLine = startParam?.startsWith("ref_")
-      ? "\n🎁 Referral link detected — your friend can receive rewards after joining."
-      : "";
-
+    // Keep the /start message clean and app-focused, matching the
+    // polished Telegram welcome layout used by the reference bot.
     await ctx.reply(
       [
-        `🚀 *Welcome to EarnX, ${firstName}!*`,
+        "🚀 *Welcome to EarnX!*",
         "",
-        "Your all-in-one Telegram rewards hub — complete missions, watch rewarded ads, invite friends and grow your EarnX balance.",
-        referralLine,
+        "🎁 Complete tasks, watch rewarded ads, invite friends and earn rewards.",
         "",
-        "👇 Open the Mini App and start earning.",
+        "👇 Tap *Open EarnX* below to start earning.",
+        startParam?.startsWith("ref_")
+          ? ""
+          : "",
       ].join("\n"),
       {
         parse_mode: "Markdown",
