@@ -1501,7 +1501,10 @@ await loadState();
                 showPage('homePage', document.querySelector('.nav-button:nth-child(1)'));
 
                 safeTgAction(tg => {
-                    tg.ready(); tg.expand();
+                    tg.ready();
+                    // Do not force Telegram Mini App fullscreen/expanded mode.
+                    // Keeping the native Telegram sheet height prevents ad overlays
+                    // from covering the Telegram close controls.
                     tg.onEvent('themeChanged', () => { document.documentElement.setAttribute('data-theme', tg.colorScheme); updateChart(); });
                 });
 
