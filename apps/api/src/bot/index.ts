@@ -47,27 +47,11 @@ async function syncTelegramUser(from: any, referrerTelegramId?: number | null) {
   return created.id;
 }
 
-function botUsername() {
-  return config.bot.username.replace(/^@/, "").trim();
-}
-
 function appKeyboard(referrerTelegramId?: number | null) {
-  const username = botUsername();
-  const inviteUrl = username && referrerTelegramId
-    ? `https://t.me/share/url?url=${encodeURIComponent(
-        `https://t.me/${username}?startapp=ref_${referrerTelegramId}`
-      )}&text=${encodeURIComponent("🚀 Join me on EarnX and start earning rewards!")}`
-    : null;
-
   const keyboard = new InlineKeyboard().webApp(
     "🚀 Open EarnX",
     config.bot.appUrl || config.bot.publicUrl.replace(/\/api\/?$/, "")
   );
-
-  if (inviteUrl) {
-    keyboard.row().url("👥 Invite Friends", inviteUrl);
-  }
-
   return keyboard;
 }
 
@@ -78,13 +62,11 @@ export async function startBot(app: Express) {
   }
 
   const bot = new Bot(config.bot.token);
-  const username = botUsername();
 
   bot.catch((err) => {
     console.error("[bot] update error:", err.error);
   });
 
-  // /start — the main EarnX welcome experience.
   bot.command("start", async (ctx) => {
     const startParam = ctx.match?.toString().trim() || null;
     const firstName = ctx.from?.first_name || "Miner";
@@ -115,90 +97,8 @@ export async function startBot(app: Express) {
 
     await ctx.reply(message.join("\n"), {
       parse_mode: "Markdown",
-      reply_markup: appKeyboard(ctx.from?.id),
+      reply_markup: appKeyboard(),
     });
-  });
-
-  bot.command("app", async (ctx) => {
-    await ctx.reply("⚡ *EarnX is ready.*\n\nTap below to open your dashboard:", {
-      parse_mode: "Markdown",
-      reply_markup: appKeyboard(ctx.from?.id),
-    });
-  });
-
-  bot.command("balance", async (ctx) => {
-    const telegramId = ctx.from?.id;
-    if (!telegramId) return;
-
-    const { data: user, error } = await supabaseAdmin
-      .from("users")
-      .select("nova, ton_balance, mining_power, first_name")
-      .eq("telegram_id", telegramId)
-      .maybeSingle();
-
-    if (error) {
-      console.error("[bot] balance lookup failed:", error.message);
-      return ctx.reply("⚠️ I couldn't load your balance right now. Please try again.");
-    }
-
-    if (!user) {
-      return ctx.reply(
-        "👋 You haven't opened EarnX yet. Tap the button below to create your account.",
-        { reply_markup: appKeyboard(ctx.from?.id) }
-      );
-    }
-
-    await ctx.reply(
-      [
-        `⚡ *EarnX Balance — ${user.first_name || "Miner"}*`,
-        "",
-        `💎 NOVA: *${Number(user.nova || 0).toLocaleString()}*`,
-        `💎 TON: *${Number(user.ton_balance || 0).toFixed(6)}*`,
-        `⚡ Power: *${Number(user.mining_power || 0).toLocaleString()}*`,
-        "",
-        "Open EarnX to earn more.",
-      ].join("\n"),
-      { parse_mode: "Markdown", reply_markup: appKeyboard(ctx.from?.id) }
-    );
-  });
-
-  bot.command("invite", async (ctx) => {
-    const telegramId = ctx.from?.id;
-    if (!telegramId || !username) {
-      return ctx.reply("⚠️ Referral links are not configured yet.");
-    }
-
-    const link = `https://t.me/${username}?start=ref_${telegramId}`;
-
-    await ctx.reply(
-      [
-        "👥 *Your EarnX referral link*",
-        "",
-        "Share this link with friends:",
-        `\`${link}\``,
-        "",
-        "Friends who join through your link are tracked automatically.",
-      ].join("\n"),
-      {
-        parse_mode: "Markdown",
-        reply_markup: new InlineKeyboard().url("🚀 Open EarnX", link),
-      }
-    );
-  });
-
-  bot.command("help", async (ctx) => {
-    await ctx.reply(
-      [
-        "⚡ *EarnX Help*",
-        "",
-        "/start — welcome & open EarnX",
-        "/app — launch the Mini App",
-        "/balance — view your balance",
-        "/invite — get your referral link",
-        "/help — show this menu",
-      ].join("\n"),
-      { parse_mode: "Markdown", reply_markup: appKeyboard(ctx.from?.id) }
-    );
   });
 
   bot.on("message:text", async (ctx) => {
@@ -210,22 +110,16 @@ export async function startBot(app: Express) {
   try {
     await bot.api.setMyCommands([
       { command: "start", description: "Open EarnX" },
-      { command: "app", description: "Launch the Mini App" },
-      { command: "balance", description: "Check your balance" },
-      { command: "invite", description: "Get your referral link" },
-      { command: "help", description: "EarnX help" },
     ]);
 
-    if (username) {
-      const appUrl = config.bot.appUrl || config.bot.publicUrl.replace(/\/api\/?$/, "");
-      await bot.api.setChatMenuButton({
-        menu_button: {
-          type: "web_app",
-          text: "🚀 Open EarnX",
-          web_app: { url: appUrl },
-        },
-      });
-    }
+    const appUrl = config.bot.appUrl || config.bot.publicUrl.replace(/\/$/, "");
+    await bot.api.setChatMenuButton({
+      menu_button: {
+        type: "web_app",
+        text: "🚀 Open EarnX",
+        web_app: { url: appUrl },
+      },
+    });
   } catch (err) {
     console.error("[bot] Telegram UI setup failed:", err);
   }
