@@ -40,7 +40,7 @@ function appKeyboard(referrerTelegramId?: number | null) {
   const inviteUrl = username && referrerTelegramId
     ? `https://t.me/share/url?url=${encodeURIComponent(
         `https://t.me/${username}?startapp=ref_${referrerTelegramId}`
-      )}&text=${encodeURIComponent("🚀 Join me on EarnX and start earning rewards!")}`
+      )}&text=${encodeURIComponent("🚀 Join me on NovaMine and start earning rewards!")}`
     : null;
 
   const keyboard = new InlineKeyboard()
@@ -98,7 +98,7 @@ export async function startBot(app: Express) {
 
   // ── /app ─────────────────────────────────────────────────────────────────
   bot.command("app", async (ctx) => {
-    await ctx.reply("⚡ Your EarnX dashboard is ready:", {
+    await ctx.reply("⚡ Your NovaMine dashboard is ready:", {
       reply_markup: appKeyboard(ctx.from?.id),
     });
   });
@@ -121,20 +121,20 @@ export async function startBot(app: Express) {
 
     if (!user) {
       return ctx.reply(
-        "👋 You haven't opened EarnX yet. Tap the button below to create your account.",
+        "👋 You haven't opened NovaMine yet. Tap the button below to create your account.",
         { reply_markup: appKeyboard(ctx.from?.id) }
       );
     }
 
     await ctx.reply(
       [
-        `⚡ *EarnX Balance — ${user.first_name || "Miner"}*`,
+        `⚡ *NovaMine Balance — ${user.first_name || "Miner"}*`,
         "",
         `💎 TON: *${Number(user.ton_balance || 0).toFixed(6)}*`,
         `💎 TON: *${Number(user.ton_balance || 0).toFixed(6)}*`,
         `⚡ Power: *${Number(user.mining_power || 0).toLocaleString()}*`,
         "",
-        "Open EarnX to earn more.",
+        "Open NovaMine to earn more.",
       ].join("\n"),
       { parse_mode: "Markdown", reply_markup: appKeyboard(ctx.from?.id) }
     );
@@ -151,14 +151,14 @@ export async function startBot(app: Express) {
 
     await ctx.reply(
       [
-        "👥 *Your EarnX referral link*",
+        "👥 *Your NovaMine referral link*",
         "",
         "Share this link with friends:",
         `\`${link}\``,
         "",
         "Friends who join through your link are tracked automatically.",
       ].join("\n"),
-      { parse_mode: "Markdown", reply_markup: new InlineKeyboard().url("🚀 Open EarnX", link) }
+      { parse_mode: "Markdown", reply_markup: new InlineKeyboard().url("🚀 Open NovaMine", link) }
     );
   });
 
@@ -166,15 +166,15 @@ export async function startBot(app: Express) {
   bot.command("help", async (ctx) => {
     await ctx.reply(
       [
-        "⚡ *EarnX Help*",
+        "⚡ *NovaMine Help*",
         "",
-        "/start — welcome & open EarnX",
+        "/start — welcome & open NovaMine",
         "/app — open the Mini App",
         "/balance — view your balance",
         "/invite — get your referral link",
         "/help — show this menu",
         "",
-        "Inside EarnX you can use Tasks, Reward Ads, Referrals and Withdraw.",
+        "Inside NovaMine you can use Tasks, Reward Ads, Referrals and Withdraw.",
       ].join("\n"),
       { parse_mode: "Markdown", reply_markup: appKeyboard(ctx.from?.id) }
     );
@@ -182,7 +182,7 @@ export async function startBot(app: Express) {
 
   // Ignore commands we don't own and give plain messages a useful response.
   bot.on("message:text", async (ctx) => {
-    await ctx.reply("⚡ Use the buttons below to open EarnX.", {
+    await ctx.reply("⚡ Use the buttons below to open NovaMine.", {
       reply_markup: appKeyboard(),
     });
   });
@@ -190,11 +190,11 @@ export async function startBot(app: Express) {
   // ── Bot UX setup ─────────────────────────────────────────────────────────
   try {
     await bot.api.setMyCommands([
-      { command: "start", description: "Open EarnX" },
+      { command: "start", description: "Open NovaMine" },
       { command: "app", description: "Launch the Mini App" },
       { command: "balance", description: "Check TON & TON" },
       { command: "invite", description: "Get your referral link" },
-      { command: "help", description: "EarnX help" },
+      { command: "help", description: "NovaMine help" },
     ]);
 
     if (username) {
