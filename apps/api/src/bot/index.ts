@@ -47,6 +47,75 @@ async function syncTelegramUser(from: any, referrerTelegramId?: number | null) {
   return created.id;
 }
 
+
+function formatCooldown(remainingMs: number) {
+  const totalSeconds = Math.max(0, Math.ceil(remainingMs / 1000));
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+}
+
+const cooldownTimers = new Map<number, ReturnType<typeof setInterval>>();
+
+async function sendCooldownCountdown(ctx: any, telegramId: number) {
+  const { data: siteUser, error } = await supabaseAdmin
+    .from("site_users")
+    .select("cooldown_until, ads_watched_today")
+    .eq("telegram_id", telegramId)
+    .maybeSingle();
+
+  if (error || !siteUser?.cooldown_until) return;
+  const cooldownUntil = new Date(siteUser.cooldown_until).getTime();
+  if (!Number.isFinite(cooldownUntil) || cooldownUntil <= Date.now()) return;
+
+  const textFor = () => [
+    "⏳ *Ad cooldown active*",
+    "",
+    "🚫 You have reached today's ad limit.",
+    `⏱️ *Next ads in: ${formatCooldown(cooldownUntil - Date.now())}*`,
+    "",
+    "The countdown updates every second.",
+  ].join("\n");
+
+  const message = await ctx.reply(textFor(), { parse_mode: "Markdown" });
+  const chatId = Number(ctx.chat?.id);
+  if (!chatId) return;
+
+  const oldTimer = cooldownTimers.get(chatId);
+  if (oldTimer) clearInterval(oldTimer);
+
+  const timer = setInterval(async () => {
+    try {
+      const remaining = cooldownUntil - Date.now();
+      if (remaining <= 0) {
+        clearInterval(timer);
+        cooldownTimers.delete(chatId);
+        await ctx.api.editMessageText(
+          chatId,
+          message.message_id,
+          "✅ *Ad cooldown finished.*\n\nYou can watch ads again.",
+          { parse_mode: "Markdown" }
+        );
+        return;
+      }
+
+      await ctx.api.editMessageText(
+        chatId,
+        message.message_id,
+        textFor(),
+        { parse_mode: "Markdown" }
+      );
+    } catch (err) {
+      clearInterval(timer);
+      cooldownTimers.delete(chatId);
+      console.error("[bot] cooldown countdown stopped:", err);
+    }
+  }, 1000);
+
+  cooldownTimers.set(chatId, timer);
+}
+
 function appKeyboard(referrerTelegramId?: number | null) {
   const keyboard = new InlineKeyboard().webApp(
     "🚀 Open EarnX",
@@ -99,6 +168,8 @@ export async function startBot(app: Express) {
       parse_mode: "Markdown",
       reply_markup: appKeyboard(),
     });
+
+    await sendCooldownCountdown(ctx, Number(ctx.from?.id));
   });
 
   bot.on("message:text", async (ctx) => {
