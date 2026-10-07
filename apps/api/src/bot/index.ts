@@ -3,36 +3,52 @@ import type { Express } from "express";
 import { config } from "../config.js";
 import { supabaseAdmin } from "../lib/supabase.js";
 
-
 async function syncTelegramUser(from: any, referrerTelegramId?: number | null) {
   if (!from?.id) return;
   const telegramId = Number(from.id);
-  const patch = { telegram_id: telegramId, username: from.username ?? null, first_name: from.first_name ?? null, last_name: from.last_name ?? null, language_code: from.language_code ?? null, last_seen_at: new Date().toISOString() };
-  const { data: existing, error: readError } = await supabaseAdmin.from("users").select("id").eq("telegram_id", telegramId).maybeSingle();
+  const patch = {
+    telegram_id: telegramId,
+    username: from.username ?? null,
+    first_name: from.first_name ?? null,
+    last_name: from.last_name ?? null,
+    language_code: from.language_code ?? null,
+    last_seen_at: new Date().toISOString(),
+  };
+
+  const { data: existing, error: readError } = await supabaseAdmin
+    .from("users")
+    .select("id")
+    .eq("telegram_id", telegramId)
+    .maybeSingle();
   if (readError) throw readError;
+
   if (existing?.id) {
     const { error } = await supabaseAdmin.from("users").update(patch).eq("id", existing.id);
     if (error) throw error;
     return existing.id;
   }
+
   let referrerId: string | null = null;
   if (referrerTelegramId && referrerTelegramId !== telegramId) {
-    const { data: referrer } = await supabaseAdmin.from("users").select("id").eq("telegram_id", referrerTelegramId).maybeSingle();
+    const { data: referrer } = await supabaseAdmin
+      .from("users")
+      .select("id")
+      .eq("telegram_id", referrerTelegramId)
+      .maybeSingle();
     referrerId = referrer?.id ?? null;
   }
-  const { data: created, error } = await supabaseAdmin.from("users").insert({ ...patch, referrer_id: referrerId }).select("id").single();
+
+  const { data: created, error } = await supabaseAdmin
+    .from("users")
+    .insert({ ...patch, referrer_id: referrerId })
+    .select("id")
+    .single();
   if (error) throw error;
   return created.id;
 }
 
 function botUsername() {
   return config.bot.username.replace(/^@/, "").trim();
-}
-
-function miniAppLink(startParam?: string | null) {
-  const u = botUsername();
-  if (!u) return config.bot.publicUrl.replace(/\/$/, "");
-  return `https://t.me/${u}${startParam ? `?startapp=${encodeURIComponent(startParam)}` : ""}`;
 }
 
 function appKeyboard(referrerTelegramId?: number | null) {
@@ -43,8 +59,10 @@ function appKeyboard(referrerTelegramId?: number | null) {
       )}&text=${encodeURIComponent("🚀 Join me on NovaMine and start earning rewards!")}`
     : null;
 
-  const keyboard = new InlineKeyboard()
-    .webApp("🚀 Open NovaMine", config.bot.appUrl || config.bot.publicUrl.replace(/\/api\/?$/, ""));
+  const keyboard = new InlineKeyboard().webApp(
+    "🚀 Open NovaMine",
+    config.bot.appUrl || config.bot.publicUrl.replace(/\/api\/?$/, "")
+  );
 
   if (inviteUrl) {
     keyboard.row().url("👥 Invite Friends", inviteUrl);
@@ -66,44 +84,48 @@ export async function startBot(app: Express) {
     console.error("[bot] update error:", err.error);
   });
 
-  // ── /start ───────────────────────────────────────────────────────────────
+  // /start — the main NovaMine welcome experience.
   bot.command("start", async (ctx) => {
     const startParam = ctx.match?.toString().trim() || null;
     const firstName = ctx.from?.first_name || "Miner";
 
-    // NovaMine welcome message: clean Telegram layout with a prominent
-    // Mini App button and an optional referral button, matching the
-    // reference design shown by the owner.
-    await syncTelegramUser(ctx.from, null);
-
-    const referralLine = startParam?.startsWith("ref_")
-      ? "🎁 Referral link detected — your friend can receive rewards after joining."
-      : "";
-
-    await ctx.reply(
-      [
-        `🚀 *Welcome to NovaMine, ${firstName}!*`,
-        "",
-        "🎁 Complete tasks, watch rewarded ads, invite friends and earn rewards.",
-        referralLine,
-        "",
-        "👇 Tap *Open NovaMine* below to start earning.",
-      ].filter(Boolean).join("\n"),
-      {
-        parse_mode: "Markdown",
-        reply_markup: appKeyboard(ctx.from?.id),
+    let referrerTelegramId: number | null = null;
+    if (startParam?.startsWith("ref_")) {
+      const parsed = Number(startParam.slice(4));
+      if (Number.isSafeInteger(parsed) && parsed > 0) {
+        referrerTelegramId = parsed;
       }
-    );
-  });
+    }
 
-  // ── /app ─────────────────────────────────────────────────────────────────
-  bot.command("app", async (ctx) => {
-    await ctx.reply("⚡ Your NovaMine dashboard is ready:", {
+    await syncTelegramUser(ctx.from, referrerTelegramId);
+
+    const message = [
+      `🚀 *Welcome to NovaMine, ${firstName}!*`,
+      "",
+      "⛏️ Mine NOVA and grow your rewards.",
+      "🎁 Complete tasks, watch rewarded ads, and invite friends.",
+      "💎 Track your balance and manage everything directly inside NovaMine.",
+      "",
+      "👇 *Tap the button below to enter NovaMine.*",
+    ];
+
+    if (referrerTelegramId) {
+      message.splice(5, 0, "🎉 Referral detected — welcome bonus tracking is active.");
+    }
+
+    await ctx.reply(message.join("\n"), {
+      parse_mode: "Markdown",
       reply_markup: appKeyboard(ctx.from?.id),
     });
   });
 
-  // ── /balance ─────────────────────────────────────────────────────────────
+  bot.command("app", async (ctx) => {
+    await ctx.reply("⚡ *NovaMine is ready.*\n\nTap below to open your dashboard:", {
+      parse_mode: "Markdown",
+      reply_markup: appKeyboard(ctx.from?.id),
+    });
+  });
+
   bot.command("balance", async (ctx) => {
     const telegramId = ctx.from?.id;
     if (!telegramId) return;
@@ -130,7 +152,7 @@ export async function startBot(app: Express) {
       [
         `⚡ *NovaMine Balance — ${user.first_name || "Miner"}*`,
         "",
-        `💎 TON: *${Number(user.ton_balance || 0).toFixed(6)}*`,
+        `💎 NOVA: *${Number(user.nova || 0).toLocaleString()}*`,
         `💎 TON: *${Number(user.ton_balance || 0).toFixed(6)}*`,
         `⚡ Power: *${Number(user.mining_power || 0).toLocaleString()}*`,
         "",
@@ -140,14 +162,13 @@ export async function startBot(app: Express) {
     );
   });
 
-  // ── /invite ──────────────────────────────────────────────────────────────
   bot.command("invite", async (ctx) => {
     const telegramId = ctx.from?.id;
     if (!telegramId || !username) {
       return ctx.reply("⚠️ Referral links are not configured yet.");
     }
 
-    const link = `https://t.me/${username}?startapp=ref_${telegramId}`;
+    const link = `https://t.me/${username}?start=ref_${telegramId}`;
 
     await ctx.reply(
       [
@@ -158,41 +179,39 @@ export async function startBot(app: Express) {
         "",
         "Friends who join through your link are tracked automatically.",
       ].join("\n"),
-      { parse_mode: "Markdown", reply_markup: new InlineKeyboard().url("🚀 Open NovaMine", link) }
+      {
+        parse_mode: "Markdown",
+        reply_markup: new InlineKeyboard().url("🚀 Open NovaMine", link),
+      }
     );
   });
 
-  // ── /help ────────────────────────────────────────────────────────────────
   bot.command("help", async (ctx) => {
     await ctx.reply(
       [
         "⚡ *NovaMine Help*",
         "",
         "/start — welcome & open NovaMine",
-        "/app — open the Mini App",
+        "/app — launch the Mini App",
         "/balance — view your balance",
         "/invite — get your referral link",
         "/help — show this menu",
-        "",
-        "Inside NovaMine you can use Tasks, Reward Ads, Referrals and Withdraw.",
       ].join("\n"),
       { parse_mode: "Markdown", reply_markup: appKeyboard(ctx.from?.id) }
     );
   });
 
-  // Ignore commands we don't own and give plain messages a useful response.
   bot.on("message:text", async (ctx) => {
-    await ctx.reply("⚡ Use the buttons below to open NovaMine.", {
+    await ctx.reply("⚡ Use the button below to open NovaMine.", {
       reply_markup: appKeyboard(),
     });
   });
 
-  // ── Bot UX setup ─────────────────────────────────────────────────────────
   try {
     await bot.api.setMyCommands([
       { command: "start", description: "Open NovaMine" },
       { command: "app", description: "Launch the Mini App" },
-      { command: "balance", description: "Check TON & TON" },
+      { command: "balance", description: "Check your balance" },
       { command: "invite", description: "Get your referral link" },
       { command: "help", description: "NovaMine help" },
     ]);
@@ -211,15 +230,8 @@ export async function startBot(app: Express) {
     console.error("[bot] Telegram UI setup failed:", err);
   }
 
-  // ── Notification scheduler ───────────────────────────────────────────────
-  // Disabled until the production users table contains the notification
-  // timestamp columns. Running the old joined query against the deployed
-  // schema causes PostgREST "Invalid path specified in request URL" errors.
-  // Re-enable this block only after applying the notification schema migration.
   console.log("[bot] notifications disabled until notification schema is deployed");
 
-  // ── Telegram transport ───────────────────────────────────────────────────
-  // Use Telegram webhooks in production to avoid 409 getUpdates conflicts.
   try {
     if (!config.bot.publicUrl) throw new Error("PUBLIC_API_URL is not configured");
     const webhookUrl = config.bot.publicUrl.replace(/\/$/, "") + "/webhook";
