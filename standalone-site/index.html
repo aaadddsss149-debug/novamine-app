@@ -1125,6 +1125,17 @@
                 // Only this part is considered an ad/API failure.
                 await window.showadsbitvex();
 
+                // Ads can leave Telegram's Mini App in fullscreen on iOS.
+                // Exit Telegram fullscreen immediately after the ad closes so the
+                // native Telegram controls remain accessible.
+                try {
+                    const telegram = await waitForTelegramWebApp(1500);
+                    if (typeof telegram.exitFullscreen === 'function' &&
+                        telegram.isFullscreen === true) {
+                        telegram.exitFullscreen();
+                    }
+                } catch (_) {}
+
                 const result = await apiCall('reward_ad', {
                     provider: 'adsbitvex',
                     appId: config.ADSBITVEX_APP_ID
