@@ -732,7 +732,111 @@
         #invitePage .referral-user-name { font-size:13px; font-weight:700; color:#eef9ff; }
         #invitePage .referral-user-meta { margin-top:3px; font-size:10px; color:#8fa8c7; }
         #invitePage .action-button { touch-action:manipulation; -webkit-tap-highlight-color:transparent; margin-top:8px; }
-    </style>
+    
+        /* Unified NovaMine button design — visual only */
+        .action-button,
+        .bonus-item .claim-button {
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(0, 191, 255, .28);
+            border-radius: 15px;
+            background: linear-gradient(135deg, #0878ff 0%, #00bfff 100%);
+            color: #fff;
+            box-shadow: 0 8px 24px rgba(0, 122, 255, .18), inset 0 1px 0 rgba(255,255,255,.18);
+            transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+        }
+        .action-button::before,
+        .bonus-item .claim-button::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(110deg, transparent 25%, rgba(255,255,255,.16) 50%, transparent 75%);
+            transform: translateX(-120%);
+            transition: transform .55s ease;
+            pointer-events: none;
+        }
+        .action-button:hover:not(:disabled),
+        .bonus-item .claim-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            filter: brightness(1.06);
+            box-shadow: 0 12px 30px rgba(0, 122, 255, .25), inset 0 1px 0 rgba(255,255,255,.2);
+        }
+        .action-button:hover:not(:disabled)::before,
+        .bonus-item .claim-button:hover:not(:disabled)::before {
+            transform: translateX(120%);
+        }
+        .action-button:active:not(:disabled),
+        .bonus-item .claim-button:active:not(:disabled) {
+            transform: scale(.97);
+        }
+        .action-button:disabled,
+        .bonus-item .claim-button:disabled {
+            opacity: .58;
+            filter: grayscale(.2);
+            box-shadow: none;
+        }
+        .secondary-button {
+            background: rgba(0, 191, 255, .07) !important;
+            color: var(--primary-color) !important;
+            border: 1px solid rgba(0, 191, 255, .30) !important;
+            box-shadow: none !important;
+        }
+        .nav-button {
+            position: relative;
+            min-height: 52px;
+            border: 1px solid transparent;
+            border-radius: 16px;
+            color: var(--text-light);
+            transition: transform .18s ease, background .18s ease, color .18s ease, border-color .18s ease;
+        }
+        .nav-button.active {
+            color: #fff;
+            background: linear-gradient(135deg, rgba(8,120,255,.95), rgba(0,191,255,.85));
+            border-color: rgba(0, 217, 255, .28);
+            box-shadow: 0 7px 20px rgba(0,122,255,.22), inset 0 1px 0 rgba(255,255,255,.16);
+        }
+        [data-theme="dark"] .nav-button.active {
+            color: #fff;
+        }
+        .nav-button:hover {
+            transform: translateY(-1px);
+            color: var(--primary-color);
+            background: rgba(0, 191, 255, .08);
+        }
+        .nav-button.active:hover {
+            color: #fff;
+        }
+        .nav-button:active {
+            transform: scale(.94);
+        }
+        .nav-button i {
+            font-size: 18px;
+            transition: transform .18s ease;
+        }
+        .nav-button.active i {
+            transform: translateY(-1px) scale(1.05);
+            text-shadow: 0 0 12px rgba(0, 217, 255, .45);
+        }
+        #watch-ad-button {
+            min-height: 58px;
+            border-radius: 17px;
+            font-size: 17px;
+            letter-spacing: .1px;
+        }
+        #watch-ad-button i {
+            width: 34px;
+            height: 34px;
+            display: grid;
+            place-items: center;
+            border-radius: 11px;
+            background: rgba(255,255,255,.16);
+        }
+        #withdraw-submit-button {
+            min-height: 56px;
+            border-radius: 16px;
+        }
+
+</style>
 </head>
 <body>
     <div id="preloader" aria-label="EarnX loading">
