@@ -6,6 +6,9 @@ import { supabaseAdmin } from "../lib/supabase.js";
 async function syncTelegramUser(from: any, referrerTelegramId?: number | null) {
   if (!from?.id) return;
   const telegramId = Number(from.id);
+  const lastSync = recentUserSync.get(telegramId) || 0;
+  if (Date.now() - lastSync < USER_SYNC_TTL_MS) return;
+  recentUserSync.set(telegramId, Date.now());
   const patch = {
     telegram_id: telegramId,
     username: from.username ?? null,
@@ -57,6 +60,8 @@ function formatCooldown(remainingMs: number) {
 }
 
 const cooldownTimers = new Map<number, ReturnType<typeof setInterval>>();
+const recentUserSync = new Map<number, number>();
+const USER_SYNC_TTL_MS = 15_000;
 
 async function getAdCooldownUntil(telegramId: number) {
   const { data: siteUser, error: userError } = await supabaseAdmin
@@ -176,7 +181,11 @@ export async function startBot(app: Express) {
       }
     }
 
-    await syncTelegramUser(ctx.from, referrerTelegramId);
+    // Reply to Telegram first so the webhook is acknowledged immediately.
+    // User sync is non-critical for the first response and runs in the background.
+    void syncTelegramUser(ctx.from, referrerTelegramId).catch((err) => {
+      console.error("[bot] user sync failed:", err);
+    });
 
     const message = [
       `🚀 *Welcome to EarnX, ${firstName}!*`,
@@ -197,14 +206,19 @@ export async function startBot(app: Express) {
       reply_markup: appKeyboard(),
     });
 
-    await sendCooldownCountdown(ctx, Number(ctx.from?.id));
+    // Do not make the Telegram webhook wait for cooldown/database work.
+    void sendCooldownCountdown(ctx, Number(ctx.from?.id)).catch((err) => {
+      console.error("[bot] cooldown check failed:", err);
+    });
   });
 
   bot.on("message:text", async (ctx) => {
     await ctx.reply("⚡ Use the button below to open EarnX.", {
       reply_markup: appKeyboard(),
     });
-    await sendCooldownCountdown(ctx, Number(ctx.from?.id));
+    void sendCooldownCountdown(ctx, Number(ctx.from?.id)).catch((err) => {
+      console.error("[bot] cooldown check failed:", err);
+    });
   });
 
   try {
