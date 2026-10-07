@@ -247,3 +247,9 @@ export async function startBot(app: Express) {
     await bot.api.setWebhook(webhookUrl, {
       drop_pending_updates: false,
       ...(config.bot.webhookSecret ? { secret_token: config.bot.webhookSecret } : {}),
+    });
+    console.log("[bot] webhook set: " + webhookUrl);
+  } catch (err) {
+    console.error("[bot] failed to configure webhook:", err);
+  }
+}
