@@ -44,7 +44,7 @@ function appKeyboard(referrerTelegramId?: number | null) {
     : null;
 
   const keyboard = new InlineKeyboard()
-    .webApp("🚀 Open EarnX", config.bot.appUrl || config.bot.publicUrl.replace(/\/api\/?$/, ""));
+    .webApp("🚀 Open NovaMine", config.bot.appUrl || config.bot.publicUrl.replace(/\/api\/?$/, ""));
 
   if (inviteUrl) {
     keyboard.row().url("👥 Invite Friends", inviteUrl);
@@ -69,20 +69,26 @@ export async function startBot(app: Express) {
   // ── /start ───────────────────────────────────────────────────────────────
   bot.command("start", async (ctx) => {
     const startParam = ctx.match?.toString().trim() || null;
+    const firstName = ctx.from?.first_name || "Miner";
 
-    // Keep the /start message clean and app-focused, matching the
-    // polished Telegram welcome layout used by the reference bot.
+    // NovaMine welcome message: clean Telegram layout with a prominent
+    // Mini App button and an optional referral button, matching the
+    // reference design shown by the owner.
+    await syncTelegramUser(ctx.from, null);
+
+    const referralLine = startParam?.startsWith("ref_")
+      ? "🎁 Referral link detected — your friend can receive rewards after joining."
+      : "";
+
     await ctx.reply(
       [
-        "🚀 *Welcome to EarnX!*",
+        `🚀 *Welcome to NovaMine, ${firstName}!*`,
         "",
         "🎁 Complete tasks, watch rewarded ads, invite friends and earn rewards.",
+        referralLine,
         "",
-        "👇 Tap *Open EarnX* below to start earning.",
-        startParam?.startsWith("ref_")
-          ? ""
-          : "",
-      ].join("\n"),
+        "👇 Tap *Open NovaMine* below to start earning.",
+      ].filter(Boolean).join("\n"),
       {
         parse_mode: "Markdown",
         reply_markup: appKeyboard(ctx.from?.id),
@@ -196,7 +202,7 @@ export async function startBot(app: Express) {
       await bot.api.setChatMenuButton({
         menu_button: {
           type: "web_app",
-          text: "🚀 Open EarnX",
+          text: "🚀 Open NovaMine",
           web_app: { url: appUrl },
         },
       });
