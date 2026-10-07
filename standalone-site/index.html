@@ -29,8 +29,9 @@
         [data-theme="dark"] { --primary-color: #0A84FF; --primary-color-rgb: 10, 132, 255; --secondary-color: #3395FF; --background-color: #000000; --card-background: #1C1C1E; --text-color: #F5F5F7; --text-light: #8E8E93; --border-color: #3A3A3C; --glass-bg: rgba(28, 28, 30, 0.8); }
         
         * { box-sizing: border-box; }
-        html, body { overscroll-behavior-y: contain; touch-action: manipulation; -webkit-text-size-adjust: 100%; }
-        body { touch-action: manipulation; font-family: 'Noto Sans', sans-serif; margin: 0; padding: max(18px, env(safe-area-inset-top)) 14px calc(92px + env(safe-area-inset-bottom)) 14px; background-color: var(--background-color); color: var(--text-color); -webkit-font-smoothing: antialiased; transition: background-color 0.3s, color 0.3s; }
+        html { background-color: #020711; min-height: 100%; overscroll-behavior: none; }
+        html, body { overscroll-behavior: none; touch-action: manipulation; -webkit-text-size-adjust: 100%; }
+        body { min-height: 100vh; background-color: #020711; touch-action: manipulation; font-family: 'Noto Sans', sans-serif; margin: 0; padding: max(18px, env(safe-area-inset-top)) 14px calc(92px + env(safe-area-inset-bottom)) 14px; color: var(--text-color); -webkit-font-smoothing: antialiased; transition: background-color 0.3s, color 0.3s; }
         
         #preloader {
  position:fixed; inset:0; z-index:9999; overflow:hidden;
