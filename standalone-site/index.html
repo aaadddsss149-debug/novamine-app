@@ -921,7 +921,7 @@
             ],
             welcomeNotice: {
                 title: "Welcome!",
-                message: `Please follow the rules to ensure you receive your payment.\n\n💰 Reward per Ad: $0.001\n💝 After watching 15 ads, there is a 30-minute break.\n✅ 100% Payment Guarantee\n💸 Withdraw via Binance UID or Email\n🔥 Minimum withdrawal is only $2\n\n⛔ IMPORTANT RULES ⛔\n- Use mobile data for tasks. Do not use WiFi.\n- After each break, change your IP address. Simply turn Airplane Mode ON and then OFF.\n- Do NOT use any free or paid VPN.\n- Watch the complete guide video on our Telegram channel before starting.\n\nFollowing these rules is mandatory to get paid. Join our Telegram channel for updates and support! ✅`
+                message: `Please follow the rules to ensure you receive your payment.\n\n💰 Reward per Ad: $0.001\n💝 After watching 15 ads, the next ads unlock after 24 hours.\n✅ 100% Payment Guarantee\n💸 Withdraw via Binance UID or Email\n🔥 Minimum withdrawal is only $2\n\n⛔ IMPORTANT RULES ⛔\n- Use mobile data for tasks. Do not use WiFi.\n- After each break, change your IP address. Simply turn Airplane Mode ON and then OFF.\n- Do NOT use any free or paid VPN.\n- Watch the complete guide video on our Telegram channel before starting.\n\nFollowing these rules is mandatory to get paid. Join our Telegram channel for updates and support! ✅`
             }
         };
 
@@ -1089,12 +1089,12 @@
                 const updateTimer = () => {
                     const remaining = new Date(state.cooldownUntil) - new Date();
                     if (remaining <= 0) { clearInterval(cooldownInterval); state.cooldownUntil = null; state.adsWatchedToday = 0; saveState(); updateUI(); safeTgAlert(`Your break is over! Please change your IP address before starting.`); } 
-                    else { const minutes = Math.floor((remaining / 1000 / 60) % 60); const seconds = Math.floor((remaining / 1000) % 60); watchAdButton.querySelector('span').textContent = `Break: ${minutes}m ${seconds}s`; }
+                    else { const totalSeconds = Math.max(0, Math.ceil(remaining / 1000)); const hours = Math.floor(totalSeconds / 3600); const minutes = Math.floor((totalSeconds % 3600) / 60); const seconds = totalSeconds % 60; watchAdButton.querySelector('span').textContent = `Next ads in ${hours.toString().padStart(2,'0')}:${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`; }
                 };
                 cooldownInterval = setInterval(updateTimer, 1000); updateTimer();
             } else {
                 watchAdButton.disabled = state.adsWatchedToday >= config.DAILY_AD_LIMIT;
-                watchAdButton.querySelector('span').textContent = state.adsWatchedToday >= config.DAILY_AD_LIMIT ? 'Take a Break' : 'Watch Ad';
+                watchAdButton.querySelector('span').textContent = state.adsWatchedToday >= config.DAILY_AD_LIMIT ? 'Next ads in 24:00:00' : 'Watch Ad';
             }
             watchAdButton.classList.toggle('pulsing', !watchAdButton.disabled);
             updateChart();
