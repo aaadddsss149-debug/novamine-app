@@ -58,16 +58,44 @@ function formatCooldown(remainingMs: number) {
 
 const cooldownTimers = new Map<number, ReturnType<typeof setInterval>>();
 
-async function sendCooldownCountdown(ctx: any, telegramId: number) {
-  const { data: siteUser, error } = await supabaseAdmin
+async function getAdCooldownUntil(telegramId: number) {
+  const { data: siteUser, error: userError } = await supabaseAdmin
     .from("site_users")
-    .select("cooldown_until, ads_watched_today")
+    .select("id")
     .eq("telegram_id", telegramId)
     .maybeSingle();
 
-  if (error || !siteUser?.cooldown_until) return;
-  const cooldownUntil = new Date(siteUser.cooldown_until).getTime();
-  if (!Number.isFinite(cooldownUntil) || cooldownUntil <= Date.now()) return;
+  if (userError || !siteUser?.id) return null;
+
+  // The cooldown starts when the 15th ad in the rolling 24-hour window was watched.
+  const { data: rewards, error: rewardError } = await supabaseAdmin
+    .from("site_ad_rewards")
+    .select("created_at")
+    .eq("user_id", siteUser.id)
+    .gte("created_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+    .order("created_at", { ascending: true })
+    .limit(15);
+
+  if (rewardError || !rewards || rewards.length < 15) return null;
+
+  const fifteenthRewardAt = new Date(rewards[14].created_at).getTime();
+  if (!Number.isFinite(fifteenthRewardAt)) return null;
+
+  const cooldownUntil = fifteenthRewardAt + 24 * 60 * 60 * 1000;
+  if (cooldownUntil <= Date.now()) return null;
+
+  // Keep the cached field in sync for the website as well.
+  await supabaseAdmin
+    .from("site_users")
+    .update({ cooldown_until: new Date(cooldownUntil).toISOString() })
+    .eq("id", siteUser.id);
+
+  return cooldownUntil;
+}
+
+async function sendCooldownCountdown(ctx: any, telegramId: number) {
+  const cooldownUntil = await getAdCooldownUntil(telegramId);
+  if (!cooldownUntil) return;
 
   const textFor = () => [
     "⏳ *Ad cooldown active*",
@@ -176,6 +204,7 @@ export async function startBot(app: Express) {
     await ctx.reply("⚡ Use the button below to open EarnX.", {
       reply_markup: appKeyboard(),
     });
+    await sendCooldownCountdown(ctx, Number(ctx.from?.id));
   });
 
   try {
@@ -218,9 +247,3 @@ export async function startBot(app: Express) {
     await bot.api.setWebhook(webhookUrl, {
       drop_pending_updates: false,
       ...(config.bot.webhookSecret ? { secret_token: config.bot.webhookSecret } : {}),
-    });
-    console.log("[bot] webhook set: " + webhookUrl);
-  } catch (err) {
-    console.error("[bot] failed to configure webhook:", err);
-  }
-}
