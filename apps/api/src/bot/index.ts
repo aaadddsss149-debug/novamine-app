@@ -181,7 +181,7 @@ export async function startBot(app: Express) {
     const message = [
       `🚀 *Welcome to EarnX, ${firstName}!*`,
       "",
-      "⛏️ Mine NOVA and grow your rewards.",
+      "⛏️ Earn rewards and grow your balance.",
       "🎁 Complete tasks, watch rewarded ads, and invite friends.",
       "💎 Track your balance and manage everything directly inside EarnX.",
       "",
