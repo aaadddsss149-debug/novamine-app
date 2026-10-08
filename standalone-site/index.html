@@ -837,6 +837,9 @@
             border-radius: 16px;
         }
 
+
+        /* Subscription plans */
+        .plans-grid{display:grid;gap:12px}.plan-card{position:relative;padding:17px;border-radius:17px;background:linear-gradient(145deg,rgba(8,24,45,.96),rgba(4,14,28,.96));border:1px solid rgba(0,191,255,.16);box-shadow:0 7px 24px rgba(0,0,0,.22)}.plan-card.active{border-color:rgba(0,207,255,.55);box-shadow:0 0 22px rgba(0,191,255,.10)}.plan-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.plan-name{font-size:17px;font-weight:800}.plan-badge{font-size:9px;font-weight:800;letter-spacing:1px;color:#00d9ff;border:1px solid rgba(0,207,255,.25);border-radius:999px;padding:4px 7px}.plan-price{font-size:25px;font-weight:900;margin:9px 0 3px}.plan-meta{font-size:11px;color:#8fa8c7}.plan-reward{font-size:12px;color:#00cfff;font-weight:800;margin-top:8px}.plan-buy{margin-top:12px;width:100%;min-height:44px;border:0;border-radius:12px;background:linear-gradient(90deg,#0878ff,#00bfff);color:#fff;font-weight:800}.plan-buy:disabled{opacity:.55}
 </style>
 </head>
 <body>
@@ -853,6 +856,8 @@
     
     <div id="homePage" class="container app-page active">        <div class="profile-header"><div id="profile-pic"><i class="fa-solid fa-user"></i></div><h1 id="greeting">Welcome!</h1></div>
         <div class="balance-card"><h3>Your Balance</h3><div class="amount" id="total-earning">$0.000</div></div>
+        
+        <div class="card" id="plans-card"><h3 class="card-title"><i class="fa-solid fa-gem"></i> Subscription Plans</h3><div id="plans-grid" class="plans-grid"><p class="no-history">Loading plans...</p></div></div>
         <div class="stats-grid">
             <div class="stat-item"><i class="fa-solid fa-rectangle-ad bg-icon"></i><div class="icon"><i class="fa-solid fa-rectangle-ad"></i></div><div class="value" id="ad-count">0</div><div class="label">Ads Watched</div></div>
             <div class="stat-item"><i class="fa-solid fa-calendar-day bg-icon"></i><div class="icon"><i class="fa-solid fa-calendar-day"></i></div><div class="value" id="ads-today-count">0 / 15</div><div class="label">Today's Ads</div></div>
@@ -974,6 +979,595 @@
         }
 
         async function saveState() { return true; }
+
+
+        async function loadPlans(){
+            const grid=document.getElementById('plans-grid'); if(!grid) return;
+            try{
+                const r=await fetch(config.SUPABASE_URL+'/rest/v1/site_plans?select=id,name,price_ton,ad_reward_usd,duration_days,active&active=eq.true&order=price_ton.asc',{headers:{apikey:config.SUPABASE_PUBLISHABLE_KEY,Authorization:'Bearer '+config.SUPABASE_PUBLISHABLE_KEY}});
+                if(!r.ok) throw new Error('PLANS_LOAD_FAILED');
+                const plans=await r.json();
+                if(!Array.isArray(plans)||!plans.length){grid.innerHTML='<p class="no-history">No active plans available.</p>';return;}
+                const currentPlan=String(state.planId||'free');
+                grid.innerHTML=plans.map(p=>{const active=String(p.id)===currentPlan;const price=Number(p.price_ton||0);const reward=Number(p.ad_reward_usd||0);const days=Number(p.duration_days||0);return '<div class="plan-card '+(active?'active':'')+'"><div class="plan-head"><span class="plan-name">'+escapeHTML(p.name||p.id)+'</span>'+(active?'<span class="plan-badge">CURRENT</span>':'')+'</div><div class="plan-price">'+(price?price.toFixed(3)+' TON':'FREE')+'</div><div class="plan-meta">'+(days?days+' days':'No expiry')+'</div><div class="plan-reward">Ad reward: 
+            const data = await apiCall('bootstrap');
+            const u = data.user || {};
+            siteUserId = u.id;
+            state.totalEarning = Number(u.balance_usd || 0);
+            state.planId = String(u.plan_id || "free");
+            state.planExpiresAt = u.plan_expires_at || null;
+            state.adCount = Number(u.ads_watched || 0);
+            state.adsWatchedToday = Number(u.ads_watched_today || 0);
+            state.withdrawalHistory = data.history || [];
+            state.completedBonusTasks = data.completedBonusTasks || [];
+            state.referredUsers = data.referredUsers || [];
+            state.weeklyActivity = data.weeklyActivity || [0,0,0,0,0,0,0];
+
+            // Load live tasks created from the Admin dashboard.
+            // The API returns active tasks from the Supabase tasks table.
+            if (Array.isArray(data.tasks)) {
+                config.bonusTasks = data.tasks.map(task => ({
+                    id: String(task.id || ''),
+                    title: String(task.label || task.id || 'Task'),
+                    link: String(task.url || ''),
+                    reward: Number(task.reward || 0),
+                    duration: 10,
+                    action: String(task.action || ''),
+                    category: String(task.category || '')
+                })).filter(task => task.id && task.reward > 0);
+            }
+
+            if (typeof renderReferrals === 'function') renderReferrals();
+            state.originalUserId = u.telegram_id;
+            state.cooldownUntil = u.cooldown_until || null;
+            const cfg = data.config || {};
+            if (cfg.ad_reward !== undefined) config.AD_REWARD = Number(cfg.ad_reward);
+            if (cfg.daily_ad_limit !== undefined) config.DAILY_AD_LIMIT = Number(cfg.daily_ad_limit);
+            if (cfg.minimum_withdrawal !== undefined) config.MINIMUM_WITHDRAWAL = Number(cfg.minimum_withdrawal);
+            if (cfg.cooldown_minutes !== undefined) config.COOLDOWN_MINUTES = Number(cfg.cooldown_minutes);
+            if (cfg.referral_reward !== undefined) config.REFERRAL_REWARD = Number(cfg.referral_reward);
+        }
+
+        function checkIpInDB() { return Promise.resolve(false); }
+        function saveIpToDB() {}
+        async function getIpAddress() { try { const response = await fetch('https://api.ipify.org?format=json'); const data = await response.json(); return data.ip; } catch (error) { console.error("Could not fetch IP address.", error); return null; } }
+        function safeTgAction(action, fallback = () => {}) { if (tg && tg.initData) { action(tg); } else { fallback(); console.log("Telegram WebApp is not available or not ready."); } }
+        function safeTgAlert(message) { safeTgAction(tg => tg.showAlert(message), () => alert(message)); }
+        function escapeHTML(str) { if (!str) return ''; return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+       
+        function populateWithdrawalMethods() {
+            const methodSelect = document.getElementById('method');
+            if (!methodSelect) return;
+            methodSelect.querySelectorAll('option:not([value=""])').forEach(o => o.remove());
+            config.withdrawalMethods.forEach(method => {
+                const option = document.createElement('option');
+                option.value = method;
+                option.textContent = method === 'USDT TRX-20' ? 'USDT TRC-20' : method;
+                methodSelect.appendChild(option);
+            });
+            methodSelect.addEventListener('change', updatePaymentField);
+            updatePaymentField();
+        }
+
+        function updatePaymentField() {
+            const method = document.getElementById('method')?.value || '';
+            const wrap = document.getElementById('payment-details-wrap');
+            const input = document.getElementById('account-number');
+            const label = document.getElementById('account-label');
+            const hint = document.getElementById('account-hint');
+            if (!wrap || !input || !label || !hint) return;
+            const details = {
+                'Binance UID': {
+                    label: 'Binance UID or Email',
+                    placeholder: 'Enter your Binance UID or Email',
+                    hint: 'Use the Binance UID or email linked to your Binance account.'
+                },
+                'USDT TRX-20': {
+                    label: 'USDT TRC-20 Address',
+                    placeholder: 'Enter your USDT TRC-20 wallet address',
+                    hint: 'Make sure the address is a TRC-20 USDT address.'
+                },
+                'TON': {
+                    label: 'TON Wallet Address',
+                    placeholder: 'Enter your TON wallet address',
+                    hint: 'Enter the TON wallet address where you want to receive payment.'
+                }
+            };
+            if (!details[method]) {
+                wrap.style.display = 'none';
+                input.value = '';
+                input.required = false;
+                return;
+            }
+            const d = details[method];
+            wrap.style.display = 'flex';
+            label.textContent = d.label;
+            input.placeholder = d.placeholder;
+            hint.textContent = d.hint;
+            input.required = true;
+        }
+
+        let cooldownInterval;
+        function updateUI() {
+            if (state.cooldownUntil && new Date() >= new Date(state.cooldownUntil)) { state.cooldownUntil = null; state.adsWatchedToday = 0; saveState(); }
+            allDOMElements.totalEarningEl.textContent = `$${state.totalEarning.toFixed(3)}`;
+            allDOMElements.adCountEl.textContent = state.adCount;
+            allDOMElements.adsTodayCountEl.textContent = `${state.adsWatchedToday} / ${config.DAILY_AD_LIMIT}`;
+            if (allDOMElements.referralCountEl) allDOMElements.referralCountEl.textContent = state.referredUsers.length;
+            if (allDOMElements.minWithdrawText) allDOMElements.minWithdrawText.textContent = `Minimum withdrawal is ${config.MINIMUM_WITHDRAWAL.toFixed(2)}.`;
+            const wb = document.getElementById("withdraw-balance"); if (wb) wb.textContent = "$" + state.totalEarning.toFixed(3);
+            const wm = document.getElementById("withdraw-min"); if (wm) wm.textContent = "$" + config.MINIMUM_WITHDRAWAL.toFixed(2);
+            
+            clearInterval(cooldownInterval);
+            const watchAdButton = allDOMElements.watchAdButton;
+            if (state.cooldownUntil && new Date() < new Date(state.cooldownUntil)) {
+                watchAdButton.disabled = true;
+                const updateTimer = () => {
+                    const remaining = new Date(state.cooldownUntil) - new Date();
+                    if (remaining <= 0) { clearInterval(cooldownInterval); state.cooldownUntil = null; state.adsWatchedToday = 0; saveState(); updateUI(); safeTgAlert(`Your break is over! Please change your IP address before starting.`); } 
+                    else { const totalSeconds = Math.max(0, Math.ceil(remaining / 1000)); const hours = Math.floor(totalSeconds / 3600); const minutes = Math.floor((totalSeconds % 3600) / 60); const seconds = totalSeconds % 60; watchAdButton.querySelector('span').textContent = `Next ads in ${hours.toString().padStart(2,'0')}:${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`; }
+                };
+                cooldownInterval = setInterval(updateTimer, 1000); updateTimer();
+            } else {
+                watchAdButton.disabled = state.adsWatchedToday >= config.DAILY_AD_LIMIT;
+                watchAdButton.querySelector('span').textContent = state.adsWatchedToday >= config.DAILY_AD_LIMIT ? 'Next ads in 24:00:00' : 'Watch Ad';
+            }
+            watchAdButton.classList.toggle('pulsing', !watchAdButton.disabled);
+            updateChart();
+        }
+        
+        let adRewardInFlight = false;
+
+        function initAdsBitvex() {
+            return typeof window.showadsbitvex === 'function';
+        }
+
+        async function watchAd() {
+            if (adRewardInFlight) return;
+            if (state.adsWatchedToday >= config.DAILY_AD_LIMIT) {
+                safeTgAlert('You have reached today\'s ad limit. Please try again later.');
+                return;
+            }
+            if (!initAdsBitvex()) {
+                safeTgAlert('Ad service is not ready. Please wait a moment and try again.');
+                return;
+            }
+
+            adRewardInFlight = true;
+            allDOMElements.adLoaderOverlay.style.display = 'flex';
+
+            try {
+                // Only this part is considered an ad/API failure.
+                await window.showadsbitvex();
+
+                // Ads can leave Telegram's Mini App in fullscreen on iOS.
+                // Exit Telegram fullscreen immediately after the ad closes so the
+                // native Telegram controls remain accessible.
+                try {
+                    const telegram = await waitForTelegramWebApp(1500);
+                    if (typeof telegram.exitFullscreen === 'function' &&
+                        telegram.isFullscreen === true) {
+                        telegram.exitFullscreen();
+                    }
+                } catch (_) {}
+
+                const result = await apiCall('reward_ad', {
+                    provider: 'adsbitvex',
+                    appId: config.ADSBITVEX_APP_ID
+                });
+
+                const reward = Number(result.reward || config.AD_REWARD || 0.001);
+                const returnedUser = result.user || {};
+
+                // The API returns the real database values.
+                const serverBalance = Number(
+                    returnedUser.balance_usd ??
+                    returnedUser.balance ??
+                    returnedUser.total_earning
+                );
+                const serverAdsToday = Number(
+                    returnedUser.ads_today ??
+                    returnedUser.ads_watched_today
+                );
+                const serverAdsTotal = Number(
+                    returnedUser.ads_watched ??
+                    returnedUser.total_ads
+                );
+
+                state.totalEarning = Number.isFinite(serverBalance)
+                    ? serverBalance
+                    : Number(state.totalEarning || 0) + reward;
+
+                // Keep both counters in sync: total "Ads Watched" and today's ads.
+                state.adCount = Number.isFinite(serverAdsTotal)
+                    ? serverAdsTotal
+                    : Number(state.adCount || 0) + 1;
+
+                state.adsWatchedToday = Number.isFinite(serverAdsToday)
+                    ? serverAdsToday
+                    : Number(state.adsWatchedToday || 0) + 1;
+
+                // Refresh the weekly activity from the server immediately after the
+                // successful reward, then redraw the chart. This keeps it consistent with
+                // the real database instead of waiting for a page reload.
+                try {
+                    const fresh = await apiCall('bootstrap');
+                    if (Array.isArray(fresh.weeklyActivity) && fresh.weeklyActivity.length === 7) {
+                        state.weeklyActivity = fresh.weeklyActivity.map(v => Math.max(0, Number(v) || 0));
+                    } else {
+                        if (!Array.isArray(state.weeklyActivity) || state.weeklyActivity.length !== 7) {
+                            state.weeklyActivity = [0, 0, 0, 0, 0, 0, 0];
+                        }
+                        const todayIndex = new Date().getDay();
+                        state.weeklyActivity[todayIndex] = Number(state.weeklyActivity[todayIndex] || 0) + 1;
+                    }
+                } catch (weeklyError) {
+                    console.error('Weekly activity refresh failed:', weeklyError);
+                    if (!Array.isArray(state.weeklyActivity) || state.weeklyActivity.length !== 7) {
+                        state.weeklyActivity = [0, 0, 0, 0, 0, 0, 0];
+                    }
+                    const todayIndex = new Date().getDay();
+                    state.weeklyActivity[todayIndex] = Number(state.weeklyActivity[todayIndex] || 0) + 1;
+                }
+
+                // UI rendering must never turn a successful reward into an ad error.
+                try {
+                    updateUI();
+                    if (typeof renderDashboard === 'function') renderDashboard();
+                    if (typeof renderHistory === 'function') renderHistory();
+                    if (typeof updateStats === 'function') updateStats();
+                    if (typeof updateChart === 'function') updateChart();
+                    if (typeof saveLocalState === 'function') saveLocalState();
+                } catch (uiError) {
+                    console.error('Post-ad UI update error:', uiError);
+                    // The server reward is already saved; keep the local state updated.
+                }
+
+                safeTgAction(tg => tg.HapticFeedback.notificationOccurred('success'));
+                safeTgAlert('🎉 Ad completed! +$' + reward.toFixed(3));
+            } catch (e) {
+                console.error('AdsBitvex/reward error:', e);
+                safeTgAlert('No ad is available right now. Please try again later.');
+            } finally {
+                adRewardInFlight = false;
+                allDOMElements.adLoaderOverlay.style.display = 'none';
+            }
+        }
+
+        async function handleWithdrawal(event) {
+            event.preventDefault();
+            const { withdrawForm } = allDOMElements;
+            const submitButton = document.getElementById('withdraw-submit-button');
+            const buttonText = submitButton.querySelector('.button-text');
+            const spinner = submitButton.querySelector('.spinner');
+            const amount = parseFloat(withdrawForm.elements['withdraw-amount'].value);
+            const method = withdrawForm.elements.method.value;
+            const accountNumber = withdrawForm.elements['account-number'].value.trim();
+
+            if (!Number.isFinite(amount) || amount <= 0) return safeTgAlert('Enter a valid amount.');
+            if (amount > state.totalEarning) return safeTgAlert('You do not have enough balance.');
+            if (amount < config.MINIMUM_WITHDRAWAL) return safeTgAlert('Minimum withdrawal amount is $' + config.MINIMUM_WITHDRAWAL + '.');
+
+            buttonText.style.display = 'none';
+            spinner.style.display = 'block';
+            submitButton.disabled = true;
+            try {
+                const result = await apiCall('withdraw', { amount, method, accountNumber });
+                const created = result.withdrawal;
+                if (created) {
+                    state.totalEarning = Math.max(0, state.totalEarning - amount);
+                    if (!Array.isArray(state.withdrawalHistory)) state.withdrawalHistory = [];
+                    state.withdrawalHistory.unshift(created);
+                }
+                updateUI();
+                renderHistory();
+                withdrawForm.reset();
+                showPage('historyPage', document.querySelector('.nav-button:nth-child(3)'));
+                safeTgAlert('Your withdrawal request has been saved and is pending admin processing.');
+                safeTgAction(tg => tg.HapticFeedback.notificationOccurred('success'));
+                loadState().then(() => {
+                    updateUI();
+                    renderHistory();
+                    renderReferrals();
+                }).catch(refreshError => console.warn('Background refresh after withdrawal failed:', refreshError));
+            } catch (error) {
+                console.error('Withdrawal Error:', error);
+                const msg = String(error && error.message ? error.message : '');
+                let message = 'Withdrawal failed: ' + (msg || 'Unknown error');
+                if (msg === 'INSUFFICIENT_BALANCE') message = 'You do not have enough balance.';
+                else if (msg === 'MINIMUM_WITHDRAWAL') message = 'Minimum withdrawal amount is $' + config.MINIMUM_WITHDRAWAL + '.';
+                else if (msg === 'INVALID_WITHDRAWAL') message = 'Please choose a withdrawal method and enter your account.';
+                else if (msg === 'PENDING_WITHDRAWAL') message = 'You already have a pending withdrawal.';
+                safeTgAlert(message);
+            } finally {
+                buttonText.style.display = 'inline';
+                spinner.style.display = 'none';
+                submitButton.disabled = false;
+            }
+        }
+
+        function checkPendingWithdrawals() { return; }
+        function renderHistory() {
+            const { historyListEl } = allDOMElements;
+            if (!state.withdrawalHistory || state.withdrawalHistory.length === 0) {
+                historyListEl.innerHTML = '<p class="no-history">No withdrawal history found.</p>';
+                return;
+            }
+            historyListEl.innerHTML = state.withdrawalHistory.map(item => {
+                const status = String(item.status || 'pending').toLowerCase();
+                const label = status.charAt(0).toUpperCase() + status.slice(1);
+                return `<div class="history-item">
+                    <div class="history-details"><span class="method-number">${escapeHTML(item.method)} - ${escapeHTML(item.account_number)}</span><span class="date">${new Date(item.created_at).toLocaleString()}</span></div>
+                    <div class="history-amount"><span>$${Number(item.amount_usd).toFixed(3)}</span><div class="history-status ${status}">${label}</div></div>
+                </div>`;
+            }).join('');
+        }
+
+        function renderBonusTasks() {
+            const { bonusTasksListEl } = allDOMElements;
+            bonusTasksListEl.innerHTML = '';
+            if (config.bonusTasks.length === 0) { bonusTasksListEl.innerHTML = '<p class="no-history">No bonus tasks are available right now.</p>'; return; }
+            config.bonusTasks.forEach(task => {
+                const isCompleted = state.completedBonusTasks.includes(task.id);
+                const item = document.createElement('div');
+                item.className = 'bonus-item';
+                item.innerHTML = `<div class="details"><span class="title">${escapeHTML(task.title)}</span><span class="reward"><i class="fa-solid fa-gift"></i>+ $${task.reward.toFixed(3)}</span></div><button class="claim-button" ${isCompleted ? 'disabled' : ''}>${isCompleted ? 'Completed' : 'Claim'}</button>`;
+                if (!isCompleted) { item.querySelector('.claim-button').addEventListener('click', (e) => handleBonusTask(task, e.target)); }
+                bonusTasksListEl.appendChild(item);
+            });
+        }
+
+        async function handleBonusTask(task, button) {
+            button.disabled = true; button.textContent = 'Processing...';
+            safeTgAction(tg => tg.openLink(task.link));
+            try {
+                await new Promise(resolve => setTimeout(resolve, task.duration * 1000));
+                if (state.completedBonusTasks.includes(task.id)) return;
+                const data = await apiCall('claim_bonus', { taskId: task.id, reward: task.reward });
+                state.totalEarning = Number(data.balance);
+                state.completedBonusTasks.push(task.id);
+                updateUI(); button.textContent = 'Completed';
+                safeTgAlert(`Bonus of $${task.reward.toFixed(3)} added successfully!`);
+                safeTgAction(tg => tg.HapticFeedback.notificationOccurred('success'));
+            } catch (e) {
+                console.error('Bonus error:', e);
+                button.disabled = false; button.textContent = 'Claim';
+                safeTgAlert(e.message === 'BONUS_ALREADY_CLAIMED' ? 'This bonus is already completed.' : 'Could not claim this bonus.');
+            }
+        }
+
+        function syncWithdrawBalance() {
+            const balanceEl = document.getElementById("withdraw-balance");
+            const minEl = document.getElementById("withdraw-min");
+            if (balanceEl) balanceEl.textContent = "$" + Number(state.totalEarning || 0).toFixed(3);
+            if (minEl) minEl.textContent = "$" + Number(config.MINIMUM_WITHDRAWAL || 0).toFixed(2);
+        }
+
+        function showPage(pageId, buttonEl) {
+            document.querySelectorAll('.app-page').forEach(page => {
+                page.classList.remove('active');
+                page.style.display = 'none';
+            });
+            document.querySelectorAll('.nav-button').forEach(btn => btn.classList.remove('active'));
+            const page = document.getElementById(pageId);
+            if (!page) return;
+            page.classList.add('active');
+            page.style.display = 'block';
+            if (buttonEl) buttonEl.classList.add('active');
+            if (pageId === 'withdrawPage') syncWithdrawBalance();
+            if (pageId === 'historyPage') renderHistory();
+            if (pageId === 'bonusPage') renderBonusTasks();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        function getReferralLink() {
+            const webApp = window.Telegram?.WebApp || tg;
+            const userId = webApp?.initDataUnsafe?.user?.id;
+            const botUsername = String(config.BOT_USERNAME || '').replace(/^@/, '').trim();
+            if (!userId || !botUsername) return '';
+            return 'https://t.me/' + botUsername + '?startapp=' + encodeURIComponent(String(userId));
+        }
+        function renderReferrals() {
+            const list = document.getElementById('referrals-list');
+            const count = document.getElementById('invite-referral-count');
+            const users = Array.isArray(state.referredUsers) ? state.referredUsers : [];
+            if (count) count.textContent = users.length;
+            if (!list) return;
+            if (!users.length) { list.innerHTML = '<p class="no-history">No invited users yet.</p>'; return; }
+            list.innerHTML = users.map(user => {
+                const name = [user.first_name, user.last_name].filter(Boolean).join(' ').trim() || (user.username ? '@' + user.username : 'Telegram User');
+                const username = user.username ? '@' + user.username : 'Telegram user';
+                const avatar = user.photo_url ? '<img src="' + escapeHTML(user.photo_url) + '" alt="">' : escapeHTML(name.charAt(0).toUpperCase());
+                return '<div class="referral-user"><div class="referral-avatar">' + avatar + '</div><div><div class="referral-user-name">' + escapeHTML(name) + '</div><div class="referral-user-meta">' + escapeHTML(username) + '</div></div></div>';
+            }).join('');
+        }
+        async function copyReferralLink() {
+            const link = getReferralLink();
+            if (!link) return safeTgAlert('Please open NovaMine from the Telegram bot first.');
+            let copied = false;
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(link);
+                    copied = true;
+                }
+            } catch (_) {}
+            if (!copied) {
+                const area = document.createElement('textarea');
+                area.value = link;
+                area.setAttribute('readonly', '');
+                area.style.position = 'fixed';
+                area.style.left = '-9999px';
+                area.style.top = '0';
+                area.style.opacity = '0';
+                document.body.appendChild(area);
+                area.focus();
+                area.select();
+                area.setSelectionRange(0, area.value.length);
+                try { copied = document.execCommand('copy'); } catch (_) {}
+                area.remove();
+            }
+            safeTgAlert(copied ? 'Invite link copied!' : 'Copy was blocked. Tap Share Invite Link instead.');
+        }
+        async function shareReferralLink() {
+            const link = getReferralLink();
+            if (!link) return safeTgAlert('Please open NovaMine from the Telegram bot first.');
+            const shareText = 'Join EarnX and start earning!';
+            const shareUrl = 'https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + encodeURIComponent(shareText);
+            if (navigator.share) {
+                try {
+                    await navigator.share({ title: 'EarnX Invite', text: shareText, url: link });
+                    return;
+                } catch (error) {
+                    if (error?.name === 'AbortError') return;
+                }
+            }
+            safeTgAction(tg => {
+                try {
+                    if (typeof tg.openTelegramLink === 'function') tg.openTelegramLink(shareUrl);
+                    else if (typeof tg.openLink === 'function') tg.openLink(shareUrl);
+                    else window.open(shareUrl, '_blank');
+                } catch (_) { window.open(shareUrl, '_blank'); }
+            }, () => window.open(shareUrl, '_blank'));
+        }
+        
+        function updateChart() {
+            const el = document.getElementById('weekly-activity');
+            if (!el) return;
+            const values = Array.isArray(state.weeklyActivity) && state.weeklyActivity.length === 7
+                ? state.weeklyActivity.map(v => Math.max(0, Number(v) || 0))
+                : [0,0,0,0,0,0,0];
+            const labels = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+            const max = Math.max(1, ...values);
+            const today = new Date().getDay();
+            const days = el.querySelectorAll('.activity-day');
+            values.forEach((value, i) => {
+                const day = days[i];
+                if (!day) return;
+                const bar = day.querySelector('.activity-bar');
+                const valueEl = day.querySelector('.activity-value');
+                const label = day.querySelector('.activity-label');
+                if (bar) bar.style.height = Math.max(8, Math.round((value / max) * 100)) + '%';
+                if (valueEl) valueEl.textContent = String(value);
+                if (label) label.textContent = labels[i];
+                day.classList.toggle('active', i === today);
+            });
+        }
+
+        async function handleReferral() { return; }
+        async function processReferralRewards() { return; }
+        async function listenForReferralCount() { return; }
+
+        function loadMonetagSDK() { return; }
+
+        async function initApp() {
+            if (window.__novamineStarted) return;
+            window.__novamineStarted = true;
+            const preloaderStartedAt = Date.now();
+            const MIN_PRELOADER_MS = 5000;
+            let appReady = false;
+            let preloaderAnimationDone = false;
+            
+            const tryFinishLoading = () => {
+                if(appReady && preloaderAnimationDone) {
+                    const elapsed = Date.now() - preloaderStartedAt;
+                    const remaining = Math.max(0, MIN_PRELOADER_MS - elapsed);
+                    setTimeout(() => {
+                        allDOMElements.preloader.style.opacity = '0';
+                        if (allDOMElements.preloaderFooter) allDOMElements.preloaderFooter.style.opacity = '0';
+                        setTimeout(() => {
+                            allDOMElements.preloader.style.display = 'none';
+                            if (allDOMElements.preloaderFooter) allDOMElements.preloaderFooter.style.display = 'none';
+                            allDOMElements.container.style.display = 'block';
+                        }, 550);
+                    }, remaining);
+                }
+            };
+
+            let percentage = 0;
+            const interval = setInterval(() => {
+                percentage += Math.floor(Math.random() * 5) + 1;
+                if (percentage > 100) percentage = 100;
+                allDOMElements.preloaderPercentage.textContent = `${percentage}%`;
+                const progressFill = document.getElementById('preloader-progress-fill');
+                if (progressFill) progressFill.style.width = `${percentage}%`;
+                if (percentage >= 100) {
+                    clearInterval(interval);
+                    preloaderAnimationDone = true;
+                    tryFinishLoading();
+                }
+            }, 60);
+
+            try {
+                loadMonetagSDK();
+                initAdsBitvex(); 
+               
+                populateWithdrawalMethods();
+
+await loadState();
+                await loadPlans();
+
+                const user = tg ? tg.initDataUnsafe?.user : { first_name: 'User', photo_url: null };
+                if (user?.first_name) {
+                    allDOMElements.greetingEl.textContent = `Welcome, ${escapeHTML(user.first_name)}!`;
+                    if (user.photo_url) { allDOMElements.profilePicEl.innerHTML = `<img src="${user.photo_url}" alt="P">`; }
+                    else { allDOMElements.profilePicEl.innerHTML = `<span>${escapeHTML(user.first_name.charAt(0))}</span>`; }
+                }
+                
+                updateUI();
+                
+                allDOMElements.watchAdButton.addEventListener('click', watchAd);
+                if (allDOMElements.withdrawForm) {
+                    allDOMElements.withdrawForm.onsubmit = (event) => {
+                        event.preventDefault();
+                        void handleWithdrawal(event);
+                        return false;
+                    };
+                }
+                    allDOMElements.copyLinkButton.addEventListener('click', (event) => { event.preventDefault(); void copyReferralLink(); });
+                allDOMElements.shareLinkButton.addEventListener('click', (event) => { event.preventDefault(); shareReferralLink(); });
+                renderReferrals();
+                showPage('homePage', document.querySelector('.nav-button:nth-child(1)'));
+
+                safeTgAction(tg => {
+                    tg.ready();
+                    // Do not force Telegram Mini App fullscreen/expanded mode.
+                    // Keeping the native Telegram sheet height prevents ad overlays
+                    // from covering the Telegram close controls.
+                    tg.onEvent('themeChanged', () => { document.documentElement.setAttribute('data-theme', tg.colorScheme); updateChart(); });
+                });
+
+} catch (error) {
+                console.error("Initialization failed:", error);
+            } 
+            finally {
+                appReady = true;
+                if (percentage < 100) {
+                    clearInterval(interval);
+                    allDOMElements.preloaderPercentage.textContent = '100%';
+                    const progressFill = document.getElementById('preloader-progress-fill');
+                    if (progressFill) progressFill.style.width = '100%';
+                    preloaderAnimationDone = true;
+                }
+                tryFinishLoading();
+            }
+        }
+        
+        window.addEventListener('load', initApp);
+        document.addEventListener('DOMContentLoaded', () => { setTimeout(initApp, 50); });
+        setTimeout(() => { if (!window.__novamineStarted) initApp(); }, 4000);
+    </script>
+</body>
+</html>+reward.toFixed(3)+'</div><button class="plan-buy" '+(active||!price?'disabled':'')+' onclick="openPlanPayment('+JSON.stringify(String(p.id))+','+price+')">'+(active?'Current plan':(price?'Pay with TON':'Free plan'))+'</button></div>'}).join('');
+            }catch(e){console.warn(e);grid.innerHTML='<p class="no-history">Plans could not be loaded.</p>';}
+        }
+        function openPlanPayment(planId,priceTon){
+            const wallet='UQDPscg3FKO6AKp-HEqpWUi_eHS2bW7Nv3RmVe2bpQEkg3xT';
+            if(!priceTon) return;
+            const nano=String(Math.round(Number(priceTon)*1000000000));
+            const uri='ton://transfer/'+encodeURIComponent(wallet)+'?amount='+nano+'&text='+encodeURIComponent('EarnX-'+planId+'-'+Date.now());
+            safeTgAction(t=>{try{if(typeof t.openLink==='function')t.openLink(uri);else window.location.href=uri}catch(_){window.location.href=uri}},()=>{window.location.href=uri});
+            safeTgAlert('TON payment opened. Do not send payment unless the plan purchase/verification system is enabled.');
+        }
 
         async function loadState() {
             const data = await apiCall('bootstrap');
