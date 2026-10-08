@@ -858,7 +858,6 @@
     <div id="homePage" class="container app-page active">        <div class="profile-header"><div id="profile-pic"><i class="fa-solid fa-user"></i></div><h1 id="greeting">Welcome!</h1></div>
         <div class="balance-card"><h3>Your Balance</h3><div class="amount" id="total-earning">$0.000</div></div>
         
-        <div class="card" id="plans-card"><h3 class="card-title"><i class="fa-solid fa-gem"></i> Subscription Plans</h3><div id="plans-grid" class="plans-grid"><p class="no-history">Loading plans...</p></div></div>
         <div class="stats-grid">
             <div class="stat-item"><i class="fa-solid fa-rectangle-ad bg-icon"></i><div class="icon"><i class="fa-solid fa-rectangle-ad"></i></div><div class="value" id="ad-count">0</div><div class="label">Ads Watched</div></div>
             <div class="stat-item"><i class="fa-solid fa-calendar-day bg-icon"></i><div class="icon"><i class="fa-solid fa-calendar-day"></i></div><div class="value" id="ads-today-count">0 / 15</div><div class="label">Today's Ads</div></div>
@@ -872,7 +871,7 @@
         <button class="nav-button" onclick="showPage('withdrawPage', this)"><i class="fa-solid fa-money-bill-transfer"></i><span>Withdraw</span></button>
         <button class="nav-button" onclick="showPage('historyPage', this)"><i class="fa-solid fa-clock-rotate-left"></i><span>History</span></button>
         <button class="nav-button" onclick="showPage('invitePage', this)"><i class="fa-solid fa-user-plus"></i><span>Invite</span></button>
-        <button class="nav-button" onclick="showPage('bonusPage', this)"><i class="fa-solid fa-star"></i><span>Task</span></button>
+        <button class="nav-button" onclick="showPage('plansPage', this)"><i class="fa-solid fa-gem"></i><span>Plans</span></button>
     </div>
     
         <section id="withdrawPage" class="app-page">
@@ -896,7 +895,7 @@
         </section>
         <section id="historyPage" class="app-page"><div class="page-header"><div class="page-icon"><i class="fa-solid fa-clock-rotate-left"></i></div><div><h2>History</h2><p>Your withdrawal activity</p></div></div><div class="card"><div id="history-list"></div></div></section>
         <section id="invitePage" class="app-page"><div class="page-header"><div class="page-icon"><i class="fa-solid fa-user-plus"></i></div><div><h2>Invite</h2><p>Invite friends and earn rewards</p></div></div><div class="card"><h3 class="card-title"><i class="fa-solid fa-user-group"></i> Your Referrals</h3><div class="referral-count-card"><strong id="invite-referral-count">0</strong><span>Friends Invited</span></div><button type="button" class="action-button" id="copy-link-button" onclick="void copyReferralLink()"><i class="fa-solid fa-copy"></i><span>Copy Invite Link</span></button><button type="button" class="action-button secondary-button" id="share-link-button" onclick="void shareReferralLink()"><i class="fa-solid fa-share-nodes"></i><span>Share Invite Link</span></button><div class="invite-list-title"><i class="fa-solid fa-users"></i><span>People You Invited</span></div><div id="referrals-list" class="referrals-list"><p class="no-history">No invited users yet.</p></div></div></section>
-        <section id="bonusPage" class="app-page"><div class="page-header"><div class="page-icon"><i class="fa-solid fa-star"></i></div><div><h2>Task</h2><p>Complete tasks for extra rewards</p></div></div><div class="card"><h3 class="card-title">Tasks</h3><p style="text-align:center;margin-bottom:20px;">Complete tasks to earn extra rewards!</p><div id="bonus-tasks-list"></div></div></section>
+        <section id="plansPage" class="app-page"><div class="page-header"><div class="page-icon"><i class="fa-solid fa-gem"></i></div><div><h2>Plans</h2><p>Choose a plan and increase your ad rewards</p></div></div><div class="card"><h3 class="card-title"><i class="fa-solid fa-gem"></i> Subscription Plans</h3><div id="plans-grid" class="plans-grid"><p class="no-history">Loading plans...</p></div></div></section>
         <div id="multiAccountModal" class="modal"><div class="modal-content"><h3 class="card-title" style="text-align:center;">⚠️ Warning</h3><p>Multiple accounts are not allowed. Only one Telegram account can be used on this device. Please use your original account to continue.</p></div></div>
 
     <script>
@@ -922,10 +921,6 @@
             SUPABASE_URL: 'https://ziutwampfoqreozyvcnm.supabase.co',
             SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_Ym_0bRbsiEKCvvFdN0rxow_-JHh94ra',
             REFERRAL_REWARD: 0.01,
-            bonusTasks: [
-                { id: 'bonus_01', title: 'আমাদের চ্যানেল ভিজিট করুন', link: 'https://t.me/earnx0official', reward: 0.01, duration: 10 },
-                { id: 'bonus_02', title: 'অন্য অ্যাপটি দেখুন', link: 'https://t.me/earnx0official', reward: 0.01, duration: 10 }
-            ],
             welcomeNotice: {
                 title: "Welcome!",
                 message: `Please follow the rules to ensure you receive your payment.\n\n💰 Reward per Ad: $0.001\n💝 After watching 15 ads, the next ads unlock after 24 hours.\n✅ 100% Payment Guarantee\n💸 Withdraw via Binance UID or Email\n🔥 Minimum withdrawal is only $2\n\n⛔ IMPORTANT RULES ⛔\n- Use mobile data for tasks. Do not use WiFi.\n- After each break, change your IP address. Simply turn Airplane Mode ON and then OFF.\n- Do NOT use any free or paid VPN.\n- Watch the complete guide video on our Telegram channel before starting.\n\nFollowing these rules is mandatory to get paid. Join our Telegram channel for updates and support! ✅`
@@ -1365,7 +1360,7 @@
             if (buttonEl) buttonEl.classList.add('active');
             if (pageId === 'withdrawPage') syncWithdrawBalance();
             if (pageId === 'historyPage') renderHistory();
-            if (pageId === 'bonusPage') renderBonusTasks();
+            if (pageId === 'plansPage') loadPlans();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
         function getReferralLink() {
