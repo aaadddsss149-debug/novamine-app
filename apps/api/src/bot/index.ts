@@ -28,6 +28,15 @@ async function syncTelegramUser(from: any, referrerTelegramId?: number | null) {
   if (existing?.id) {
     const { error } = await supabaseAdmin.from("users").update(patch).eq("id", existing.id);
     if (error) throw error;
+    // Keep the Mini App account in sync with the Telegram bot account.
+    const { error: siteSyncError } = await supabaseAdmin.from("site_users").upsert({
+      telegram_id: telegramId,
+      username: patch.username,
+      first_name: patch.first_name,
+      last_name: patch.last_name,
+      last_seen_at: patch.last_seen_at,
+    }, { onConflict: "telegram_id" });
+    if (siteSyncError) console.error("[bot] site user sync failed:", siteSyncError);
     return existing.id;
   }
 
@@ -47,6 +56,15 @@ async function syncTelegramUser(from: any, referrerTelegramId?: number | null) {
     .select("id")
     .single();
   if (error) throw error;
+
+  const { error: siteSyncError } = await supabaseAdmin.from("site_users").upsert({
+    telegram_id: telegramId,
+    username: patch.username,
+    first_name: patch.first_name,
+    last_name: patch.last_name,
+    last_seen_at: patch.last_seen_at,
+  }, { onConflict: "telegram_id" });
+  if (siteSyncError) console.error("[bot] site user sync failed:", siteSyncError);
   return created.id;
 }
 
@@ -149,10 +167,16 @@ async function sendCooldownCountdown(ctx: any, telegramId: number) {
   cooldownTimers.set(chatId, timer);
 }
 
+const WEB_APP_CACHE_VERSION = "2026-10-08-876cf17";
+
 function appKeyboard(referrerTelegramId?: number | null) {
+  const baseUrl = config.bot.appUrl || config.bot.publicUrl.replace(/\/api\/?$/, "");
+  const appUrl = baseUrl.includes("?")
+    ? `${baseUrl}&v=${WEB_APP_CACHE_VERSION}`
+    : `${baseUrl}?v=${WEB_APP_CACHE_VERSION}`;
   const keyboard = new InlineKeyboard().webApp(
     "🚀 Open EarnX",
-    config.bot.appUrl || config.bot.publicUrl.replace(/\/api\/?$/, "")
+    appUrl
   );
   return keyboard;
 }
@@ -226,7 +250,10 @@ export async function startBot(app: Express) {
       { command: "start", description: "Open EarnX" },
     ]);
 
-    const appUrl = config.bot.appUrl || config.bot.publicUrl.replace(/\/$/, "");
+    const baseAppUrl = config.bot.appUrl || config.bot.publicUrl.replace(/\/$/, "");
+    const appUrl = baseAppUrl.includes("?")
+      ? `${baseAppUrl}&v=${WEB_APP_CACHE_VERSION}`
+      : `${baseAppUrl}?v=${WEB_APP_CACHE_VERSION}`;
     await bot.api.setChatMenuButton({
       menu_button: {
         type: "web_app",
