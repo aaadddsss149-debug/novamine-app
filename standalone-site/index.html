@@ -1556,6 +1556,20 @@ await loadState();
         document.addEventListener('DOMContentLoaded', () => { setTimeout(initApp, 50); });
         setTimeout(() => { if (!window.__novamineStarted) initApp(); }, 4000);
     </script>
+<script>
+/* HARD START FAILSAFE: never leave the Mini App stuck on the preloader. */
+setTimeout(function(){
+  try {
+    var p=document.getElementById('preloader');
+    var f=document.getElementById('preloader-footer');
+    var app=document.querySelector('.container');
+    if(p) p.style.display='none';
+    if(f) f.style.display='none';
+    if(app) { app.style.display='block'; app.classList.add('active'); }
+    document.body.style.overflowY='auto';
+  } catch(e) {}
+}, 6500);
+</script>
 </body>
 </html>+reward.toFixed(3)+'</div><button class="plan-buy" '+(active||!price?'disabled':'')+' onclick="openPlanPayment('+JSON.stringify(String(p.id))+','+price+')">'+(active?'Current plan':(price?'Pay with TON':'Free plan'))+'</button></div>'}).join('');
             }catch(e){console.warn(e);grid.innerHTML='<p class="no-history">Plans could not be loaded.</p>';}
