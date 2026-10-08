@@ -1556,6 +1556,14 @@ try {
                     ]);
                 } catch (error) {
                     console.warn('Account bootstrap delayed:', error);
+                    // Keep the UI responsive, then retry the real Telegram/Supabase
+                    // account bootstrap after the app is visible.
+                    setTimeout(() => {
+                        loadState().then(() => {
+                            updateUI();
+                            renderReferrals();
+                        }).catch(retryError => console.warn('Account bootstrap retry failed:', retryError));
+                    }, 1200);
                 }
                 try {
                     await Promise.race([
@@ -1628,7 +1636,7 @@ setTimeout(function(){
     if(app) { app.style.display='block'; app.classList.add('active'); }
     document.body.style.overflowY='auto';
   } catch(e) {}
-}, 5500);
+}, 9000);
 </script>
 </body>
 </html>
