@@ -149,12 +149,16 @@ async function sendCooldownCountdown(ctx: any, telegramId: number) {
   cooldownTimers.set(chatId, timer);
 }
 
+const WEB_APP_FALLBACK = "https://novamine-site.onrender.com";
+
+function getWebAppUrl() {
+  const configured = String(config.bot.appUrl || "").trim();
+  if (configured) return configured.replace(/\/$/, "");
+  return WEB_APP_FALLBACK;
+}
+
 function appKeyboard(referrerTelegramId?: number | null) {
-  const keyboard = new InlineKeyboard().webApp(
-    "🚀 Open EarnX",
-    config.bot.appUrl || config.bot.publicUrl.replace(/\/api\/?$/, "")
-  );
-  return keyboard;
+  return new InlineKeyboard().webApp("🚀 Open EarnX", getWebAppUrl());
 }
 
 export async function startBot(app: Express) {
@@ -226,7 +230,7 @@ export async function startBot(app: Express) {
       { command: "start", description: "Open EarnX" },
     ]);
 
-    const appUrl = config.bot.appUrl || config.bot.publicUrl.replace(/\/$/, "");
+    const appUrl = getWebAppUrl();
     await bot.api.setChatMenuButton({
       menu_button: {
         type: "web_app",
