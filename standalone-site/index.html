@@ -935,14 +935,24 @@
         // --- MAIN APP LOGIC ---
         let tg = window.Telegram?.WebApp || null;
         let telegramReadyPromise;
-        function waitForTelegramWebApp(timeout = 6000) {
-            if (window.Telegram?.WebApp) { tg = window.Telegram.WebApp; return Promise.resolve(tg); }
+        function waitForTelegramWebApp(timeout = 8000) {
             if (telegramReadyPromise) return telegramReadyPromise;
             telegramReadyPromise = new Promise((resolve, reject) => {
                 const started = Date.now();
                 const check = () => {
-                    if (window.Telegram?.WebApp) { tg = window.Telegram.WebApp; return resolve(tg); }
-                    if (Date.now() - started >= timeout) return reject(new Error('TELEGRAM_WEBAPP_NOT_READY'));
+                    const webApp = window.Telegram?.WebApp;
+                    if (webApp) {
+                        tg = webApp;
+                        try { if (typeof tg.ready === 'function') tg.ready(); } catch (_) {}
+                        // In Telegram, the WebApp object can exist for a moment before
+                        // initData is populated. Do not continue until the signed data exists.
+                        if (typeof tg.initData === 'string' && tg.initData.length > 0) {
+                            return resolve(tg);
+                        }
+                    }
+                    if (Date.now() - started >= timeout) {
+                        return reject(new Error('TELEGRAM_WEBAPP_NOT_READY'));
+                    }
                     setTimeout(check, 100);
                 };
                 check();
@@ -1456,6 +1466,47 @@
         async function listenForReferralCount() { return; }
 
         function loadMonetagSDK() { return; }
+
+        async function loadState() {
+            // Always load the real account from Telegram -> Supabase.
+            const telegram = await waitForTelegramWebApp();
+            if (!telegram.initData) throw new Error('OPEN_IN_TELEGRAM');
+
+            const data = await apiCall('bootstrap');
+            const u = data?.user || {};
+
+            siteUserId = u.id || null;
+            state.totalEarning = Number(u.balance_usd ?? u.balance ?? 0);
+            state.adCount = Number(u.ads_watched ?? u.total_ads ?? 0);
+            state.adsWatchedToday = Number(u.ads_watched_today ?? u.ads_today ?? 0);
+            state.lastAdWatchedDate = u.last_ad_watched_at || u.last_ad_watched_date || null;
+            state.cooldownUntil = u.cooldown_until || null;
+            state.originalUserId = u.telegram_id ?? telegram.initDataUnsafe?.user?.id ?? null;
+            state.completedBonusTasks = Array.isArray(data.completedBonusTasks) ? data.completedBonusTasks : [];
+            state.withdrawalHistory = Array.isArray(data.history) ? data.history : [];
+            state.referredUsers = Array.isArray(data.referredUsers) ? data.referredUsers : [];
+            state.rewardedReferrals = Number(u.referrals ?? data.referrals ?? state.referredUsers.length ?? 0);
+            state.weeklyActivity = Array.isArray(data.weeklyActivity) && data.weeklyActivity.length === 7
+                ? data.weeklyActivity.map(v => Math.max(0, Number(v) || 0))
+                : [0,0,0,0,0,0,0];
+            state.planId = String(u.plan_id || 'free');
+
+            // Use server configuration when present, so Admin settings control the app.
+            const serverConfig = data?.config || {};
+            const numericConfig = {
+                AD_REWARD: 'ad_reward',
+                DAILY_AD_LIMIT: 'daily_ad_limit',
+                MINIMUM_WITHDRAWAL: 'minimum_withdrawal',
+                COOLDOWN_MINUTES: 'cooldown_minutes',
+                REFERRAL_REWARD: 'referral_reward'
+            };
+            Object.entries(numericConfig).forEach(([localKey, serverKey]) => {
+                const n = Number(serverConfig[serverKey]);
+                if (Number.isFinite(n)) config[localKey] = n;
+            });
+
+            return data;
+        }
 
         async function initApp() {
             if (window.__novamineStarted) return;
