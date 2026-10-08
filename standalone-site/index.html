@@ -930,7 +930,7 @@
         // --- MAIN APP LOGIC ---
         let tg = window.Telegram?.WebApp || null;
         let telegramReadyPromise;
-        function waitForTelegramWebApp(timeout = 8000) {
+        function waitForTelegramWebApp(timeout = 15000) {
             if (telegramReadyPromise) return telegramReadyPromise;
             telegramReadyPromise = new Promise((resolve, reject) => {
                 const started = Date.now();
@@ -946,11 +946,17 @@
                         }
                     }
                     if (Date.now() - started >= timeout) {
+                        telegramReadyPromise = null;
                         return reject(new Error('TELEGRAM_WEBAPP_NOT_READY'));
                     }
                     setTimeout(check, 100);
                 };
                 check();
+            });
+            // Never cache a rejected readiness promise. Telegram can finish
+            // injecting initData after the first attempt.
+            telegramReadyPromise.catch(() => {
+                telegramReadyPromise = null;
             });
             return telegramReadyPromise;
         }
@@ -1552,18 +1558,28 @@
 try {
                     await Promise.race([
                         loadState(),
-                        new Promise((_, reject) => setTimeout(() => reject(new Error('BOOTSTRAP_TIMEOUT')), 4500))
+                        new Promise((_, reject) => setTimeout(() => reject(new Error('BOOTSTRAP_TIMEOUT')), 12000))
                     ]);
                 } catch (error) {
                     console.warn('Account bootstrap delayed:', error);
                     // Keep the UI responsive, then retry the real Telegram/Supabase
                     // account bootstrap after the app is visible.
-                    setTimeout(() => {
+                    let accountRetryCount = 0;
+                    const retryAccount = () => {
+                        if (accountRetryCount >= 6) {
+                            console.warn('Account bootstrap unavailable after retries');
+                            return;
+                        }
+                        accountRetryCount += 1;
                         loadState().then(() => {
                             updateUI();
                             renderReferrals();
-                        }).catch(retryError => console.warn('Account bootstrap retry failed:', retryError));
-                    }, 1200);
+                        }).catch(retryError => {
+                            console.warn('Account bootstrap retry failed:', retryError);
+                            setTimeout(retryAccount, 1800);
+                        });
+                    };
+                    setTimeout(retryAccount, 500);
                 }
                 try {
                     await Promise.race([
