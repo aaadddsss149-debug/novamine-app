@@ -1016,18 +1016,25 @@
                 grid.innerHTML = plans.map(plan => {
                     const active = String(plan.id) === currentPlan;
                     const priceTon = Number(plan.price_ton || 0);
-                    // Display plan prices in USD (TON is kept only for payment internally).
-                    const price = priceTon * 1.43;
+                    const priceUsd = priceTon * 1.43;
                     const reward = Number(plan.ad_reward_usd || 0);
                     const days = Number(plan.duration_days || 0);
-                    const action = active
-                        ? '<span class="plan-badge">CURRENT PLAN</span>'
-                        : (priceTon > 0
-                            ? '<button class="plan-buy" type="button" onclick="openPlanPayment(\'' + escapeHTML(String(plan.id)) + '\',' + priceTon + ')">Choose Plan</button>'
-                            : '<span class="plan-badge">FREE PLAN</span>');
+                    let action;
+                    if (active) {
+                        action = '<span class="plan-badge">CURRENT PLAN</span>';
+                    } else if (priceTon > 0) {
+                        action = '<button class="plan-buy" type="button" onclick="openPlanPayment(\'' +
+                            escapeHTML(String(plan.id)) + '\',' + priceTon + ')">Choose Plan</button>';
+                    } else {
+                        action = '<span class="plan-badge">FREE PLAN</span>';
+                    }
                     return '<div class="plan-card ' + (active ? 'active' : '') + '">' +
                         '<div class="plan-head"><span class="plan-name">' + escapeHTML(plan.name || plan.id) + '</span></div>' +
-                        '<div class="plan-price">' + (price > 0 ? '
+                        '<div class="plan-price">' + (priceUsd > 0 ? '$' + priceUsd.toFixed(2) : 'FREE') + '</div>' +
+                        '<div class="plan-meta">' + (days > 0 ? days + ' days' : 'No expiry') + '</div>' +
+                        '<div class="plan-reward">Ad reward: +$' + reward.toFixed(3) + '</div>' +
+                        '<div class="plan-action">' + action + '</div>' +
+                        '</div>';
                 }).join('');
             } catch (e) {
                 console.warn('Plans could not be loaded:', e);
