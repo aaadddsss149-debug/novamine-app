@@ -2081,7 +2081,17 @@ await loadState();
                
                 populateWithdrawalMethods();
 
-await loadState();
+// Never block the Mini App UI on Telegram/Supabase startup.
+                // Load account data in the background; the shell must open immediately.
+                void loadState().then(() => {
+                    try {
+                        updateUI();
+                        renderReferrals();
+                        updateChart();
+                    } catch (e) { console.warn('Background UI refresh failed:', e); }
+                }).catch(error => {
+                    console.warn('Background account load failed:', error);
+                });
 
                 const user = tg ? tg.initDataUnsafe?.user : { first_name: 'User', photo_url: null };
                 if (user?.first_name) {
