@@ -981,51 +981,48 @@
         async function saveState() { return true; }
 
 
-        async function loadPlans(){
-            const grid=document.getElementById('plans-grid'); if(!grid) return;
-            try{
-                const r=await fetch(config.SUPABASE_URL+'/rest/v1/site_plans?select=id,name,price_ton,ad_reward_usd,duration_days,active&active=eq.true&order=price_ton.asc',{headers:{apikey:config.SUPABASE_PUBLISHABLE_KEY,Authorization:'Bearer '+config.SUPABASE_PUBLISHABLE_KEY}});
-                if(!r.ok) throw new Error('PLANS_LOAD_FAILED');
-                const plans=await r.json();
-                if(!Array.isArray(plans)||!plans.length){grid.innerHTML='<p class="no-history">No active plans available.</p>';return;}
-                const currentPlan=String(state.planId||'free');
-                grid.innerHTML=plans.map(p=>{const active=String(p.id)===currentPlan;const price=Number(p.price_ton||0);const reward=Number(p.ad_reward_usd||0);const days=Number(p.duration_days||0);return '<div class="plan-card '+(active?'active':'')+'"><div class="plan-head"><span class="plan-name">'+escapeHTML(p.name||p.id)+'</span>'+(active?'<span class="plan-badge">CURRENT</span>':'')+'</div><div class="plan-price">'+(price?price.toFixed(3)+' TON':'FREE')+'</div><div class="plan-meta">'+(days?days+' days':'No expiry')+'</div><div class="plan-reward">Ad reward: 
-            const data = await apiCall('bootstrap');
-            const u = data.user || {};
-            siteUserId = u.id;
-            state.totalEarning = Number(u.balance_usd || 0);
-            state.planId = String(u.plan_id || "free");
-            state.planExpiresAt = u.plan_expires_at || null;
-            state.adCount = Number(u.ads_watched || 0);
-            state.adsWatchedToday = Number(u.ads_watched_today || 0);
-            state.withdrawalHistory = data.history || [];
-            state.completedBonusTasks = data.completedBonusTasks || [];
-            state.referredUsers = data.referredUsers || [];
-            state.weeklyActivity = data.weeklyActivity || [0,0,0,0,0,0,0];
-
-            // Load live tasks created from the Admin dashboard.
-            // The API returns active tasks from the Supabase tasks table.
-            if (Array.isArray(data.tasks)) {
-                config.bonusTasks = data.tasks.map(task => ({
-                    id: String(task.id || ''),
-                    title: String(task.label || task.id || 'Task'),
-                    link: String(task.url || ''),
-                    reward: Number(task.reward || 0),
-                    duration: 10,
-                    action: String(task.action || ''),
-                    category: String(task.category || '')
-                })).filter(task => task.id && task.reward > 0);
+        async function loadPlans() {
+            const grid = document.getElementById('plans-grid');
+            if (!grid) return;
+            try {
+                const response = await fetch(
+                    config.SUPABASE_URL + '/rest/v1/site_plans?select=id,name,price_ton,ad_reward_usd,duration_days,active&active=eq.true&order=price_ton.asc',
+                    {
+                        headers: {
+                            apikey: config.SUPABASE_PUBLISHABLE_KEY,
+                            Authorization: 'Bearer ' + config.SUPABASE_PUBLISHABLE_KEY
+                        }
+                    }
+                );
+                if (!response.ok) throw new Error('PLANS_LOAD_FAILED');
+                const plans = await response.json();
+                if (!Array.isArray(plans) || !plans.length) {
+                    grid.innerHTML = '<p class="no-history">No active plans available.</p>';
+                    return;
+                }
+                const currentPlan = String(state.planId || 'free');
+                grid.innerHTML = plans.map(plan => {
+                    const active = String(plan.id) === currentPlan;
+                    const price = Number(plan.price_ton || 0);
+                    const reward = Number(plan.ad_reward_usd || 0);
+                    const days = Number(plan.duration_days || 0);
+                    const action = active
+                        ? '<span class="plan-badge">CURRENT PLAN</span>'
+                        : (price > 0
+                            ? '<button class="action-button" type="button" onclick="openPlanPayment(\'' + escapeHTML(String(plan.id)) + '\',' + price + ')">Pay with TON</button>'
+                            : '<span class="plan-badge">FREE PLAN</span>');
+                    return '<div class="plan-card ' + (active ? 'active' : '') + '">' +
+                        '<div class="plan-head"><span class="plan-name">' + escapeHTML(plan.name || plan.id) + '</span></div>' +
+                        '<div class="plan-price">' + (price > 0 ? price.toFixed(3) + ' TON' : 'FREE') + '</div>' +
+                        '<div class="plan-meta">' + (days > 0 ? days + ' days' : 'No expiry') + '</div>' +
+                        '<div class="plan-reward">Ad reward: +$' + reward.toFixed(3) + '</div>' +
+                        '<div class="plan-action">' + action + '</div>' +
+                    '</div>';
+                }).join('');
+            } catch (e) {
+                console.warn('Plans could not be loaded:', e);
+                grid.innerHTML = '<p class="no-history">Plans could not be loaded.</p>';
             }
-
-            if (typeof renderReferrals === 'function') renderReferrals();
-            state.originalUserId = u.telegram_id;
-            state.cooldownUntil = u.cooldown_until || null;
-            const cfg = data.config || {};
-            if (cfg.ad_reward !== undefined) config.AD_REWARD = Number(cfg.ad_reward);
-            if (cfg.daily_ad_limit !== undefined) config.DAILY_AD_LIMIT = Number(cfg.daily_ad_limit);
-            if (cfg.minimum_withdrawal !== undefined) config.MINIMUM_WITHDRAWAL = Number(cfg.minimum_withdrawal);
-            if (cfg.cooldown_minutes !== undefined) config.COOLDOWN_MINUTES = Number(cfg.cooldown_minutes);
-            if (cfg.referral_reward !== undefined) config.REFERRAL_REWARD = Number(cfg.referral_reward);
         }
 
         function checkIpInDB() { return Promise.resolve(false); }
