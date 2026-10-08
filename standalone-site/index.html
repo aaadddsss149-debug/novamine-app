@@ -1031,24 +1031,47 @@
             }
         }
 
-        function openPlanPayment(planId, priceTon) {
-            const price = Number(priceTon);
-            if (!planId || !Number.isFinite(price) || price <= 0) {
-                return safeTgAlert('Invalid plan.');
-            }
-            const wallet = 'UQDPscg3FK6OAKp-HEqpWUi_eHS2bW7Nv3RmVe2bpQEkg3xT';
-            const nano = Math.round(price * 1000000000);
-            const uri = 'ton://transfer/' + encodeURIComponent(wallet) +
-                '?amount=' + nano +
-                '&text=' + encodeURIComponent('EarnX-' + String(planId) + '-' + Date.now());
-            safeTgAction(tg => {
-                try {
-                    if (typeof tg.openLink === 'function') tg.openLink(uri);
-                    else window.open(uri, '_blank');
-                } catch (_) {
-                    window.open(uri, '_blank');
+        async function openPlanPayment(planId, priceTon) {
+            try {
+                const price = Number(priceTon);
+                if (!planId || !Number.isFinite(price) || price <= 0) {
+                    return safeTgAlert('Invalid plan.');
                 }
-            }, () => window.open(uri, '_blank'));
+
+                const order = await apiCall('create_plan_order', { planId: String(planId) });
+                const uri = order.paymentUri;
+                if (!uri) throw new Error('PAYMENT_URI_MISSING');
+
+                safeTgAction(tg => {
+                    try {
+                        if (typeof tg.openLink === 'function') tg.openLink(uri);
+                        else window.open(uri, '_blank');
+                    } catch (_) {
+                        window.open(uri, '_blank');
+                    }
+                }, () => window.open(uri, '_blank'));
+
+                safeTgAlert('Payment opened. Complete the TON payment, then keep this page open while we verify it.');
+
+                for (let attempt = 0; attempt < 8; attempt++) {
+                    await new Promise(resolve => setTimeout(resolve, 5000));
+                    try {
+                        const result = await apiCall('verify_plan_payment', { orderId: order.orderId });
+                        if (result.status === 'paid') {
+                            await loadState();
+                            await loadPlans();
+                            return safeTgAlert('Payment confirmed. Your plan is now active.');
+                        }
+                    } catch (e) {
+                        if (String(e.message || e).includes('ORDER_EXPIRED')) break;
+                    }
+                }
+
+                safeTgAlert('Payment is not confirmed yet. If you already paid, open Plans again shortly and press the plan button to check.');
+            } catch (e) {
+                console.error('Plan payment failed:', e);
+                safeTgAlert('Payment could not be started: ' + (e.message || 'unknown error'));
+            }
         }
 
         function checkIpInDB() { return Promise.resolve(false); }
