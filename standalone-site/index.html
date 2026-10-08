@@ -1391,6 +1391,7 @@
         }
 
         function showPage(pageId, buttonEl) {
+            window.__userSelectedPage = true;
             document.querySelectorAll('.app-page').forEach(page => {
                 page.classList.remove('active');
                 page.style.display = 'none';
@@ -1613,7 +1614,7 @@ await loadState();
                     allDOMElements.copyLinkButton.addEventListener('click', (event) => { event.preventDefault(); void copyReferralLink(); });
                 allDOMElements.shareLinkButton.addEventListener('click', (event) => { event.preventDefault(); shareReferralLink(); });
                 renderReferrals();
-                showPage('homePage', document.querySelector('.nav-button:nth-child(1)'));
+                if (!window.__userSelectedPage) showPage('homePage', document.querySelector('.nav-button:nth-child(1)'));
 
                 safeTgAction(tg => {
                     tg.ready();
