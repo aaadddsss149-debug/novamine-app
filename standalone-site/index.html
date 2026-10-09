@@ -1614,14 +1614,58 @@ setTimeout(function(){
     document.body.style.overflowY='auto';
   } catch(e) {}
 }, 6500);
-        function openPlanPayment(planId, priceTon) {
+        let tonConnectUiInstance = null;
+        async function getTonConnectUI() {
+            if (tonConnectUiInstance) return tonConnectUiInstance;
+            if (!window.TON_CONNECT_UI) {
+                await new Promise((resolve, reject) => {
+                    const script = document.createElement('script');
+                    script.src = 'https://unpkg.com/@tonconnect/ui@2.0.9/dist/tonconnect-ui.min.js';
+                    script.onload = resolve;
+                    script.onerror = () => reject(new Error('TON_CONNECT_LIBRARY_FAILED'));
+                    document.head.appendChild(script);
+                });
+            }
+            if (!window.TON_CONNECT_UI || !window.TON_CONNECT_UI.TonConnectUI) throw new Error('TON_CONNECT_UNAVAILABLE');
+            tonConnectUiInstance = new window.TON_CONNECT_UI.TonConnectUI({
+                manifestUrl: 'https://novamine-site.onrender.com/tonconnect-manifest.json',
+                uiPreferences: { theme: 'DARK' }
+            });
+            return tonConnectUiInstance;
+        }
+        async function openPlanPayment(planId, priceTon) {
             const price = Number(priceTon);
             if (!planId || !Number.isFinite(price) || price <= 0) return safeTgAlert('Invalid plan.');
-            apiCall('create_plan_order', { planId: String(planId) }).then(order => {
-                const uri = order.paymentUri;
-                if (!uri) throw new Error('PAYMENT_URI_MISSING');
-                safeTgAction(t => { try { t.openLink(uri); } catch (_) { window.open(uri, '_blank'); } }, () => window.open(uri, '_blank'));
-            }).catch(e => { console.error(e); safeTgAlert('Payment could not be started.'); });
+            try {
+                const order = await apiCall('create_plan_order', { planId: String(planId) });
+                if (!order || !order.orderId || !order.paymentAddress || !order.memo) throw new Error('INVALID_PAYMENT_ORDER');
+                const ui = await getTonConnectUI();
+                if (!ui.wallet) {
+                    await ui.openModal();
+                    if (!ui.wallet) return safeTgAlert('Connect your TON wallet, then tap Pay with TON again.');
+                }
+                const { beginCell } = await import('https://esm.sh/@ton/core@0.59.0');
+                const payload = beginCell().storeUint(0, 32).storeStringTail(String(order.memo)).endCell().toBoc().toString('base64');
+                await ui.sendTransaction({
+                    validUntil: Math.floor(Date.now() / 1000) + 300,
+                    network: '-239',
+                    messages: [{ address: order.paymentAddress, amount: String(Math.round(Number(order.amountTon) * 1e9)), payload }]
+                });
+                safeTgAlert('Payment submitted. Checking the blockchain; your plan activates only after confirmation.');
+                for (let attempt = 0; attempt < 5; attempt++) {
+                    await new Promise(resolve => setTimeout(resolve, 3000));
+                    const result = await apiCall('verify_plan_payment', { orderId: order.orderId, senderAddress: ui.wallet && ui.wallet.account ? ui.wallet.account.address : '' });
+                    if (result && result.status === 'paid') {
+                        safeTgAlert('Payment confirmed! Your plan is now active.');
+                        if (typeof initApp === 'function') await initApp();
+                        return;
+                    }
+                }
+                safeTgAlert('Payment was sent but is not confirmed yet. Please wait a minute and check your plan again.');
+            } catch (e) {
+                console.error('TON Connect payment error:', e);
+                safeTgAlert('Wallet payment could not be completed: ' + (e && e.message ? e.message : 'Please try again.'));
+            }
         }
 
 </script>
