@@ -1663,8 +1663,10 @@ setTimeout(function(){
                 }
                 safeTgAlert('Payment was sent but is not confirmed yet. Please wait a minute and check your plan again.');
             } catch (e) {
-                console.error('TON Connect payment error:', e);
-                safeTgAlert('Wallet payment could not be completed: ' + (e && e.message ? e.message : 'Please try again.'));
+                console.warn('TON Connect payment cancelled or rejected.');
+                const raw = String((e && e.message) || e || '').toLowerCase();
+                if (/not enough funds|insufficient funds|insufficient balance|no enough funds|reject|cancel/.test(raw)) return;
+                safeTgAlert('Payment could not be completed. Please try again.');
             }
         }
 
